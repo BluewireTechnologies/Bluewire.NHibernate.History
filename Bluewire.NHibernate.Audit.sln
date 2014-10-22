@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bluewire.NHibernate.Audit", "Bluewire.NHibernate.Audit\Bluewire.NHibernate.Audit.csproj", "{3ED898F3-8D4C-4BF7-BCDF-0B1BEAEF4CEB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bluewire.NHibernate.Audit.UnitTests", "Bluewire.NHibernate.Audit.UnitTests\Bluewire.NHibernate.Audit.UnitTests.csproj", "{EC1FA61E-4CCC-44C8-B926-865AA9A0A7A2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3ED898F3-8D4C-4BF7-BCDF-0B1BEAEF4CEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ED898F3-8D4C-4BF7-BCDF-0B1BEAEF4CEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ED898F3-8D4C-4BF7-BCDF-0B1BEAEF4CEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ED898F3-8D4C-4BF7-BCDF-0B1BEAEF4CEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC1FA61E-4CCC-44C8-B926-865AA9A0A7A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC1FA61E-4CCC-44C8-B926-865AA9A0A7A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC1FA61E-4CCC-44C8-B926-865AA9A0A7A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC1FA61E-4CCC-44C8-B926-865AA9A0A7A2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

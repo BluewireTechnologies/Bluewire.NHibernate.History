@@ -4,7 +4,11 @@ namespace Bluewire.NHibernate.Audit
 {
     public interface IAuditHistory
     {
-        object VersionId { get; }
+        /// <summary>
+        /// Primary key of the audit table.
+        /// </summary>
+        long AuditId { get; }
+        object VersionId { get; set; }
         object Id { get; }
         object PreviousVersionId { get; set; }
         DateTimeOffset AuditDatestamp { get; set; }

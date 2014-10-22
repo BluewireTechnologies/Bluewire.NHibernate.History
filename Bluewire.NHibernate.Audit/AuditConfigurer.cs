@@ -35,7 +35,7 @@ namespace Bluewire.NHibernate.Audit
             listeners.FlushEntityEventListeners = listeners.FlushEntityEventListeners.Prepend(concurrencyCheckListener).ToArray();
 
             listeners.FlushEventListeners = listeners.FlushEventListeners.Prepend(new BeforeFlush()).Append(new AfterFlush()).ToArray();
-            listeners.FlushEntityEventListeners = listeners.FlushEntityEventListeners.Prepend(new RecordExistingEntityVersion(model)).Append(new SaveSimpleAuditEntry(model)).ToArray();
+            listeners.FlushEntityEventListeners = listeners.FlushEntityEventListeners.Append(new SaveSimpleAuditEntry(model)).ToArray();
         }
 
     }

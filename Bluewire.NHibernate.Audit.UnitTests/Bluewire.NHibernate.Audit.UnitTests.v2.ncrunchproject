@@ -1,6 +1,6 @@
 <ProjectConfiguration>
   <BuildPriority>1000</BuildPriority>
-  <CopyReferencedAssembliesToWorkspace>true</CopyReferencedAssembliesToWorkspace>
+  <CopyReferencedAssembliesToWorkspace>false</CopyReferencedAssembliesToWorkspace>
   <ConsiderInconclusiveTestsAsPassing>false</ConsiderInconclusiveTestsAsPassing>
   <PreloadReferencedAssemblies>false</PreloadReferencedAssemblies>
   <AllowDynamicCodeContractChecking>true</AllowDynamicCodeContractChecking>
@@ -22,5 +22,5 @@
   <UseCPUArchitecture>AutoDetect</UseCPUArchitecture>
   <MSTestThreadApartmentState>STA</MSTestThreadApartmentState>
   <BuildProcessArchitecture>x86</BuildProcessArchitecture>
-  <AdditionalFilesToInclude>..\packages\System.Data.SQLite.Core.1.0.94.0\**.*</AdditionalFilesToInclude>
+  <AdditionalFilesToInclude>..\packages\System.Data.SQLite.Core.1.0.94.0\**.*;..\packages\NHibernate.3.3.3.4000\**.*</AdditionalFilesToInclude>
 </ProjectConfiguration>

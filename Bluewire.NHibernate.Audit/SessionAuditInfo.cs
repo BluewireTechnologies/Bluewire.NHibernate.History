@@ -79,7 +79,6 @@ namespace Bluewire.NHibernate.Audit
 
         public class EntityState
         {
-            public object PreviousVersionId { get; set; }
         }
     }
 }

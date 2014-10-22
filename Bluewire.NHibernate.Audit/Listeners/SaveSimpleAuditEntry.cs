@@ -19,19 +19,27 @@ namespace Bluewire.NHibernate.Audit.Listeners
         {
             if (@event.EntityEntry.ExistsInDatabase && (@event.DirtyProperties == null || !@event.DirtyProperties.Any())) return;
 
-            var operation = @event.EntityEntry.ExistsInDatabase ? AuditedOperation.Update : AuditedOperation.Add;
-
             IAuditableEntityModel entityModel;
             if (!model.TryGetModelForPersister(@event.EntityEntry.Persister, out entityModel)) return;
 
             var sessionAuditInfo = SessionAuditInfo.For(@event.Session);
 
-            var state = sessionAuditInfo.GetState(@event.Entity);
             var auditEntry = model.GenerateAuditEntry(entityModel, @event.Entity);
-            Debug.Assert(Equals(auditEntry.Id, @event.EntityEntry.EntityKey.Identifier));
-            auditEntry.PreviousVersionId = state.PreviousVersionId;
             auditEntry.AuditDatestamp = sessionAuditInfo.FlushDatestamp;
-            auditEntry.AuditedOperation = operation;
+            if (@event.EntityEntry.ExistsInDatabase)
+            {
+                auditEntry.PreviousVersionId = @event.EntityEntry.Version;
+                auditEntry.VersionId = @event.PropertyValues[@event.EntityEntry.Persister.VersionProperty];
+                auditEntry.AuditedOperation = AuditedOperation.Update;
+            }
+            else
+            {
+                auditEntry.PreviousVersionId = null;
+                auditEntry.VersionId = @event.EntityEntry.Persister.GetVersion(@event.Entity, EntityMode.Poco);
+                auditEntry.AuditedOperation = AuditedOperation.Add;
+            }
+            Debug.Assert(Equals(auditEntry.Id, @event.EntityEntry.EntityKey.Identifier));
+            Debug.Assert(!Equals(auditEntry.VersionId, auditEntry.PreviousVersionId));
             @event.Session.Save(auditEntry);
         }
     }

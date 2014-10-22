@@ -6,8 +6,8 @@ namespace Bluewire.NHibernate.Audit
     {
         object VersionId { get; }
         object Id { get; }
-        object PreviousVersionId { get; }
-        DateTimeOffset Datestamp { get; }
-        AuditedOperation AuditedOperation { get; }
+        object PreviousVersionId { get; set; }
+        DateTimeOffset AuditDatestamp { get; set; }
+        AuditedOperation AuditedOperation { get; set; }
     }
 }

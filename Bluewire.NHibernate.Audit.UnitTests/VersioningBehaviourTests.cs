@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AutoMapper;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Mapping.ByCode;
@@ -123,7 +124,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests
                 e.Version(i => i.VersionId, v => { });
             });
             cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
-            new AuditConfigurer().IntegrateWithNHibernate(cfg);
+            new AuditConfigurer(new DynamicAuditEntryFactory()).IntegrateWithNHibernate(cfg);
         }
     }
 

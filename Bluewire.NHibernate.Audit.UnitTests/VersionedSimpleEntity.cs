@@ -14,6 +14,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests
     {
         public virtual int Id { get; protected set; }
         public virtual int VersionId { get; protected set; }
+        public virtual int? PreviousVersionId { get; protected set; }
 
         object IAuditHistory.VersionId
         {
@@ -25,9 +26,9 @@ namespace Bluewire.NHibernate.Audit.UnitTests
             get { return Id; }
         }
 
-        public virtual object PreviousVersionId { get; protected set; }
+        object IAuditHistory.PreviousVersionId { get; set; }
 
-        public virtual DateTimeOffset Datestamp { get; protected set; }
-        public virtual AuditedOperation AuditedOperation { get; protected set; }
+        public virtual DateTimeOffset AuditDatestamp { get; set; }
+        public virtual AuditedOperation AuditedOperation { get; set; }
     }
 }

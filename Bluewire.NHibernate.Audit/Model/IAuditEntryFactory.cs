@@ -7,5 +7,6 @@ namespace Bluewire.NHibernate.Audit.Model
         void AssertConfigurationIsValid();
         bool CanCreate(Type entityType, Type auditEntryType);
         IAuditHistory Create(object entity, Type entityType, Type auditEntryType);
+        object Create(object entry, Type relationAuditEntryType);
     }
 }

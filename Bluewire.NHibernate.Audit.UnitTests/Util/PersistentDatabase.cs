@@ -25,7 +25,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Util
             dbFileName = Path.GetTempFileName();
             cfg = new Configuration();
             cfg.DataBaseIntegration(d =>
-            {
+            {   
                 d.Dialect<SQLiteDialect>();
                 d.ConnectionString = String.Format("Data Source={0};Version=3", dbFileName);
             });
@@ -41,6 +41,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Util
         private void InitConfiguration(Action<Configuration> configure)
         {
             configure(cfg);
+            SchemaMetadataUpdater.QuoteTableAndColumns(cfg);
             sessionFactory = cfg.BuildSessionFactory();
             new SchemaExport(cfg).Create(false, true);
         }

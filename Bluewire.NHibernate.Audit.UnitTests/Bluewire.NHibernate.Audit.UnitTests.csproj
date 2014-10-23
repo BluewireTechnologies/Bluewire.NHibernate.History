@@ -63,6 +63,14 @@
     <Compile Include="EnableLog4NetAttribute.cs" />
     <Compile Include="ManyToOne\EntityWithManyToOne.cs" />
     <Compile Include="ManyToOne\EntityWithManyToOnePersistenceTests.cs" />
+    <Compile Include="ManyToMany\EntityWithListOfReferences.cs" />
+    <Compile Include="OneToMany\ComponentType.cs" />
+    <Compile Include="OneToMany\EntityWithListOfValueTypes.cs" />
+    <Compile Include="ManyToMany\EntityWithMapOfReferences.cs" />
+    <Compile Include="OneToMany\EntityWithListOfValueTypesPersistenceTests.cs" />
+    <Compile Include="OneToMany\EntityWithMapOfValueTypes.cs" />
+    <Compile Include="ManyToMany\EntityWithSetOfReferences.cs" />
+    <Compile Include="OneToMany\EntityWithSetOfValueTypes.cs" />
     <Compile Include="Util\DynamicAuditEntryFactory.cs" />
     <Compile Include="Util\PersistentDatabase.cs" />
     <Compile Include="Simple\SimpleEntity.cs" />

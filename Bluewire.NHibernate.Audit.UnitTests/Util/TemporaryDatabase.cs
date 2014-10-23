@@ -38,6 +38,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Util
         private void InitConfiguration(Action<Configuration> configure)
         {
             configure(cfg);
+            SchemaMetadataUpdater.QuoteTableAndColumns(cfg);
             sessionFactory = cfg.BuildSessionFactory();
         }
 

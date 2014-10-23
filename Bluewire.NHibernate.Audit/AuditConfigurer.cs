@@ -47,6 +47,11 @@ namespace Bluewire.NHibernate.Audit
             var auditListener = new SaveSimpleAuditEntry(sessions, model);
             listeners.FlushEntityEventListeners = listeners.FlushEntityEventListeners.Append(auditListener).ToArray();
             listeners.DeleteEventListeners = listeners.DeleteEventListeners.Append(auditListener).ToArray();
+
+            var listAuditListener = new SaveListAuditEntry(sessions, model);
+            listeners.PreCollectionRecreateEventListeners = listeners.PreCollectionRecreateEventListeners.Append(listAuditListener).ToArray();
+            listeners.PreCollectionRemoveEventListeners = listeners.PreCollectionRemoveEventListeners.Append(listAuditListener).ToArray();
+            listeners.PreCollectionUpdateEventListeners = listeners.PreCollectionUpdateEventListeners.Append(listAuditListener).ToArray();
         }
 
     }

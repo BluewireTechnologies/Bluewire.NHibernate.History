@@ -7,4 +7,11 @@ namespace Bluewire.NHibernate.Audit.Model
         Type EntityType { get; }
         Type AuditEntryType { get;  }
     }
+
+    public interface IAuditableRelationModel
+    {
+        string CollectionRole { get; }
+        Type AuditEntryType { get; }
+        string OwnerKeyPropertyName { get; }
+    }
 }

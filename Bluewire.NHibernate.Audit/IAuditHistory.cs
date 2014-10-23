@@ -14,4 +14,12 @@ namespace Bluewire.NHibernate.Audit
         DateTimeOffset AuditDatestamp { get; set; }
         AuditedOperation AuditedOperation { get; set; }
     }
+
+    public abstract class ListElementAuditHistory
+    {
+        public virtual long AuditId { get; protected set; }
+        public virtual DateTimeOffset StartDatestamp { get; set; }
+        public virtual DateTimeOffset? EndDatestamp { get; set; }
+        public virtual int Index { get; set; }
+    }
 }

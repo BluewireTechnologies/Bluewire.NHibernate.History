@@ -1,12 +1,13 @@
 using System.Linq;
 using Bluewire.NHibernate.Audit.Support;
+using Bluewire.NHibernate.Audit.UnitTests.ManyToOne;
 using Bluewire.NHibernate.Audit.UnitTests.Util;
 using NHibernate.Cfg;
 using NHibernate.Linq;
 using NHibernate.Mapping.ByCode;
 using NUnit.Framework;
 
-namespace Bluewire.NHibernate.Audit.UnitTests.ManyToOne
+namespace Bluewire.NHibernate.Audit.UnitTests
 {
     [TestFixture]
     public class EntityWithManyToOnePersistenceTests

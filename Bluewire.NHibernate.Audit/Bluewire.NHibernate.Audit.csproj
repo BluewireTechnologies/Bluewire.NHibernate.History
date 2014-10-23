@@ -52,10 +52,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\AuditableEntityAttribute.cs" />
+    <Compile Include="Attributes\AuditableRelationAttribute.cs" />
     <Compile Include="AuditableEntityExtensions.cs" />
     <Compile Include="AuditConfigurationException.cs" />
     <Compile Include="AuditConfigurer.cs" />
     <Compile Include="AuditedOperationEnumType.cs" />
+    <Compile Include="Listeners\SaveListAuditEntry.cs" />
     <Compile Include="SessionsAuditInfo.cs" />
     <Compile Include="Support\DateTimeOffsetAsIntegerUserType.cs" />
     <Compile Include="Listeners\AfterFlush.cs" />

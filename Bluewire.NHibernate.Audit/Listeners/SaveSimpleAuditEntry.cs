@@ -3,15 +3,18 @@ using System.Linq;
 using Bluewire.NHibernate.Audit.Model;
 using NHibernate;
 using NHibernate.Event;
+using NHibernate.Persister.Entity;
 
 namespace Bluewire.NHibernate.Audit.Listeners
 {
     class SaveSimpleAuditEntry : IFlushEntityEventListener, IDeleteEventListener
     {
+        private readonly SessionsAuditInfo sessions;
         private readonly AuditModel model;
 
-        public SaveSimpleAuditEntry(AuditModel model)
+        public SaveSimpleAuditEntry(SessionsAuditInfo sessions, AuditModel model)
         {
+            this.sessions = sessions;
             this.model = model;
         }
 
@@ -22,22 +25,21 @@ namespace Bluewire.NHibernate.Audit.Listeners
             IAuditableEntityModel entityModel;
             if (!model.TryGetModelForPersister(@event.EntityEntry.Persister, out entityModel)) return;
 
-            var sessionAuditInfo = SessionAuditInfo.For(@event.Session);
+            var sessionAuditInfo = sessions.Lookup(@event.Session);
+            sessionAuditInfo.AssertIsFlushing();
 
             var auditEntry = model.GenerateAuditEntry(entityModel, @event.Entity);
-            auditEntry.AuditDatestamp = sessionAuditInfo.FlushDatestamp;
+            auditEntry.AuditDatestamp = sessionAuditInfo.OperationDatestamp;
+
             if (@event.EntityEntry.ExistsInDatabase)
             {
-                auditEntry.PreviousVersionId = @event.EntityEntry.Version;
-                auditEntry.VersionId = @event.PropertyValues[@event.EntityEntry.Persister.VersionProperty];
-                auditEntry.AuditedOperation = AuditedOperation.Update;
+                AuditUpdate(auditEntry, @event);
             }
             else
             {
-                auditEntry.PreviousVersionId = null;
-                auditEntry.VersionId = @event.EntityEntry.Persister.GetVersion(@event.Entity, EntityMode.Poco);
-                auditEntry.AuditedOperation = AuditedOperation.Add;
+                AuditAdd(auditEntry, @event);
             }
+
             Debug.Assert(Equals(auditEntry.Id, @event.EntityEntry.EntityKey.Identifier));
             Debug.Assert(!Equals(auditEntry.VersionId, auditEntry.PreviousVersionId));
             @event.Session.Save(auditEntry);
@@ -54,18 +56,37 @@ namespace Bluewire.NHibernate.Audit.Listeners
             IAuditableEntityModel entityModel;
             if (!model.TryGetModelForPersister(persister, out entityModel)) return;
 
-            var sessionAuditInfo = SessionAuditInfo.For(@event.Session);
+            var sessionAuditInfo = sessions.Lookup(@event.Session);
 
             var auditEntry = model.GenerateAuditEntry(entityModel, @event.Entity);
             auditEntry.AuditDatestamp = sessionAuditInfo.OperationDatestamp;
-            
-            auditEntry.PreviousVersionId = persister.GetVersion(@event.Entity, EntityMode.Poco);
-            auditEntry.VersionId = null;
-            auditEntry.AuditedOperation = AuditedOperation.Delete;
+
+            AuditDelete(auditEntry, @event, persister);
 
             Debug.Assert(Equals(auditEntry.Id, persister.GetIdentifier(@event.Entity, EntityMode.Poco)));
             Debug.Assert(!Equals(auditEntry.VersionId, auditEntry.PreviousVersionId));
             @event.Session.Save(auditEntry);
+        }
+
+        private static void AuditAdd(IAuditHistory auditEntry, FlushEntityEvent @event)
+        {
+            auditEntry.AuditedOperation = AuditedOperation.Add;
+            auditEntry.PreviousVersionId = null;
+            auditEntry.VersionId = @event.EntityEntry.Persister.GetVersion(@event.Entity, EntityMode.Poco);
+        }
+
+        private static void AuditUpdate(IAuditHistory auditEntry, FlushEntityEvent @event)
+        {
+            auditEntry.AuditedOperation = AuditedOperation.Update;
+            auditEntry.PreviousVersionId = @event.EntityEntry.Version;
+            auditEntry.VersionId = @event.PropertyValues[@event.EntityEntry.Persister.VersionProperty];
+        }
+
+        private static void AuditDelete(IAuditHistory auditEntry, DeleteEvent @event, IEntityPersister persister)
+        {
+            auditEntry.AuditedOperation = AuditedOperation.Delete;
+            auditEntry.PreviousVersionId = persister.GetVersion(@event.Entity, EntityMode.Poco);
+            auditEntry.VersionId = null;
         }
     }
 }

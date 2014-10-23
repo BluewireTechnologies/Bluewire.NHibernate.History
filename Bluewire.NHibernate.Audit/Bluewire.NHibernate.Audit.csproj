@@ -56,6 +56,7 @@
     <Compile Include="AuditConfigurationException.cs" />
     <Compile Include="AuditConfigurer.cs" />
     <Compile Include="AuditedOperationEnumType.cs" />
+    <Compile Include="SessionsAuditInfo.cs" />
     <Compile Include="Support\DateTimeOffsetAsIntegerUserType.cs" />
     <Compile Include="Listeners\AfterFlush.cs" />
     <Compile Include="Listeners\BeforeFlush.cs" />

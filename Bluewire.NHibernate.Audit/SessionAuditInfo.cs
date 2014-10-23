@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using Bluewire.NHibernate.Audit.Support;
-using NHibernate.Engine;
+using Bluewire.Common.Time;
 
 namespace Bluewire.NHibernate.Audit
 {
     public class SessionAuditInfo
     {
+        private readonly IClock clock;
         private readonly Dictionary<object, EntityState> entityStates = new Dictionary<object, EntityState>();
 
         public EntityState GetState(object entity)
@@ -25,21 +25,22 @@ namespace Bluewire.NHibernate.Audit
         private readonly ThreadLocal<DateTimeOffset?> flushDatestamp = new ThreadLocal<DateTimeOffset?>();
         private int flushDepth;
 
-        public DateTimeOffset FlushDatestamp
+        public SessionAuditInfo(IClock clock)
         {
-            get
-            {
-                var v = flushDatestamp.Value;
-                Debug.Assert(v != null);
-                return v.Value;
-            }
+            this.clock = clock;
+        }
+
+        public void AssertIsFlushing()
+        {
+            var v = flushDatestamp.Value;
+            if (v == null) throw new InvalidOperationException("No flush in progress when one was expected.");
         }
 
         public DateTimeOffset OperationDatestamp
         {
             get
             {
-                return flushDatestamp.Value ?? DateTimeOffset.Now;
+                return flushDatestamp.Value ?? clock.Now;
             }
         }
 
@@ -51,7 +52,7 @@ namespace Bluewire.NHibernate.Audit
                 if (flushDepth <= 1)
                 {
                     Debug.Assert(flushDatestamp.Value == null);
-                    flushDatestamp.Value = DateTimeOffset.Now;
+                    flushDatestamp.Value = clock.Now;
                 }
                 else
                 {
@@ -76,13 +77,6 @@ namespace Bluewire.NHibernate.Audit
                     Debug.Assert(flushDatestamp.Value != null);
                 }
             }
-        }
-
-        private static readonly WeakDictionary<ISessionImplementor, SessionAuditInfo> sessionInfos = new WeakDictionary<ISessionImplementor, SessionAuditInfo>();
-
-        public static SessionAuditInfo For(ISessionImplementor session)
-        {
-            return sessionInfos.GetOrAdd(session, () => new SessionAuditInfo());
         }
 
         public class EntityState

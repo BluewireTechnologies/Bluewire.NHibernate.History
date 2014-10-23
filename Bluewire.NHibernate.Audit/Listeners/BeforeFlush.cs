@@ -6,9 +6,16 @@ namespace Bluewire.NHibernate.Audit.Listeners
 {
     class BeforeFlush : IFlushEventListener
     {
+        private readonly SessionsAuditInfo sessions;
+
+        public BeforeFlush(SessionsAuditInfo sessions)
+        {
+            this.sessions = sessions;
+        }
+
         public void OnFlush(FlushEvent @event)
         {
-            SessionAuditInfo.For(@event.Session).BeginFlush();
+            sessions.Lookup(@event.Session).BeginFlush();
         }
     }
 }

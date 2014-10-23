@@ -61,8 +61,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EnableLog4NetAttribute.cs" />
-    <Compile Include="ManyToOne\EntityWithManyToOneUnaudited.cs" />
-    <Compile Include="ManyToOne\EntityWithManyToOneUnauditedPersistenceTests.cs" />
+    <Compile Include="ManyToOne\EntityWithManyToOne.cs" />
+    <Compile Include="ManyToOne\EntityWithManyToOnePersistenceTests.cs" />
     <Compile Include="Util\DynamicAuditEntryFactory.cs" />
     <Compile Include="Util\PersistentDatabase.cs" />
     <Compile Include="Simple\SimpleEntity.cs" />

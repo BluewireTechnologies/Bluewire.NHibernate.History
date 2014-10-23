@@ -1,10 +1,6 @@
-using System;
 using System.Linq;
-using AutoMapper;
-using Bluewire.NHibernate.Audit.Model;
 using Bluewire.NHibernate.Audit.Support;
 using Bluewire.NHibernate.Audit.UnitTests.ManyToOne;
-using Bluewire.NHibernate.Audit.UnitTests.Simple;
 using Bluewire.NHibernate.Audit.UnitTests.Util;
 using NHibernate.Cfg;
 using NHibernate.Linq;
@@ -14,11 +10,11 @@ using NUnit.Framework;
 namespace Bluewire.NHibernate.Audit.UnitTests
 {
     [TestFixture]
-    public class EntityWithManyToOneUnauditedPersistenceTests
+    public class EntityWithManyToOnePersistenceTests
     {
         private TemporaryDatabase db;
 
-        public EntityWithManyToOneUnauditedPersistenceTests()
+        public EntityWithManyToOnePersistenceTests()
         {
             
             db = TemporaryDatabase.Configure(Configure);
@@ -32,11 +28,11 @@ namespace Bluewire.NHibernate.Audit.UnitTests
             {
                 var unaudited = new UnauditedEntity { Id = 2 };
                 session.Save(unaudited);
-                var entity = new EntityWithManyToOneUnaudited { Id = 42, Reference = unaudited };
+                var entity = new EntityWithManyToOne { Id = 42, Reference = unaudited };
                 session.Save(entity);
                 session.Flush();
 
-                var audited = session.Query<EntityWithManyToOneUnauditedAuditHistory>().Single(h => h.Id == 42);
+                var audited = session.Query<EntityWithManyToOneAuditHistory>().Single(h => h.Id == 42);
 
                 Assert.AreEqual(42, audited.Id);
                 Assert.AreEqual(entity.VersionId, audited.VersionId);
@@ -51,11 +47,11 @@ namespace Bluewire.NHibernate.Audit.UnitTests
         {
             using (var session = db.CreateSession())
             {
-                var entity = new EntityWithManyToOneUnaudited { Id = 42, Reference = null };
+                var entity = new EntityWithManyToOne { Id = 42, Reference = null };
                 session.Save(entity);
                 session.Flush();
 
-                var audited = session.Query<EntityWithManyToOneUnauditedAuditHistory>().Single(h => h.Id == 42);
+                var audited = session.Query<EntityWithManyToOneAuditHistory>().Single(h => h.Id == 42);
 
                 Assert.AreEqual(42, audited.Id);
                 Assert.AreEqual(entity.VersionId, audited.VersionId);
@@ -72,7 +68,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests
             {
                 var firstUnaudited = new UnauditedEntity { Id = 2 };
                 session.Save(firstUnaudited);
-                var entity = new EntityWithManyToOneUnaudited { Id = 42, Reference = firstUnaudited };
+                var entity = new EntityWithManyToOne { Id = 42, Reference = firstUnaudited };
                 session.Save(entity);
                 session.Flush();
                 var initialVersion = entity.VersionId;
@@ -83,7 +79,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests
                 session.Flush();
                 Assume.That(entity.VersionId, Is.Not.EqualTo(initialVersion));
 
-                var audited = session.Query<EntityWithManyToOneUnauditedAuditHistory>().SingleOrDefault(h => h.Id == 42 && h.VersionId == entity.VersionId);
+                var audited = session.Query<EntityWithManyToOneAuditHistory>().SingleOrDefault(h => h.Id == 42 && h.VersionId == entity.VersionId);
 
                 Assert.AreEqual(42, audited.Id);
                 Assert.AreEqual(entity.VersionId, audited.VersionId);
@@ -100,14 +96,14 @@ namespace Bluewire.NHibernate.Audit.UnitTests
             {
                 var unaudited = new UnauditedEntity { Id = 2 };
                 session.Save(unaudited);
-                var entity = new EntityWithManyToOneUnaudited { Id = 42, Reference = unaudited };
+                var entity = new EntityWithManyToOne { Id = 42, Reference = unaudited };
                 session.Save(entity);
                 session.Flush();
 
                 session.Delete(entity);
                 session.Flush();
 
-                var audited = session.Query<EntityWithManyToOneUnauditedAuditHistory>().Where(h => h.Id == 42).ToList();
+                var audited = session.Query<EntityWithManyToOneAuditHistory>().Where(h => h.Id == 42).ToList();
 
                 Assert.That(audited.Count, Is.EqualTo(2));
 
@@ -128,13 +124,13 @@ namespace Bluewire.NHibernate.Audit.UnitTests
             {
                 e.Id(i => i.Id, i => i.Generator(new AssignedGeneratorDef()));
             });
-            mapper.Class<EntityWithManyToOneUnaudited>(e =>
+            mapper.Class<EntityWithManyToOne>(e =>
             {
                 e.Id(i => i.Id, i => i.Generator(new AssignedGeneratorDef()));
                 e.ManyToOne(i => i.Reference);
                 e.Version(i => i.VersionId, v => { });
             });
-            mapper.Class<EntityWithManyToOneUnauditedAuditHistory>(e =>
+            mapper.Class<EntityWithManyToOneAuditHistory>(e =>
             {
                 e.Id(i => i.AuditId, i => i.Generator(new HighLowGeneratorDef()));
                 e.Property(i => i.Id);

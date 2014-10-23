@@ -8,15 +8,15 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToOne
         public virtual int Id { get; set; }
     }
 
-    [AuditableEntity(typeof(EntityWithManyToOneUnauditedAuditHistory))]
-    public class EntityWithManyToOneUnaudited
+    [AuditableEntity(typeof(EntityWithManyToOneAuditHistory))]
+    public class EntityWithManyToOne
     {
         public virtual int Id { get; set; }
         public virtual UnauditedEntity Reference { get; set; }
         public virtual int VersionId { get; set; }
     }
 
-    public class EntityWithManyToOneUnauditedAuditHistory : IAuditHistory
+    public class EntityWithManyToOneAuditHistory : IAuditHistory
     {
         public virtual int Id { get; protected set; }
         public virtual int? ReferenceId { get; set; }

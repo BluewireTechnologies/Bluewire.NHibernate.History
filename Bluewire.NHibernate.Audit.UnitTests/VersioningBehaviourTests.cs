@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using AutoMapper;
+﻿using Bluewire.NHibernate.Audit.UnitTests.Util;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Mapping.ByCode;
@@ -10,6 +6,17 @@ using NUnit.Framework;
 
 namespace Bluewire.NHibernate.Audit.UnitTests
 {
+    /// <summary>
+    /// NHibernate's optimistic concurrency handles version numbers internally and ignores the
+    /// value of the version property on the entity, which is used only for persistence mapping.
+    /// Flushing an entity fails with a StaleObjectStateException if the version in the session
+    /// does not match the version in the database.
+    /// 
+    /// We extend NHibernate's optimistic concurrency to also fail with a StaleObjectStateException
+    /// if the version on the entity does not match the version in the session. This is useful
+    /// when an operation may cross multiple sessions and may not carry the entire entity state
+    /// between them, necessitating a read-modify-write to save it.
+    /// </summary>
     [TestFixture]
     public class VersioningBehaviourTests
     {

@@ -5,12 +5,18 @@ using NHibernate.Cfg;
 using NHibernate.Dialect;
 using NHibernate.Tool.hbm2ddl;
 
-namespace Bluewire.NHibernate.Audit.UnitTests
+namespace Bluewire.NHibernate.Audit.UnitTests.Util
 {
+    /// <summary>
+    /// Temporary file-backed test database instance. 
+    /// </summary>
+    /// <remarks>
+    /// Retains data between sessions. Useful when testing interactions between sessions.
+    /// </remarks>
     public class PersistentDatabase : IDisposable
     {
         private readonly string dbFileName;
-        private Configuration cfg;
+        private readonly Configuration cfg;
         private ISessionFactory sessionFactory;
 
         private PersistentDatabase()

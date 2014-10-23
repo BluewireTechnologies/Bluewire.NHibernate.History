@@ -1,0 +1,31 @@
+Audit/History plugin for NHibernate
+===================================
+
+ * Operates on tables rather than object graphs.
+   * History tables have no foreign keys between them.
+   * Collection relations which are backed by an explicit table become a list of datestamped relations.
+ * All audited entity types MUST use NHib's versioning feature (optimistic concurrency). If Guid versions are desired instead of integers, implement an IUserVersionType.
+ * All audited entity types must have a corresponding 'audit entry' class which implements IAuditHistory.
+   * Audit entries cannot reference entities or each other, and cannot have collection-typed properties. They are simple tuples of value types.
+ * An IAuditEntryFactory must be provided to AuditConfigurer. Given an auditable entity, this must create an instance of the appropriate audit entry class and copy all audited data to it.
+   * AutoMapper is useful for this.
+ * Audit entry classes must be persistence-mapped by the consuming application. There is no automatic mapping functionality yet.
+ * There is no internal support for soft deletion. This is an application-level detail rather than a persistence concern. Deleted entities will still have audit history, but cannot be fetched or undeleted.
+   * If you want soft deletion, add an IsDeleted boolean property and Update the entity instead of Delete-ing it. Possibly add an event listener to ban the use of Session.Delete against that entity type.
+
+Audit Entry Structure 
+=====================
+
+For Entity like:
+ * Id Guid Primary Key
+ * VersionId Int32 Version
+ * <properties...>
+ 
+Define an EntityAuditHistory like:
+ * AuditId Int64 Primary Key
+ * Id Guid
+ * VersionId Int32
+ * PreviousVersionId Int32
+ * AuditDatestamp DateTimeOffset
+ * AuditedOperation Int32 (enum:AuditedOperation)
+ * <properties...>

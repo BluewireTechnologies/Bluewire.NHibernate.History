@@ -4,8 +4,14 @@ using NHibernate.Cfg;
 using NHibernate.Dialect;
 using NHibernate.Tool.hbm2ddl;
 
-namespace Bluewire.NHibernate.Audit.UnitTests
+namespace Bluewire.NHibernate.Audit.UnitTests.Util
 {
+    /// <summary>
+    /// In-memory per-session test database instance. 
+    /// </summary>
+    /// <remarks>
+    /// Faster than PersistentDatabase when only a single session will use it.
+    /// </remarks>
     public class TemporaryDatabase
     {
         private readonly Configuration cfg;

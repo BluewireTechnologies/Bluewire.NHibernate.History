@@ -1,29 +1,22 @@
 using System;
-using System.Diagnostics;
 using System.Linq;
 using AutoMapper;
-using AutoMapper.Mappers;
 using Bluewire.NHibernate.Audit.Model;
 using Bluewire.NHibernate.Audit.Support;
-using log4net;
-using log4net.Appender;
-using log4net.Core;
-using log4net.Layout;
-using NHibernate;
+using Bluewire.NHibernate.Audit.UnitTests.Util;
 using NHibernate.Cfg;
 using NHibernate.Linq;
 using NHibernate.Mapping.ByCode;
-using NHibernate.Type;
 using NUnit.Framework;
 
 namespace Bluewire.NHibernate.Audit.UnitTests
 {
     [TestFixture]
-    public class VersionedSimpleEntityPersistenceTests
+    public class SimpleEntityPersistenceTests
     {
         private TemporaryDatabase db;
 
-        public VersionedSimpleEntityPersistenceTests()
+        public SimpleEntityPersistenceTests()
         {
             
             db = TemporaryDatabase.Configure(Configure);
@@ -37,11 +30,11 @@ namespace Bluewire.NHibernate.Audit.UnitTests
 
             using (var session = db.CreateSession())
             {
-                var entity = new VersionedSimpleEntity { Id = ID, Value = "Initial value" };
+                var entity = new SimpleEntity { Id = ID, Value = "Initial value" };
                 session.Save(entity);
                 session.Flush();
 
-                var audited = session.Query<VersionedSimpleEntityAuditHistory>().Single(h => h.Id == ID);
+                var audited = session.Query<SimpleEntityAuditHistory>().Single(h => h.Id == ID);
 
                 Assert.AreEqual(ID, audited.Id);
                 Assert.AreEqual(entity.VersionId, audited.VersionId);
@@ -58,7 +51,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests
 
             using (var session = db.CreateSession())
             {
-                var entity = new VersionedSimpleEntity { Id = ID, Value = "Initial value" };
+                var entity = new SimpleEntity { Id = ID, Value = "Initial value" };
                 session.Save(entity);
                 session.Flush();
                 var initialVersion = entity.VersionId;
@@ -67,7 +60,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests
                 session.Flush();
                 Assume.That(entity.VersionId, Is.Not.EqualTo(initialVersion));
 
-                var audited = session.Query<VersionedSimpleEntityAuditHistory>().SingleOrDefault(h => h.Id == ID && h.VersionId == entity.VersionId);
+                var audited = session.Query<SimpleEntityAuditHistory>().SingleOrDefault(h => h.Id == ID && h.VersionId == entity.VersionId);
 
                 Assert.AreEqual(ID, audited.Id);
                 Assert.AreEqual(entity.VersionId, audited.VersionId);
@@ -84,14 +77,14 @@ namespace Bluewire.NHibernate.Audit.UnitTests
 
             using (var session = db.CreateSession())
             {
-                var entity = new VersionedSimpleEntity { Id = ID, Value = "Initial value" };
+                var entity = new SimpleEntity { Id = ID, Value = "Initial value" };
                 session.Save(entity);
                 session.Flush();
 
                 session.Delete(entity);
                 session.Flush();
 
-                var audited = session.Query<VersionedSimpleEntityAuditHistory>().Where(h => h.Id == ID).ToList();
+                var audited = session.Query<SimpleEntityAuditHistory>().Where(h => h.Id == ID).ToList();
 
                 Assert.That(audited.Count, Is.EqualTo(2));
 
@@ -108,13 +101,13 @@ namespace Bluewire.NHibernate.Audit.UnitTests
         private static void Configure(Configuration cfg)
         {
             var mapper = new ModelMapper();
-            mapper.Class<VersionedSimpleEntity>(e =>
+            mapper.Class<SimpleEntity>(e =>
             {
                 e.Id(i => i.Id, i => i.Generator(new AssignedGeneratorDef()));
                 e.Property(i => i.Value);
                 e.Version(i => i.VersionId, v => { });
             });
-            mapper.Class<VersionedSimpleEntityAuditHistory>(e =>
+            mapper.Class<SimpleEntityAuditHistory>(e =>
             {
                 e.Id(i => i.AuditId, i => i.Generator(new HighLowGeneratorDef()));
                 e.Property(i => i.Id);

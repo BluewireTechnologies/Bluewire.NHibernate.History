@@ -61,11 +61,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EnableLog4NetAttribute.cs" />
-    <Compile Include="PersistentDatabase.cs" />
-    <Compile Include="VersionedSimpleEntity.cs" />
+    <Compile Include="Util\PersistentDatabase.cs" />
+    <Compile Include="SimpleEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TemporaryDatabase.cs" />
-    <Compile Include="VersionedSimpleEntityPersistenceTests.cs" />
+    <Compile Include="Util\TemporaryDatabase.cs" />
+    <Compile Include="SimpleEntityPersistenceTests.cs" />
     <Compile Include="VersioningBehaviourTests.cs" />
   </ItemGroup>
   <ItemGroup>

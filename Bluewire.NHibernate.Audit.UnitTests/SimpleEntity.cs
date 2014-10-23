@@ -3,15 +3,15 @@ using Bluewire.NHibernate.Audit.Attributes;
 
 namespace Bluewire.NHibernate.Audit.UnitTests
 {
-    [AuditableEntity(typeof(VersionedSimpleEntityAuditHistory))]
-    public class VersionedSimpleEntity
+    [AuditableEntity(typeof(SimpleEntityAuditHistory))]
+    public class SimpleEntity
     {
         public virtual int Id { get; set; }
         public virtual string Value { get; set; }
         public virtual int VersionId { get; set; }
     }
 
-    public class VersionedSimpleEntityAuditHistory : IAuditHistory
+    public class SimpleEntityAuditHistory : IAuditHistory
     {
         public virtual int Id { get; protected set; }
         public virtual string Value { get; set; }

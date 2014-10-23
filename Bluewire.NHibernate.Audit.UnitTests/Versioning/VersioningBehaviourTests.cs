@@ -1,10 +1,11 @@
-﻿using Bluewire.NHibernate.Audit.UnitTests.Util;
+﻿using Bluewire.NHibernate.Audit.UnitTests.Simple;
+using Bluewire.NHibernate.Audit.UnitTests.Util;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Mapping.ByCode;
 using NUnit.Framework;
 
-namespace Bluewire.NHibernate.Audit.UnitTests
+namespace Bluewire.NHibernate.Audit.UnitTests.Versioning
 {
     /// <summary>
     /// NHibernate's optimistic concurrency handles version numbers internally and ignores the

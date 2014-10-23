@@ -1,20 +1,25 @@
 ﻿using System;
 using Bluewire.NHibernate.Audit.Attributes;
 
-namespace Bluewire.NHibernate.Audit.UnitTests
+namespace Bluewire.NHibernate.Audit.UnitTests.ManyToOne
 {
-    [AuditableEntity(typeof(SimpleEntityAuditHistory))]
-    public class SimpleEntity
+    public class UnauditedEntity
     {
         public virtual int Id { get; set; }
-        public virtual string Value { get; set; }
+    }
+
+    [AuditableEntity(typeof(EntityWithManyToOneUnauditedAuditHistory))]
+    public class EntityWithManyToOneUnaudited
+    {
+        public virtual int Id { get; set; }
+        public virtual UnauditedEntity Reference { get; set; }
         public virtual int VersionId { get; set; }
     }
 
-    public class SimpleEntityAuditHistory : IAuditHistory
+    public class EntityWithManyToOneUnauditedAuditHistory : IAuditHistory
     {
         public virtual int Id { get; protected set; }
-        public virtual string Value { get; set; }
+        public virtual int? ReferenceId { get; set; }
         public virtual int? VersionId { get; protected set; }
 
         public virtual long AuditId { get; protected set; }
@@ -31,7 +36,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests
             get { return Id; }
         }
 
-        object IAuditHistory.PreviousVersionId {
+        object IAuditHistory.PreviousVersionId
+        {
             get { return PreviousVersionId; }
             set { PreviousVersionId = (int?)value; }
         }

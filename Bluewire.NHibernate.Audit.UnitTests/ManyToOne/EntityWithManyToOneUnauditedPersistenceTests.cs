@@ -3,6 +3,8 @@ using System.Linq;
 using AutoMapper;
 using Bluewire.NHibernate.Audit.Model;
 using Bluewire.NHibernate.Audit.Support;
+using Bluewire.NHibernate.Audit.UnitTests.ManyToOne;
+using Bluewire.NHibernate.Audit.UnitTests.Simple;
 using Bluewire.NHibernate.Audit.UnitTests.Util;
 using NHibernate.Cfg;
 using NHibernate.Linq;
@@ -12,11 +14,11 @@ using NUnit.Framework;
 namespace Bluewire.NHibernate.Audit.UnitTests
 {
     [TestFixture]
-    public class SimpleEntityPersistenceTests
+    public class EntityWithManyToOneUnauditedPersistenceTests
     {
         private TemporaryDatabase db;
 
-        public SimpleEntityPersistenceTests()
+        public EntityWithManyToOneUnauditedPersistenceTests()
         {
             
             db = TemporaryDatabase.Configure(Configure);
@@ -24,21 +26,40 @@ namespace Bluewire.NHibernate.Audit.UnitTests
 
 
         [Test]
-        public void SavingSimpleEntityIsAudited()
+        public void SavingEntityIsAudited()
         {
-            const int ID = 42;
-
             using (var session = db.CreateSession())
             {
-                var entity = new SimpleEntity { Id = ID, Value = "Initial value" };
+                var unaudited = new UnauditedEntity { Id = 2 };
+                session.Save(unaudited);
+                var entity = new EntityWithManyToOneUnaudited { Id = 42, Reference = unaudited };
                 session.Save(entity);
                 session.Flush();
 
-                var audited = session.Query<SimpleEntityAuditHistory>().Single(h => h.Id == ID);
+                var audited = session.Query<EntityWithManyToOneUnauditedAuditHistory>().Single(h => h.Id == 42);
 
-                Assert.AreEqual(ID, audited.Id);
+                Assert.AreEqual(42, audited.Id);
                 Assert.AreEqual(entity.VersionId, audited.VersionId);
-                Assert.AreEqual(entity.Value, audited.Value);
+                Assert.AreEqual(unaudited.Id, audited.ReferenceId);
+                Assert.AreEqual(null, audited.PreviousVersionId);
+                Assert.AreEqual(AuditedOperation.Add, audited.AuditedOperation);
+            }
+        }
+
+        [Test]
+        public void SavingEntityWithNoReferenceIsAudited()
+        {
+            using (var session = db.CreateSession())
+            {
+                var entity = new EntityWithManyToOneUnaudited { Id = 42, Reference = null };
+                session.Save(entity);
+                session.Flush();
+
+                var audited = session.Query<EntityWithManyToOneUnauditedAuditHistory>().Single(h => h.Id == 42);
+
+                Assert.AreEqual(42, audited.Id);
+                Assert.AreEqual(entity.VersionId, audited.VersionId);
+                Assert.AreEqual(null, audited.ReferenceId);
                 Assert.AreEqual(null, audited.PreviousVersionId);
                 Assert.AreEqual(AuditedOperation.Add, audited.AuditedOperation);
             }
@@ -47,24 +68,26 @@ namespace Bluewire.NHibernate.Audit.UnitTests
         [Test]
         public void UpdatingSimpleEntityIsAudited()
         {
-            const int ID = 42;
-
             using (var session = db.CreateSession())
             {
-                var entity = new SimpleEntity { Id = ID, Value = "Initial value" };
+                var firstUnaudited = new UnauditedEntity { Id = 2 };
+                session.Save(firstUnaudited);
+                var entity = new EntityWithManyToOneUnaudited { Id = 42, Reference = firstUnaudited };
                 session.Save(entity);
                 session.Flush();
                 var initialVersion = entity.VersionId;
 
-                entity.Value = "Updated value";
+                var secondUnaudited = new UnauditedEntity { Id = 4 };
+                session.Save(secondUnaudited);
+                entity.Reference = secondUnaudited;
                 session.Flush();
                 Assume.That(entity.VersionId, Is.Not.EqualTo(initialVersion));
 
-                var audited = session.Query<SimpleEntityAuditHistory>().SingleOrDefault(h => h.Id == ID && h.VersionId == entity.VersionId);
+                var audited = session.Query<EntityWithManyToOneUnauditedAuditHistory>().SingleOrDefault(h => h.Id == 42 && h.VersionId == entity.VersionId);
 
-                Assert.AreEqual(ID, audited.Id);
+                Assert.AreEqual(42, audited.Id);
                 Assert.AreEqual(entity.VersionId, audited.VersionId);
-                Assert.AreEqual(entity.Value, audited.Value);
+                Assert.AreEqual(secondUnaudited.Id, audited.ReferenceId);
                 Assert.AreEqual(initialVersion, audited.PreviousVersionId);
                 Assert.AreEqual(AuditedOperation.Update, audited.AuditedOperation);
             }
@@ -73,26 +96,26 @@ namespace Bluewire.NHibernate.Audit.UnitTests
         [Test]
         public void DeletingSimpleEntityIsAudited()
         {
-            const int ID = 42;
-
             using (var session = db.CreateSession())
             {
-                var entity = new SimpleEntity { Id = ID, Value = "Initial value" };
+                var unaudited = new UnauditedEntity { Id = 2 };
+                session.Save(unaudited);
+                var entity = new EntityWithManyToOneUnaudited { Id = 42, Reference = unaudited };
                 session.Save(entity);
                 session.Flush();
 
                 session.Delete(entity);
                 session.Flush();
 
-                var audited = session.Query<SimpleEntityAuditHistory>().Where(h => h.Id == ID).ToList();
+                var audited = session.Query<EntityWithManyToOneUnauditedAuditHistory>().Where(h => h.Id == 42).ToList();
 
                 Assert.That(audited.Count, Is.EqualTo(2));
 
                 var deletion = audited.ElementAt(1);
 
-                Assert.AreEqual(ID, deletion.Id);
+                Assert.AreEqual(42, deletion.Id);
                 Assert.IsNull(deletion.VersionId);
-                Assert.AreEqual(entity.Value, deletion.Value);
+                Assert.AreEqual(unaudited.Id, deletion.ReferenceId);
                 Assert.AreEqual(entity.VersionId, deletion.PreviousVersionId);
                 Assert.AreEqual(AuditedOperation.Delete, deletion.AuditedOperation);
             }
@@ -101,18 +124,22 @@ namespace Bluewire.NHibernate.Audit.UnitTests
         private static void Configure(Configuration cfg)
         {
             var mapper = new ModelMapper();
-            mapper.Class<SimpleEntity>(e =>
+            mapper.Class<UnauditedEntity>(e =>
             {
                 e.Id(i => i.Id, i => i.Generator(new AssignedGeneratorDef()));
-                e.Property(i => i.Value);
+            });
+            mapper.Class<EntityWithManyToOneUnaudited>(e =>
+            {
+                e.Id(i => i.Id, i => i.Generator(new AssignedGeneratorDef()));
+                e.ManyToOne(i => i.Reference);
                 e.Version(i => i.VersionId, v => { });
             });
-            mapper.Class<SimpleEntityAuditHistory>(e =>
+            mapper.Class<EntityWithManyToOneUnauditedAuditHistory>(e =>
             {
                 e.Id(i => i.AuditId, i => i.Generator(new HighLowGeneratorDef()));
                 e.Property(i => i.Id);
                 e.Property(i => i.VersionId);
-                e.Property(i => i.Value);
+                e.Property(i => i.ReferenceId);
                 e.Property(i => i.PreviousVersionId);
                 e.Property(i => i.AuditDatestamp, p => p.Type<DateTimeOffsetAsIntegerUserType>());
                 e.Property(i => i.AuditedOperation, p => p.Type<AuditedOperationEnumType>());
@@ -121,23 +148,6 @@ namespace Bluewire.NHibernate.Audit.UnitTests
             cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
 
             new AuditConfigurer(new DynamicAuditEntryFactory()).IntegrateWithNHibernate(cfg);
-        }
-    }
-
-    class DynamicAuditEntryFactory : IAuditEntryFactory
-    {
-        public void AssertConfigurationIsValid()
-        {
-        }
-
-        public bool CanCreate(Type entityType, Type auditEntryType)
-        {
-            return true;
-        }
-
-        public IAuditHistory Create(object entity, Type entityType, Type auditEntryType)
-        {
-            return (IAuditHistory)Mapper.DynamicMap(entity, entityType, auditEntryType);
         }
     }
 }

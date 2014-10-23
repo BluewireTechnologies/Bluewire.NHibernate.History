@@ -6,7 +6,7 @@ using NHibernate.Event;
 
 namespace Bluewire.NHibernate.Audit.Listeners
 {
-    class SaveSimpleAuditEntry : IFlushEntityEventListener
+    class SaveSimpleAuditEntry : IFlushEntityEventListener, IDeleteEventListener
     {
         private readonly AuditModel model;
 
@@ -39,6 +39,31 @@ namespace Bluewire.NHibernate.Audit.Listeners
                 auditEntry.AuditedOperation = AuditedOperation.Add;
             }
             Debug.Assert(Equals(auditEntry.Id, @event.EntityEntry.EntityKey.Identifier));
+            Debug.Assert(!Equals(auditEntry.VersionId, auditEntry.PreviousVersionId));
+            @event.Session.Save(auditEntry);
+        }
+
+        public void OnDelete(DeleteEvent @event, Iesi.Collections.ISet transientEntities)
+        {
+            //OnDelete(@event);
+        }
+
+        public void OnDelete(DeleteEvent @event)
+        {
+            var persister = @event.Session.GetEntityPersister(@event.EntityName, @event.Entity);
+            IAuditableEntityModel entityModel;
+            if (!model.TryGetModelForPersister(persister, out entityModel)) return;
+
+            var sessionAuditInfo = SessionAuditInfo.For(@event.Session);
+
+            var auditEntry = model.GenerateAuditEntry(entityModel, @event.Entity);
+            auditEntry.AuditDatestamp = sessionAuditInfo.OperationDatestamp;
+            
+            auditEntry.PreviousVersionId = persister.GetVersion(@event.Entity, EntityMode.Poco);
+            auditEntry.VersionId = null;
+            auditEntry.AuditedOperation = AuditedOperation.Delete;
+
+            Debug.Assert(Equals(auditEntry.Id, persister.GetIdentifier(@event.Entity, EntityMode.Poco)));
             Debug.Assert(!Equals(auditEntry.VersionId, auditEntry.PreviousVersionId));
             @event.Session.Save(auditEntry);
         }

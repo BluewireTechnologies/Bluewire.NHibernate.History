@@ -15,7 +15,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests
     {
         public virtual int Id { get; protected set; }
         public virtual string Value { get; set; }
-        public virtual int VersionId { get; protected set; }
+        public virtual int? VersionId { get; protected set; }
 
         public virtual long AuditId { get; protected set; }
         public virtual int? PreviousVersionId { get; protected set; }
@@ -23,7 +23,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests
         object IAuditHistory.VersionId
         {
             get { return VersionId; }
-            set { VersionId = (int)value; }
+            set { VersionId = (int?)value; }
         }
 
         object IAuditHistory.Id

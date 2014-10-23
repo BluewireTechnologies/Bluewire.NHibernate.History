@@ -77,6 +77,34 @@ namespace Bluewire.NHibernate.Audit.UnitTests
             }
         }
 
+        [Test]
+        public void DeletingSimpleEntityIsAudited()
+        {
+            const int ID = 42;
+
+            using (var session = db.CreateSession())
+            {
+                var entity = new VersionedSimpleEntity { Id = ID, Value = "Initial value" };
+                session.Save(entity);
+                session.Flush();
+
+                session.Delete(entity);
+                session.Flush();
+
+                var audited = session.Query<VersionedSimpleEntityAuditHistory>().Where(h => h.Id == ID).ToList();
+
+                Assert.That(audited.Count, Is.EqualTo(2));
+
+                var deletion = audited.ElementAt(1);
+
+                Assert.AreEqual(ID, deletion.Id);
+                Assert.IsNull(deletion.VersionId);
+                Assert.AreEqual(entity.Value, deletion.Value);
+                Assert.AreEqual(entity.VersionId, deletion.PreviousVersionId);
+                Assert.AreEqual(AuditedOperation.Delete, deletion.AuditedOperation);
+            }
+        }
+
         private static void Configure(Configuration cfg)
         {
             var mapper = new ModelMapper();

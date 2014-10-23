@@ -35,6 +35,14 @@ namespace Bluewire.NHibernate.Audit
             }
         }
 
+        public DateTimeOffset OperationDatestamp
+        {
+            get
+            {
+                return flushDatestamp.Value ?? DateTimeOffset.Now;
+            }
+        }
+
         public void BeginFlush()
         {
             lock (this)

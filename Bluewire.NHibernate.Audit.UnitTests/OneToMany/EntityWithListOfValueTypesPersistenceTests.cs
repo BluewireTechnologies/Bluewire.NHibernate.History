@@ -99,59 +99,148 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
             }
         }
 
-        [Test, Ignore]
+        [Test]
         public void AddingElementToCollectionIsAudited()
         {
             using (var session = db.CreateSession())
             {
-                var unaudited = new UnauditedEntity { Id = 2 };
-                session.Save(unaudited);
-                var entity = new EntityWithManyToOne { Id = 42, Reference = unaudited };
+                var entity = new EntityWithListOfValueTypes
+                {
+                    Id = 42,
+                    Values =
+                    {
+                        new ComponentType { Integer = 2, String = "2" }
+                    }
+                };
                 session.Save(entity);
                 session.Flush();
 
-                session.Delete(entity);
+                entity.Values.Add(new ComponentType { Integer = 7, String = "8" });
                 session.Flush();
 
-                var audited = session.Query<EntityWithManyToOneAuditHistory>().Where(h => h.Id == 42).ToList();
+                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
+                Assert.AreEqual(42, auditedEntity.Id);
 
-                Assert.That(audited.Count, Is.EqualTo(2));
+                var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.EntityWithListOfValueTypesId == 42).ToList();
+                Assert.That(auditedCollection.Count, Is.EqualTo(2));
 
-                var deletion = audited.ElementAt(1);
+                var originalIndex0 = auditedCollection[0];
+                var insertedIndex1 = auditedCollection[1];
 
-                Assert.AreEqual(42, deletion.Id);
-                Assert.IsNull(deletion.VersionId);
-                Assert.AreEqual(unaudited.Id, deletion.ReferenceId);
-                Assert.AreEqual(entity.VersionId, deletion.PreviousVersionId);
-                Assert.AreEqual(AuditedOperation.Delete, deletion.AuditedOperation);
+                Assert.AreEqual("8", insertedIndex1.String);
+                Assert.AreNotEqual(originalIndex0.StartDatestamp, insertedIndex1.StartDatestamp);
+                Assert.IsNull(insertedIndex1.EndDatestamp);
             }
         }
 
-        [Test, Ignore]
-        public void RemovingElementFromCollectionIsAudited()
+        [Test]
+        public void ReorderingCollectionIsAudited()
         {
             using (var session = db.CreateSession())
             {
-                var unaudited = new UnauditedEntity { Id = 2 };
-                session.Save(unaudited);
-                var entity = new EntityWithManyToOne { Id = 42, Reference = unaudited };
+                var entity = new EntityWithListOfValueTypes
+                {
+                    Id = 42,
+                    Values =
+                    {
+                        new ComponentType { Integer = 2, String = "2" },
+                        new ComponentType { Integer = 7, String = "8" }
+                    }
+                };
                 session.Save(entity);
                 session.Flush();
 
-                session.Delete(entity);
+                var temp = entity.Values[0];
+                entity.Values[0] = entity.Values[1];
+                entity.Values[1] = temp;
                 session.Flush();
 
-                var audited = session.Query<EntityWithManyToOneAuditHistory>().Where(h => h.Id == 42).ToList();
+                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
+                Assert.AreEqual(42, auditedEntity.Id);
+
+                var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.EntityWithListOfValueTypesId == 42).ToList();
+                Assert.That(auditedCollection.Count, Is.EqualTo(4));
+
+                var originalIndex0 = auditedCollection[0];
+                var originalIndex1 = auditedCollection[1];
+                var reorderedIndex0 = auditedCollection[2];
+                var reorderedIndex1 = auditedCollection[3];
+
+                Assert.AreEqual("8", reorderedIndex0.String);
+                Assert.AreEqual("2", reorderedIndex1.String);
+
+                Assert.IsNotNull(originalIndex0.EndDatestamp);
+                Assert.IsNotNull(originalIndex1.EndDatestamp);
+                Assert.IsNull(reorderedIndex0.EndDatestamp);
+                Assert.IsNull(reorderedIndex1.EndDatestamp);
+            }
+        }
+
+        [Test]
+        public void RemovingElementFromEndOfCollectionIsAudited()
+        {
+            using (var session = db.CreateSession())
+            {
+                var entity = new EntityWithListOfValueTypes
+                {
+                    Id = 42,
+                    Values =
+                    {
+                        new ComponentType { Integer = 2, String = "2" },
+                        new ComponentType { Integer = 7, String = "8" }
+                    }
+                };
+                session.Save(entity);
+                session.Flush();
+
+                entity.Values.RemoveAt(1);
+                session.Flush();
+
+                var audited = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.EntityWithListOfValueTypesId == 42).ToList();
 
                 Assert.That(audited.Count, Is.EqualTo(2));
 
-                var deletion = audited.ElementAt(1);
+                var item = audited.ElementAt(1);
+                Assert.AreEqual("8", item.String);
+                Assert.IsNotNull(item.EndDatestamp);
+            }
+        }
 
-                Assert.AreEqual(42, deletion.Id);
-                Assert.IsNull(deletion.VersionId);
-                Assert.AreEqual(unaudited.Id, deletion.ReferenceId);
-                Assert.AreEqual(entity.VersionId, deletion.PreviousVersionId);
-                Assert.AreEqual(AuditedOperation.Delete, deletion.AuditedOperation);
+        [Test]
+        public void RemovingElementFromStartOfCollectionIsAudited()
+        {
+            using (var session = db.CreateSession())
+            {
+                var entity = new EntityWithListOfValueTypes
+                {
+                    Id = 42,
+                    Values =
+                    {
+                        new ComponentType { Integer = 2, String = "2" },
+                        new ComponentType { Integer = 7, String = "8" }
+                    }
+                };
+                session.Save(entity);
+                session.Flush();
+
+                entity.Values.RemoveAt(0);
+                session.Flush();
+
+                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
+                Assert.AreEqual(42, auditedEntity.Id);
+
+                var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.EntityWithListOfValueTypesId == 42).ToList();
+                Assert.That(auditedCollection.Count, Is.EqualTo(3));
+
+                var originalIndex0 = auditedCollection[0];
+                var originalIndex1 = auditedCollection[1];
+                var remainingIndex0 = auditedCollection[2];
+
+                Assert.AreEqual("8", remainingIndex0.String);
+
+                Assert.IsNotNull(originalIndex0.EndDatestamp);
+                Assert.IsNotNull(originalIndex1.EndDatestamp);
+                Assert.IsNull(remainingIndex0.EndDatestamp);
             }
         }
 

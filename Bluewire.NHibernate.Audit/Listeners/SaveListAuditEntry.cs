@@ -91,6 +91,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
                         var entry = model.GenerateRelationAuditEntry<ListElementAuditHistory>(createModel, insertion.Item1);
                         auditMapping.PropertyClosureIterator.Single(p => p.Name == createModel.OwnerKeyPropertyName).GetSetter(createModel.AuditEntryType).Set(entry, CollectionEntry.CurrentKey);
                         entry.Index = insertion.Item2;
+                        entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
                         innerSession.Save(entry);
                     }
                     innerSession.Flush();
@@ -144,6 +145,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var collection = @event.Collection;
             var collectionEntry = @event.Session.PersistenceContext.GetCollectionEntry(@event.Collection);
 
+            Debug.Assert(collectionEntry.CurrentPersister == collectionEntry.LoadedPersister);
             var creationPersister = collectionEntry.CurrentPersister;
             Debug.Assert(creationPersister.HasIndex);
             Debug.Assert(!creationPersister.IsOneToMany);
@@ -177,18 +179,18 @@ namespace Bluewire.NHibernate.Audit.Listeners
                 {
                     task.Delete(d);
                 }
+                var index = 0;
                 foreach (var entry in collection.Entries(deletionPersister))
                 {
-                    var index = 0;
                     if (collection.NeedsUpdating(entry, index, deletionPersister.ElementType))
                     {
                         task.Delete(index);
                     }
                     ++index;
                 }
+                index = 0;
                 foreach (var entry in collection.Entries(creationPersister))
                 {
-                    var index = 0;
                     if (collection.NeedsUpdating(entry, index, creationPersister.ElementType) ||
                         collection.NeedsInserting(entry, index, creationPersister.ElementType))
                     {

@@ -15,7 +15,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         }
 
         public virtual int Id { get; set; }
-        [AuditableRelation(typeof(EntityWithListOfValueTypesValuesAuditHistory), "EntityWithListOfValueTypesId")]
+        [AuditableRelation(typeof(EntityWithListOfValueTypesValuesAuditHistory), "EntityWithListOfValueTypesId", "Index")]
         public virtual IList<ComponentType> Values { get; protected set; }
         public virtual int VersionId { get; set; }
     }
@@ -48,11 +48,22 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         public virtual AuditedOperation AuditedOperation { get; set; }
     }
 
-    public class EntityWithListOfValueTypesValuesAuditHistory : ListElementAuditHistory
+    public class EntityWithListOfValueTypesValuesAuditHistory : IRelationAuditHistory
     {
         public virtual int EntityWithListOfValueTypesId { get; set; }
 
+        public virtual int Index { get; protected set; }
         public virtual string String { get; set; }
         public virtual int Integer { get; set; }
+
+        public virtual long AuditId { get; protected set; }
+        public virtual DateTimeOffset StartDatestamp { get; set; }
+        public virtual DateTimeOffset? EndDatestamp { get; set; }
+
+        object IRelationAuditHistory.Key
+        {
+            get { return Index; }
+            set { Index = (int)value; }
+        }
     }
 }

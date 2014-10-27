@@ -41,7 +41,7 @@ namespace Bluewire.NHibernate.Audit.Model
 
         private bool IsRelationEntryType(Type type)
         {
-            return type.IsSubclassOf(typeof(ListElementAuditHistory));
+            return typeof(IRelationAuditHistory).IsAssignableFrom(type);
         }
         private bool IsEntityEntryType(Type type)
         {
@@ -107,6 +107,7 @@ namespace Bluewire.NHibernate.Audit.Model
                 CollectionRole = role;
                 AuditEntryType = relationAttr.AuditEntryType;
                 OwnerKeyPropertyName = relationAttr.OwnerKeyPropertyName;
+                KeyPropertyName = relationAttr.KeyPropertyName;
             }
 
             public string CollectionRole { get; private set; }
@@ -114,6 +115,8 @@ namespace Bluewire.NHibernate.Audit.Model
             public Type AuditEntryType { get; private set; }
 
             public string OwnerKeyPropertyName { get; private set; }
+
+            public string KeyPropertyName { get; private set; }
         }
     }
 }

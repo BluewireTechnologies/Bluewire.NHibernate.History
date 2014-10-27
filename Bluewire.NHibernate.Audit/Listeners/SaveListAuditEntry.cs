@@ -39,29 +39,39 @@ namespace Bluewire.NHibernate.Audit.Listeners
         class CollectionAuditTask
         {
             public CollectionEntry CollectionEntry { get; private set; }
+            private readonly IPersistentCollection collection;
             private readonly SessionAuditInfo sessionAuditInfo;
             private readonly AuditModel model;
 
-            public CollectionAuditTask(CollectionEntry collectionEntry, SessionAuditInfo sessionAuditInfo, AuditModel model)
+            public CollectionAuditTask(CollectionEntry collectionEntry, IPersistentCollection collection, SessionAuditInfo sessionAuditInfo, AuditModel model)
             {
                 sessionAuditInfo.AssertIsFlushing();
 
                 this.CollectionEntry = collectionEntry;
+                this.collection = collection;
                 this.sessionAuditInfo = sessionAuditInfo;
                 this.model = model;
             }
 
-            List<int> deletions = new List<int>();
-            List<Tuple<object, int>> insertions = new List<Tuple<object, int>>();
+            List<object> deletions = new List<object>();
+            List<Tuple<object, object>> insertions = new List<Tuple<object, object>>();
 
-            public void Delete(int index)
+            public void Delete(object entry, int index, ICollectionPersister persister)
             {
-                deletions.Add(index);
+                var key = collection.GetIndex(entry, index, persister);
+                deletions.Add(key);
             }
 
-            public void Insert(object entry, int index)
+            public void Delete(object key)
             {
-                insertions.Add(new Tuple<object, int>(entry, index));
+                deletions.Add(key);
+            }
+
+            public void Insert(object entry, int index, ICollectionPersister persister)
+            {
+                var key = collection.GetIndex(entry, index, persister);
+                var item = collection.GetElement(entry);
+                insertions.Add(new Tuple<object, object>(item, key));
             }
 
             public void Execute(IEventSource session, ICollectionPersister deletePersister, ICollectionPersister createPersister)
@@ -88,9 +98,9 @@ namespace Bluewire.NHibernate.Audit.Listeners
                     var innerSession = session.GetSession(EntityMode.Poco);
                     foreach (var insertion in insertions)
                     {
-                        var entry = model.GenerateRelationAuditEntry<ListElementAuditHistory>(createModel, insertion.Item1);
+                        var entry = model.GenerateRelationAuditEntry<IRelationAuditHistory>(createModel, insertion.Item1);
                         auditMapping.PropertyClosureIterator.Single(p => p.Name == createModel.OwnerKeyPropertyName).GetSetter(createModel.AuditEntryType).Set(entry, CollectionEntry.CurrentKey);
-                        entry.Index = insertion.Item2;
+                        entry.Key = insertion.Item2;
                         entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
                         innerSession.Save(entry);
                     }
@@ -109,7 +119,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
                     var sqlUpdateBuilder = new SqlUpdateBuilder(factory.Dialect, factory);
                     
                     keyProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == relationModel.OwnerKeyPropertyName);
-                    indexProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "Index");
+                    indexProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == relationModel.KeyPropertyName);
                     endDateProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "EndDatestamp");
 
                     sqlUpdateBuilder.SetTableName(auditMapping.Table.GetQualifiedName(factory.Dialect, factory.Settings.DefaultCatalogName, factory.Settings.DefaultSchemaName));
@@ -131,7 +141,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
                 public SqlCommandInfo Command { get; private set; }
 
-                public void PopulateCommand(ISessionImplementor session, IDbCommand cmd, object key, int index, DateTimeOffset deletionDatestamp)
+                public void PopulateCommand(ISessionImplementor session, IDbCommand cmd, object key, object index, DateTimeOffset deletionDatestamp)
                 {
                     endDateProperty.Type.NullSafeSet(cmd, deletionDatestamp, 0, session);
                     keyProperty.Type.NullSafeSet(cmd, key, 1, session);
@@ -154,7 +164,9 @@ namespace Bluewire.NHibernate.Audit.Listeners
             Debug.Assert(deletionPersister.HasIndex);
             Debug.Assert(!deletionPersister.IsOneToMany);
 
-            var task = new CollectionAuditTask(collectionEntry, sessions.Lookup(@event.Session), model);
+            var task = new CollectionAuditTask(collectionEntry, collection, sessions.Lookup(@event.Session), model);
+
+            //var deletionIsMap = deletionPersister
 
             var hasFilters = collectionEntry.LoadedPersister.IsAffectedByEnabledFilters(@event.Session);
             if (!collection.WasInitialized)
@@ -174,7 +186,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             }
             else
             {
-                var deletions = collection.GetDeletes(deletionPersister, false).Cast<int>();
+                var deletions = collection.GetDeletes(deletionPersister, false).Cast<object>();
                 foreach (var d in deletions)
                 {
                     task.Delete(d);
@@ -184,7 +196,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
                 {
                     if (collection.NeedsUpdating(entry, index, deletionPersister.ElementType))
                     {
-                        task.Delete(index);
+                        task.Delete(entry, index, deletionPersister);
                     }
                     ++index;
                 }
@@ -194,7 +206,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
                     if (collection.NeedsUpdating(entry, index, creationPersister.ElementType) ||
                         collection.NeedsInserting(entry, index, creationPersister.ElementType))
                     {
-                        task.Insert(entry, index);
+                        task.Insert(entry, index, creationPersister);
                     }
                     ++index;
                 }
@@ -207,7 +219,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var index = 0;
             foreach (var item in GetAllEntries(collection, task.CollectionEntry.CurrentPersister))
             {
-                task.Insert(item, index);
+                task.Insert(item, index, task.CollectionEntry.CurrentPersister);
                 ++index;
             }
         }
@@ -221,7 +233,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var index = 0;
             foreach (var item in GetAllEntries(collection, task.CollectionEntry.LoadedPersister))
             {
-                task.Delete(index);
+                task.Delete(item, index, task.CollectionEntry.LoadedPersister);
                 ++index;
             }
         }
@@ -229,7 +241,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
         public void OnPreRemoveCollection(PreCollectionRemoveEvent @event)
         {
             var collectionEntry = @event.Session.PersistenceContext.GetCollectionEntry(@event.Collection);
-            var task = new CollectionAuditTask(collectionEntry, sessions.Lookup(@event.Session), model);
+            var task = new CollectionAuditTask(collectionEntry, @event.Collection, sessions.Lookup(@event.Session), model);
 
             RecordDestruction(task, @event.Collection);
             task.Execute(@event.Session, collectionEntry.LoadedPersister, collectionEntry.CurrentPersister);
@@ -238,7 +250,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
         public void OnPreRecreateCollection(PreCollectionRecreateEvent @event)
         {
             var collectionEntry = @event.Session.PersistenceContext.GetCollectionEntry(@event.Collection);
-            var task = new CollectionAuditTask(collectionEntry, sessions.Lookup(@event.Session), model);
+            var task = new CollectionAuditTask(collectionEntry, @event.Collection, sessions.Lookup(@event.Session), model);
 
             RecordDestruction(task, @event.Collection);
             RecordCreation(task, @event.Collection);

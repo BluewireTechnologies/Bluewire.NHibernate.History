@@ -15,11 +15,12 @@ namespace Bluewire.NHibernate.Audit
         AuditedOperation AuditedOperation { get; set; }
     }
 
-    public abstract class ListElementAuditHistory
+    public interface IRelationAuditHistory
     {
-        public virtual long AuditId { get; protected set; }
-        public virtual DateTimeOffset StartDatestamp { get; set; }
-        public virtual DateTimeOffset? EndDatestamp { get; set; }
-        public virtual int Index { get; set; }
+        long AuditId { get;}
+        DateTimeOffset StartDatestamp { get; set; }
+        DateTimeOffset? EndDatestamp { get; set; }
+        object Key { get; set; }
     }
+
 }

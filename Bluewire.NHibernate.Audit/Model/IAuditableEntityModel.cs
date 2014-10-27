@@ -13,5 +13,6 @@ namespace Bluewire.NHibernate.Audit.Model
         string CollectionRole { get; }
         Type AuditEntryType { get; }
         string OwnerKeyPropertyName { get; }
+        string KeyPropertyName { get; }
     }
 }

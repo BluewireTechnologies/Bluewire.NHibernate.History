@@ -15,7 +15,7 @@ namespace Bluewire.NHibernate.Audit
         AuditedOperation AuditedOperation { get; set; }
     }
 
-    public interface IRelationAuditHistory
+    public interface IKeyedRelationAuditHistory
     {
         long AuditId { get;}
         DateTimeOffset StartDatestamp { get; set; }
@@ -23,4 +23,10 @@ namespace Bluewire.NHibernate.Audit
         object Key { get; set; }
     }
 
+    public interface ISetRelationAuditHistory
+    {
+        long AuditId { get; }
+        DateTimeOffset StartDatestamp { get; set; }
+        DateTimeOffset? EndDatestamp { get; set; }
+    }
 }

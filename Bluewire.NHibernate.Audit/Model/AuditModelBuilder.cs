@@ -41,7 +41,7 @@ namespace Bluewire.NHibernate.Audit.Model
 
         private bool IsRelationEntryType(Type type)
         {
-            return typeof(IRelationAuditHistory).IsAssignableFrom(type);
+            return typeof(IKeyedRelationAuditHistory).IsAssignableFrom(type);
         }
         private bool IsEntityEntryType(Type type)
         {

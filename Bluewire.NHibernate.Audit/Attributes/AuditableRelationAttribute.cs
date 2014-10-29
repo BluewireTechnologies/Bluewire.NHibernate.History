@@ -5,7 +5,7 @@ namespace Bluewire.NHibernate.Audit.Attributes
     [AttributeUsage(AttributeTargets.Property, Inherited = true)]
     public class AuditableRelationAttribute : Attribute
     {
-        public AuditableRelationAttribute(Type auditEntryType, string ownerKeyPropertyName, string keyPropertyName)
+        public AuditableRelationAttribute(Type auditEntryType, string ownerKeyPropertyName, string keyPropertyName = null)
         {
             AuditEntryType = auditEntryType;
             OwnerKeyPropertyName = ownerKeyPropertyName;

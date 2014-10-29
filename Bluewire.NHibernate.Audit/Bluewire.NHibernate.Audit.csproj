@@ -58,7 +58,13 @@
     <Compile Include="AuditConfigurationException.cs" />
     <Compile Include="AuditConfigurer.cs" />
     <Compile Include="AuditedOperationEnumType.cs" />
-    <Compile Include="Listeners\SaveListAuditEntry.cs" />
+    <Compile Include="Listeners\AuditCollectionElementDeletionListener.cs" />
+    <Compile Include="Listeners\AuditCollectionElementInsertionListener.cs" />
+    <Compile Include="Listeners\AuditCollectionListenerBase.cs" />
+    <Compile Include="Listeners\ICollectionAuditInsertTask.cs" />
+    <Compile Include="Listeners\KeyedCollectionAuditDeleteTask.cs" />
+    <Compile Include="Listeners\KeyedCollectionAuditInsertTask.cs" />
+    <Compile Include="Listeners\ICollectionAuditDeleteTask.cs" />
     <Compile Include="SessionsAuditInfo.cs" />
     <Compile Include="Support\DateTimeOffsetAsIntegerUserType.cs" />
     <Compile Include="Listeners\AfterFlush.cs" />

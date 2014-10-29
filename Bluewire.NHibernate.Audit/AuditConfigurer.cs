@@ -44,14 +44,18 @@ namespace Bluewire.NHibernate.Audit
 
             listeners.FlushEventListeners = listeners.FlushEventListeners.Prepend(new BeforeFlush(sessions)).Append(new AfterFlush(sessions)).ToArray();
 
-            var auditListener = new SaveSimpleAuditEntry(sessions, model);
+            var auditListener = new AuditEntityListener(sessions, model);
             listeners.FlushEntityEventListeners = listeners.FlushEntityEventListeners.Append(auditListener).ToArray();
             listeners.DeleteEventListeners = listeners.DeleteEventListeners.Append(auditListener).ToArray();
 
-            var listAuditListener = new SaveListAuditEntry(sessions, model);
-            listeners.PreCollectionRecreateEventListeners = listeners.PreCollectionRecreateEventListeners.Append(listAuditListener).ToArray();
-            listeners.PreCollectionRemoveEventListeners = listeners.PreCollectionRemoveEventListeners.Append(listAuditListener).ToArray();
-            listeners.PreCollectionUpdateEventListeners = listeners.PreCollectionUpdateEventListeners.Append(listAuditListener).ToArray();
+            // Deletion, then insertion.
+            var collectionAuditListeners = new AuditCollectionListenerBase []{
+                new AuditCollectionElementDeletionListener(sessions, model),
+                new AuditCollectionElementInsertionListener(sessions, model)
+            };
+            listeners.PreCollectionRecreateEventListeners = listeners.PreCollectionRecreateEventListeners.Concat(collectionAuditListeners).ToArray();
+            listeners.PreCollectionRemoveEventListeners = listeners.PreCollectionRemoveEventListeners.Concat(collectionAuditListeners).ToArray();
+            listeners.PreCollectionUpdateEventListeners = listeners.PreCollectionUpdateEventListeners.Concat(collectionAuditListeners).ToArray();
         }
 
     }

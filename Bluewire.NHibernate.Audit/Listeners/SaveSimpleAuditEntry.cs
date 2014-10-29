@@ -7,12 +7,12 @@ using NHibernate.Persister.Entity;
 
 namespace Bluewire.NHibernate.Audit.Listeners
 {
-    class SaveSimpleAuditEntry : IFlushEntityEventListener, IDeleteEventListener
+    class AuditEntityListener : IFlushEntityEventListener, IDeleteEventListener
     {
         private readonly SessionsAuditInfo sessions;
         private readonly AuditModel model;
 
-        public SaveSimpleAuditEntry(SessionsAuditInfo sessions, AuditModel model)
+        public AuditEntityListener(SessionsAuditInfo sessions, AuditModel model)
         {
             this.sessions = sessions;
             this.model = model;

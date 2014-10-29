@@ -48,7 +48,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         public virtual AuditedOperation AuditedOperation { get; set; }
     }
 
-    public class EntityWithListOfValueTypesValuesAuditHistory : IRelationAuditHistory
+    public class EntityWithListOfValueTypesValuesAuditHistory : IKeyedRelationAuditHistory
     {
         public virtual int EntityWithListOfValueTypesId { get; set; }
 
@@ -60,7 +60,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         public virtual DateTimeOffset StartDatestamp { get; set; }
         public virtual DateTimeOffset? EndDatestamp { get; set; }
 
-        object IRelationAuditHistory.Key
+        object IKeyedRelationAuditHistory.Key
         {
             get { return Index; }
             set { Index = (int)value; }

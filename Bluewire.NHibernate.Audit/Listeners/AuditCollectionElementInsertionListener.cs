@@ -1,4 +1,6 @@
 ﻿using Bluewire.NHibernate.Audit.Model;
+using NHibernate.Collection;
+using NHibernate.Engine;
 using NHibernate.Event;
 
 namespace Bluewire.NHibernate.Audit.Listeners
@@ -14,20 +16,20 @@ namespace Bluewire.NHibernate.Audit.Listeners
             this.model = model;
         }
         
-        protected override void CollectionWasDestroyed(global::NHibernate.Engine.CollectionEntry collectionEntry, global::NHibernate.Collection.IPersistentCollection collection, IEventSource session)
+        protected override void CollectionWasDestroyed(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
         {
         }
 
-        protected override void CollectionWasCreated(global::NHibernate.Engine.CollectionEntry collectionEntry, global::NHibernate.Collection.IPersistentCollection collection, IEventSource session)
+        protected override void CollectionWasCreated(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
         {
-            var task = new KeyedCollectionAuditInsertTask(collectionEntry, collection, sessions.Lookup(session), model);
+            var task = GetInsertTask(collectionEntry, collection, session);
             task.InsertAll();
             task.Execute(session);
         }
 
-        protected override void CollectionWasModified(global::NHibernate.Engine.CollectionEntry collectionEntry, global::NHibernate.Collection.IPersistentCollection collection, IEventSource session)
+        protected override void CollectionWasModified(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
         {
-            var task = new KeyedCollectionAuditInsertTask(collectionEntry, collection, sessions.Lookup(session), model);
+            var task = GetInsertTask(collectionEntry, collection, session);
             var index = 0;
             foreach (var entry in collection.Entries(task.Persister))
             {
@@ -39,6 +41,15 @@ namespace Bluewire.NHibernate.Audit.Listeners
                 ++index;
             }
             task.Execute(session);
+        }
+
+        private ICollectionAuditInsertTask GetInsertTask(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
+        {
+            if (collectionEntry.CurrentPersister.HasIndex)
+            {
+                return new KeyedCollectionAuditInsertTask(collectionEntry, collection, sessions.Lookup(session), model);
+            }
+            return new SetCollectionAuditInsertTask(collectionEntry, collection, sessions.Lookup(session), model);
         }
     }
 }

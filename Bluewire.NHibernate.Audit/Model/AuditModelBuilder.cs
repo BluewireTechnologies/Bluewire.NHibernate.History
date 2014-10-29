@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Bluewire.Common.Extensions;
 using NHibernate.Cfg;
 using NHibernate.Mapping;
 
@@ -19,7 +18,7 @@ namespace Bluewire.NHibernate.Audit.Model
         private void TryAddCollection(Collection mapping)
         {
             var propertyInfo = GetPropertyForCollection(mapping);
-            if(propertyInfo.GetAuditRelationAttribute() != null) relationModels.Add(new ListRelationModel(propertyInfo, mapping.Role));
+            if(propertyInfo.GetAuditRelationAttribute() != null) relationModels.Add(new AuditableRelationModel(propertyInfo, mapping.Role));
         }
 
         private PropertyInfo GetPropertyForCollection(Collection mapping)
@@ -41,7 +40,7 @@ namespace Bluewire.NHibernate.Audit.Model
 
         private bool IsRelationEntryType(Type type)
         {
-            return typeof(IKeyedRelationAuditHistory).IsAssignableFrom(type);
+            return typeof(IKeyedRelationAuditHistory).IsAssignableFrom(type) || typeof(ISetRelationAuditHistory).IsAssignableFrom(type);
         }
         private bool IsEntityEntryType(Type type)
         {
@@ -97,9 +96,9 @@ namespace Bluewire.NHibernate.Audit.Model
             }
         }
 
-        class ListRelationModel : IAuditableRelationModel
+        class AuditableRelationModel : IAuditableRelationModel
         {
-            public ListRelationModel(PropertyInfo propertyInfo, string role)
+            public AuditableRelationModel(PropertyInfo propertyInfo, string role)
             {
                 var relationAttr = propertyInfo.GetAuditRelationAttribute();
                 if (relationAttr == null) throw new AuditConfigurationException(propertyInfo.DeclaringType, String.Format("Property {0} of type {1} does not declare audit history.", propertyInfo.Name, propertyInfo.DeclaringType));

@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
 {
-    [TestFixture, Ignore]
+    [TestFixture]
     public class EntityWithSetfValueTypesPersistenceTests
     {
         private TemporaryDatabase db;
@@ -151,7 +151,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
                     Id = 42,
                     Values =
                     {
-                        new ComponentType { Integer = 2, String = "2" }
+                        new ComponentType { Integer = 2, String = "2" },
+                        removable
                     }
                 };
                 session.Save(entity);

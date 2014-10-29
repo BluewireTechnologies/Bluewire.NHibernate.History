@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using Bluewire.Common.Extensions;
-using NHibernate.Event;
+﻿using NHibernate.Event;
 
 namespace Bluewire.NHibernate.Audit.Listeners
 {

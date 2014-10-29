@@ -19,7 +19,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         protected override void CollectionWasDestroyed(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
         {
-            var task = new KeyedCollectionAuditDeleteTask(collectionEntry, collection, sessions.Lookup(session), model);
+            var task = GetDeleteTask(collectionEntry, collection, session);
             task.DeleteAll();
             task.Execute(session);
         }
@@ -30,7 +30,8 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         protected override void CollectionWasModified(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
         {
-            var task = new KeyedCollectionAuditDeleteTask(collectionEntry, collection, sessions.Lookup(session), model);
+            var task = GetDeleteTask(collectionEntry, collection, session);
+
             var deletions = collection.GetDeletes(task.Persister, false).Cast<object>();
             foreach (var d in deletions)
             {
@@ -46,6 +47,15 @@ namespace Bluewire.NHibernate.Audit.Listeners
                 ++index;
             }
             task.Execute(session);
+        }
+
+        private ICollectionAuditDeleteTask GetDeleteTask(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
+        {
+            if (collectionEntry.LoadedPersister.HasIndex)
+            {
+                return new KeyedCollectionAuditDeleteTask(collectionEntry, collection, sessions.Lookup(session), model);
+            }
+            return new SetCollectionAuditDeleteTask(collectionEntry, collection, sessions.Lookup(session), model);
         }
     }
 }

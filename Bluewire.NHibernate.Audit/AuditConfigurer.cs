@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using Bluewire.Common.Extensions;
 using Bluewire.Common.Time;
 using Bluewire.NHibernate.Audit.Listeners;

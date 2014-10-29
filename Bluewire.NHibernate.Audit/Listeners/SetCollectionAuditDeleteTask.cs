@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Bluewire.Common.Extensions;
 using Bluewire.NHibernate.Audit.Model;
 using Bluewire.NHibernate.Audit.Support;
 using NHibernate.AdoNet;
@@ -13,15 +14,15 @@ using NHibernate.Persister.Collection;
 
 namespace Bluewire.NHibernate.Audit.Listeners
 {
-    class KeyedCollectionAuditDeleteTask : ICollectionAuditDeleteTask
+    class SetCollectionAuditDeleteTask : ICollectionAuditDeleteTask
     {
         public ICollectionPersister Persister { get; private set; }
         private readonly IPersistentCollection collection;
         private readonly SessionAuditInfo sessionAuditInfo;
         private readonly AuditModel model;
         private readonly CollectionEntry collectionEntry;
-        
-        public KeyedCollectionAuditDeleteTask(CollectionEntry collectionEntry, IPersistentCollection collection, SessionAuditInfo sessionAuditInfo, AuditModel model)
+
+        public SetCollectionAuditDeleteTask(CollectionEntry collectionEntry, IPersistentCollection collection, SessionAuditInfo sessionAuditInfo, AuditModel model)
         {
             sessionAuditInfo.AssertIsFlushing();
 
@@ -32,7 +33,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
             Persister = collectionEntry.LoadedPersister;
             if (Persister == null) throw new ArgumentException("No LoadedPersister for collection.", "collectionEntry");
-            if (!Persister.HasIndex) throw new ArgumentException(String.Format("Not a keyed collection: {0}", Persister.Role));
+            if (Persister.HasIndex) throw new ArgumentException(String.Format("This is a keyed collection: {0}", Persister.Role));
             Debug.Assert(!Persister.IsOneToMany);
         }
 
@@ -72,9 +73,10 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
                 foreach (var deletion in deletions)
                 {
+                    var entry = model.GenerateRelationAuditEntry<ISetRelationAuditHistory>(deleteModel, deletion);
                     var expectation = Expectations.AppropriateExpectation(ExecuteUpdateResultCheckStyle.Count);
                     var cmd = session.Batcher.PrepareBatchCommand(auditDelete.Command.CommandType, auditDelete.Command.Text, auditDelete.Command.ParameterTypes);
-                    auditDelete.PopulateCommand(session, cmd, collectionEntry.LoadedKey, deletion, sessionAuditInfo.OperationDatestamp);
+                    auditDelete.PopulateCommand(session, cmd, collectionEntry.LoadedKey, entry, sessionAuditInfo.OperationDatestamp);
                     session.Batcher.AddToBatch(expectation);
                 }
             }
@@ -82,17 +84,27 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         class AuditDeleteCommand : AuditDeleteCommandBase
         {
-            private readonly Property indexProperty;
+            private readonly List<Property> equalityProperties;
+            private readonly Type entryType;
 
             public AuditDeleteCommand(ISessionFactoryImplementor factory, IAuditableRelationModel relationModel, PersistentClass auditMapping) : base(factory, relationModel, auditMapping)
             {
-                indexProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == relationModel.KeyPropertyName);
-                AddPredicateProperty(indexProperty);
+                entryType = relationModel.AuditEntryType;
+                var startDateProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "StartDatestamp");
+
+                equalityProperties = auditMapping.PropertyClosureIterator.Without(KeyProperty, startDateProperty, EndDateProperty).ToList();
+                foreach(var p in equalityProperties)
+                {
+                    AddPredicateProperty(p);
+                }
             }
 
             protected override void AddParameters(CommandParameteriser parameters, object deletion)
             {
-                parameters.Set(indexProperty, deletion);
+                foreach (var p in equalityProperties)
+                {
+                    parameters.Set(p, p.GetGetter(entryType).Get(deletion));
+                }
             }
         }
     }

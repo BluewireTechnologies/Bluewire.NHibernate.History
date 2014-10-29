@@ -61,6 +61,10 @@
     <Compile Include="Listeners\AuditCollectionElementDeletionListener.cs" />
     <Compile Include="Listeners\AuditCollectionElementInsertionListener.cs" />
     <Compile Include="Listeners\AuditCollectionListenerBase.cs" />
+    <Compile Include="Listeners\AuditDeleteCommandBase.cs" />
+    <Compile Include="Support\CommandParameteriser.cs" />
+    <Compile Include="Listeners\SetCollectionAuditDeleteTask.cs" />
+    <Compile Include="Listeners\SetCollectionAuditInsertTask.cs" />
     <Compile Include="Listeners\ICollectionAuditInsertTask.cs" />
     <Compile Include="Listeners\KeyedCollectionAuditDeleteTask.cs" />
     <Compile Include="Listeners\KeyedCollectionAuditInsertTask.cs" />

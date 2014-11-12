@@ -57,13 +57,12 @@ namespace Bluewire.NHibernate.Audit.Listeners
             IAuditableRelationModel createModel;
             if (model.TryGetModelForPersister(Persister, out createModel))
             {
-                var auditMapping = model.GetAuditClassMapping(createModel.AuditEntryType);
-
                 var innerSession = session.GetSession(EntityMode.Poco);
                 foreach (var insertion in insertions)
                 {
-                    var entry = model.GenerateRelationAuditEntry<ISetRelationAuditHistory>(createModel, insertion);
-                    auditMapping.PropertyClosureIterator.Single(p => p.Name == createModel.OwnerKeyPropertyName).GetSetter(createModel.AuditEntryType).Set(entry, collectionEntry.CurrentKey);
+                    var entry = (ISetRelationAuditHistory)Activator.CreateInstance(createModel.AuditEntryType);
+                    entry.Value = model.GenerateRelationAuditValue(createModel, insertion);
+                    entry.OwnerId = collectionEntry.CurrentKey;
                     entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
                     innerSession.Save(entry);
                 }

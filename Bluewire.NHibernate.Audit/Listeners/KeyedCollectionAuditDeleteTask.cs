@@ -68,7 +68,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             if (model.TryGetModelForPersister(Persister, out deleteModel))
             {
                 var auditMapping = model.GetAuditClassMapping(deleteModel.AuditEntryType);
-                var auditDelete = new AuditDeleteCommand(session.Factory, deleteModel, auditMapping);
+                var auditDelete = new AuditDeleteCommand(session.Factory, auditMapping);
 
                 foreach (var deletion in deletions)
                 {
@@ -84,9 +84,9 @@ namespace Bluewire.NHibernate.Audit.Listeners
         {
             private readonly Property indexProperty;
 
-            public AuditDeleteCommand(ISessionFactoryImplementor factory, IAuditableRelationModel relationModel, PersistentClass auditMapping) : base(factory, relationModel, auditMapping)
+            public AuditDeleteCommand(ISessionFactoryImplementor factory, PersistentClass auditMapping) : base(factory, auditMapping)
             {
-                indexProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == relationModel.KeyPropertyName);
+                indexProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "Key");
                 AddPredicateProperty(indexProperty);
             }
 

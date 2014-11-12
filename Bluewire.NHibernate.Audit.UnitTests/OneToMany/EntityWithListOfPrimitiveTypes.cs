@@ -6,21 +6,21 @@ using Bluewire.NHibernate.Audit.Attributes;
 
 namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
 {
-    [AuditableEntity(typeof(EntityWithMapOfValueTypesAuditHistory))]
-    public class EntityWithMapOfValueTypes
+    [AuditableEntity(typeof(EntityWithListOfPrimitiveTypesAuditHistory))]
+    public class EntityWithListOfPrimitiveTypes
     {
-        public EntityWithMapOfValueTypes()
+        public EntityWithListOfPrimitiveTypes()
         {
-            Values = new Dictionary<string, ComponentType>();
+            Values = new List<string>();
         }
 
         public virtual int Id { get; set; }
-        [AuditableRelation(typeof(EntityWithMapOfValueTypesValuesAuditHistory))]
-        public virtual IDictionary<string, ComponentType> Values { get; protected set; }
+        [AuditableRelation(typeof(EntityWithListOfPrimitiveTypesValuesAuditHistory))]
+        public virtual IList<string> Values { get; protected set; }
         public virtual int VersionId { get; set; }
     }
 
-    public class EntityWithMapOfValueTypesAuditHistory : IAuditHistory
+    public class EntityWithListOfPrimitiveTypesAuditHistory : IAuditHistory
     {
         public virtual int Id { get; set; }
         public virtual int? VersionId { get; set; }
@@ -48,7 +48,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         public virtual AuditedOperation AuditedOperation { get; set; }
     }
 
-    public class EntityWithMapOfValueTypesValuesAuditHistory : KeyedRelationAuditHistoryEntry<int, string, ComponentType>
+    public class EntityWithListOfPrimitiveTypesValuesAuditHistory : KeyedRelationAuditHistoryEntry<int, int, string>
     {
     }
 }

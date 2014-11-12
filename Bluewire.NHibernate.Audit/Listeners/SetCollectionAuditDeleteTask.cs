@@ -73,7 +73,8 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
                 foreach (var deletion in deletions)
                 {
-                    var entry = model.GenerateRelationAuditEntry<ISetRelationAuditHistory>(deleteModel, deletion);
+                    var entry = (ISetRelationAuditHistory)Activator.CreateInstance(deleteModel.AuditEntryType);
+                    entry.Value = model.GenerateRelationAuditValue(deleteModel, deletion);
                     var expectation = Expectations.AppropriateExpectation(ExecuteUpdateResultCheckStyle.Count);
                     var cmd = session.Batcher.PrepareBatchCommand(auditDelete.Command.CommandType, auditDelete.Command.Text, auditDelete.Command.ParameterTypes);
                     auditDelete.PopulateCommand(session, cmd, collectionEntry.LoadedKey, entry, sessionAuditInfo.OperationDatestamp);
@@ -84,27 +85,20 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         class AuditDeleteCommand : AuditDeleteCommandBase
         {
-            private readonly List<Property> equalityProperties;
+            private readonly Property valueProperty;
             private readonly Type entryType;
 
-            public AuditDeleteCommand(ISessionFactoryImplementor factory, IAuditableRelationModel relationModel, PersistentClass auditMapping) : base(factory, relationModel, auditMapping)
+            public AuditDeleteCommand(ISessionFactoryImplementor factory, IAuditableRelationModel relationModel, PersistentClass auditMapping) : base(factory, auditMapping)
             {
                 entryType = relationModel.AuditEntryType;
-                var startDateProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "StartDatestamp");
 
-                equalityProperties = auditMapping.PropertyClosureIterator.Without(KeyProperty, startDateProperty, EndDateProperty).ToList();
-                foreach(var p in equalityProperties)
-                {
-                    AddPredicateProperty(p);
-                }
+                valueProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "Value");
+                AddPredicateProperty(valueProperty);
             }
 
             protected override void AddParameters(CommandParameteriser parameters, object deletion)
             {
-                foreach (var p in equalityProperties)
-                {
-                    parameters.Set(p, p.GetGetter(entryType).Get(deletion));
-                }
+                parameters.Set(valueProperty, valueProperty.GetGetter(entryType).Get(deletion));
             }
         }
     }

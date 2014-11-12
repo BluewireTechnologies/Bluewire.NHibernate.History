@@ -19,21 +19,21 @@ namespace Bluewire.NHibernate.Audit.Listeners
     abstract class AuditDeleteCommandBase
     {
         private readonly ISessionFactoryImplementor factory;
-        protected readonly Property KeyProperty;
+        protected readonly Property OwningEntityIdProperty;
         protected readonly Property EndDateProperty;
 
-        protected AuditDeleteCommandBase(ISessionFactoryImplementor factory, IAuditableRelationModel relationModel, PersistentClass auditMapping)
+        protected AuditDeleteCommandBase(ISessionFactoryImplementor factory, PersistentClass auditMapping)
         {
             this.factory = factory;
             SqlUpdateBuilder = new SqlUpdateBuilder(factory.Dialect, factory);
-            KeyProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == relationModel.OwnerKeyPropertyName);
+            OwningEntityIdProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "OwnerId");
             EndDateProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "EndDatestamp");
             
             SqlUpdateBuilder
                 .SetTableName(auditMapping.Table.GetQualifiedName(factory.Dialect, factory.Settings.DefaultCatalogName, factory.Settings.DefaultSchemaName))
                 .AddColumns(ColumnNames(factory, EndDateProperty.ColumnIterator), EndDateProperty.Type);
 
-            AddPredicateProperty(KeyProperty);
+            AddPredicateProperty(OwningEntityIdProperty);
             SqlUpdateBuilder.AddWhereFragment(ColumnNames(factory, EndDateProperty.ColumnIterator).Single() + " is null");
         }
 
@@ -53,11 +53,11 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         protected abstract void AddParameters(CommandParameteriser parameters, object deletion);
 
-        public void PopulateCommand(ISessionImplementor session, IDbCommand cmd, object key, object deletion, DateTimeOffset deletionDatestamp)
+        public void PopulateCommand(ISessionImplementor session, IDbCommand cmd, object owningEntityId, object deletion, DateTimeOffset deletionDatestamp)
         {
             var parameters = new CommandParameteriser(session, cmd);
             parameters.Set(EndDateProperty, deletionDatestamp);
-            parameters.Set(KeyProperty, key);
+            parameters.Set(OwningEntityIdProperty, owningEntityId);
             AddParameters(parameters, deletion);
         }
     }

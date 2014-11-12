@@ -36,11 +36,11 @@ namespace Bluewire.NHibernate.Audit.Model
             return auditEntry;
         }
 
-        public T GenerateRelationAuditEntry<T>(IAuditableRelationModel relationModel, object entry)
+        public object GenerateRelationAuditValue(IAuditableRelationModel relationModel, object entry)
         {
-            var auditEntry = (T)auditEntryFactory.Create(entry, relationModel.AuditEntryType);
-            Debug.Assert(relationModel.AuditEntryType.IsInstanceOfType(auditEntry));
-            return auditEntry;
+            var auditValue = auditEntryFactory.Create(entry, relationModel.AuditValueType);
+            Debug.Assert(relationModel.AuditValueType.IsInstanceOfType(auditValue));
+            return auditValue;
         }
 
         public IAuditableEntityModel GetModelForEntityType(Type entityType)

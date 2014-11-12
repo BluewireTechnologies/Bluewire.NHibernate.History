@@ -15,7 +15,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         }
 
         public virtual int Id { get; set; }
-        [AuditableRelation(typeof(EntityWithSetOfValueTypesValuesAuditHistory), "EntityWithSetOfValueTypesId")]
+        [AuditableRelation(typeof(EntityWithSetOfValueTypesValuesAuditHistory))]
         public virtual ISet<ComponentType> Values { get; protected set; }
         public virtual int VersionId { get; set; }
     }
@@ -49,15 +49,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         public virtual AuditedOperation AuditedOperation { get; set; }
     }
 
-    public class EntityWithSetOfValueTypesValuesAuditHistory : ISetRelationAuditHistory
+    public class EntityWithSetOfValueTypesValuesAuditHistory : SetRelationAuditHistoryEntry<int, ComponentType>
     {
-        public virtual int EntityWithSetOfValueTypesId { get; set; }
-
-        public virtual string String { get; set; }
-        public virtual int Integer { get; set; }
-
-        public virtual long AuditId { get; protected set; }
-        public virtual DateTimeOffset StartDatestamp { get; set; }
-        public virtual DateTimeOffset? EndDatestamp { get; set; }
     }
 }

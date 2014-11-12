@@ -69,6 +69,8 @@
     <Compile Include="ManyToOne\EntityWithManyToOnePersistenceTests.cs" />
     <Compile Include="ManyToMany\EntityWithListOfReferences.cs" />
     <Compile Include="OneToMany\ComponentType.cs" />
+    <Compile Include="OneToMany\EntityWithListOfPrimitiveTypesPersistenceTests.cs" />
+    <Compile Include="OneToMany\EntityWithListOfPrimitiveTypes.cs" />
     <Compile Include="OneToMany\EntityWithSetOfValueTypesPersistenceTests.cs" />
     <Compile Include="OneToMany\EntityWithMapOfValueTypesPersistenceTests.cs" />
     <Compile Include="OneToMany\EntityWithListOfValueTypes.cs" />

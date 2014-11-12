@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using NHibernate.Cfg;
 using NHibernate.Mapping;
+using NHibernate.Type;
 
 namespace Bluewire.NHibernate.Audit.Model
 {
@@ -18,7 +19,7 @@ namespace Bluewire.NHibernate.Audit.Model
         private void TryAddCollection(Collection mapping)
         {
             var propertyInfo = GetPropertyForCollection(mapping);
-            if(propertyInfo.GetAuditRelationAttribute() != null) relationModels.Add(new AuditableRelationModel(propertyInfo, mapping.Role));
+            if(propertyInfo.GetAuditRelationAttribute() != null) relationModels.Add(new AuditableRelationModel(propertyInfo, new InferredRelationAuditInfo(mapping)));
         }
 
         private PropertyInfo GetPropertyForCollection(Collection mapping)
@@ -98,24 +99,58 @@ namespace Bluewire.NHibernate.Audit.Model
 
         class AuditableRelationModel : IAuditableRelationModel
         {
-            public AuditableRelationModel(PropertyInfo propertyInfo, string role)
+            public AuditableRelationModel(PropertyInfo propertyInfo, InferredRelationAuditInfo mappingInfo)
             {
                 var relationAttr = propertyInfo.GetAuditRelationAttribute();
                 if (relationAttr == null) throw new AuditConfigurationException(propertyInfo.DeclaringType, String.Format("Property {0} of type {1} does not declare audit history.", propertyInfo.Name, propertyInfo.DeclaringType));
             
-                CollectionRole = role;
+                CollectionRole = mappingInfo.Role;
                 AuditEntryType = relationAttr.AuditEntryType;
-                OwnerKeyPropertyName = relationAttr.OwnerKeyPropertyName;
-                KeyPropertyName = relationAttr.KeyPropertyName;
+                AuditValueType = relationAttr.AuditValueType ?? mappingInfo.ElementType.ReturnedClass;
             }
 
             public string CollectionRole { get; private set; }
-
             public Type AuditEntryType { get; private set; }
+            public Type AuditValueType { get; private set; }
+        }
 
-            public string OwnerKeyPropertyName { get; private set; }
+        class InferredRelationAuditInfo
+        {
+            public InferredRelationAuditInfo(Collection mapping)
+            {
+                Role = mapping.Role;
+                ElementType = mapping.Element.Type;
+                OwningEntityIdType = mapping.Owner.Identifier.Type;
 
-            public string KeyPropertyName { get; private set; }
+                if (mapping.IsIndexed)
+                {
+                    AuditEntryBaseDefinition = typeof(KeyedRelationAuditHistoryEntry<,,>);
+                    KeyType = mapping.Key.Type;
+                    if (KeyType == null) throw new ArgumentException(String.Format("No key type for collection: {0}", mapping.Role));
+                }
+                else
+                {
+                    AuditEntryBaseDefinition = typeof(SetRelationAuditHistoryEntry<,>);
+                }
+            }
+
+            public Type GetExpectedBaseType(Type elementType)
+            {
+                if (KeyType == null)
+                {
+                    return AuditEntryBaseDefinition.MakeGenericType(OwningEntityIdType.ReturnedClass, elementType);
+                }
+                else
+                {
+                    return AuditEntryBaseDefinition.MakeGenericType(OwningEntityIdType.ReturnedClass, KeyType.ReturnedClass, elementType);
+                }
+            }
+
+            public string Role { get; private set; }
+            public Type AuditEntryBaseDefinition { get; private set; }
+            public IType KeyType { get; private set; }
+            public IType OwningEntityIdType { get; private set; }
+            public IType ElementType { get; private set; }
         }
     }
 }

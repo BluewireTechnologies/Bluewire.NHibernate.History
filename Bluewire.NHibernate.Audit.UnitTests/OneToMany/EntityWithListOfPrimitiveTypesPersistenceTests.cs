@@ -10,11 +10,11 @@ using NUnit.Framework;
 namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
 {
     [TestFixture]
-    public class EntityWithListOfValueTypesPersistenceTests
+    public class EntityWithListOfPrimitiveTypesPersistenceTests
     {
         private TemporaryDatabase db;
 
-        public EntityWithListOfValueTypesPersistenceTests()
+        public EntityWithListOfPrimitiveTypesPersistenceTests()
         {
             db = TemporaryDatabase.Configure(Configure);
         }
@@ -25,22 +25,18 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         {
             using (var session = db.CreateSession())
             {
-                var entity = new EntityWithListOfValueTypes
+                var entity = new EntityWithListOfPrimitiveTypes
                 {
                     Id = 42,
-                    Values =
-                    {
-                        new ComponentType { Integer = 2, String = "2" },
-                        new ComponentType { Integer = 7, String = "6" },
-                    }
+                    Values = { "2", "6" }
                 };
                 session.Save(entity);
                 session.Flush();
 
-                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
+                var auditedEntity = session.Query<EntityWithListOfPrimitiveTypesAuditHistory>().Single(h => h.Id == 42);
                 Assert.AreEqual(42, auditedEntity.Id);
 
-                var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
+                var auditedCollection = session.Query<EntityWithListOfPrimitiveTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 CollectionAssert.AreEqual(new[] { 0, 1 }, auditedCollection.Select(c => c.Key).ToArray());
             }
         }
@@ -50,14 +46,14 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         {
             using (var session = db.CreateSession())
             {
-                var entity = new EntityWithListOfValueTypes { Id = 42 };
+                var entity = new EntityWithListOfPrimitiveTypes { Id = 42 };
                 session.Save(entity);
                 session.Flush();
 
-                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
+                var auditedEntity = session.Query<EntityWithListOfPrimitiveTypesAuditHistory>().Single(h => h.Id == 42);
                 Assert.AreEqual(42, auditedEntity.Id);
 
-                var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
+                var auditedCollection = session.Query<EntityWithListOfPrimitiveTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 CollectionAssert.IsEmpty(auditedCollection);
             }
         }
@@ -67,32 +63,28 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         {
             using (var session = db.CreateSession())
             {
-                var entity = new EntityWithListOfValueTypes
+                var entity = new EntityWithListOfPrimitiveTypes
                 {
                     Id = 42,
-                    Values =
-                    {
-                        new ComponentType { Integer = 2, String = "2" },
-                        new ComponentType { Integer = 7, String = "6" },
-                    }
+                    Values = { "2", "6" }
                 };
                 session.Save(entity);
                 session.Flush();
 
-                entity.Values[1].String = "8";
+                entity.Values[1] = "8";
                 session.Flush();
 
-                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
+                var auditedEntity = session.Query<EntityWithListOfPrimitiveTypesAuditHistory>().Single(h => h.Id == 42);
                 Assert.AreEqual(42, auditedEntity.Id);
 
-                var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
+                var auditedCollection = session.Query<EntityWithListOfPrimitiveTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 Assert.That(auditedCollection.Count, Is.EqualTo(3));
 
                 var originalIndex0 = auditedCollection[0];
                 var originalIndex1 = auditedCollection[1];
                 var updatedIndex1 = auditedCollection[2];
 
-                Assert.AreEqual("8", updatedIndex1.Value.String);
+                Assert.AreEqual("8", updatedIndex1.Value);
                 Assert.AreEqual(originalIndex1.EndDatestamp, updatedIndex1.StartDatestamp);
                 Assert.IsNull(originalIndex0.EndDatestamp);
                 Assert.IsNull(updatedIndex1.EndDatestamp);
@@ -104,30 +96,27 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         {
             using (var session = db.CreateSession())
             {
-                var entity = new EntityWithListOfValueTypes
+                var entity = new EntityWithListOfPrimitiveTypes
                 {
                     Id = 42,
-                    Values =
-                    {
-                        new ComponentType { Integer = 2, String = "2" }
-                    }
+                    Values = { "2" }
                 };
                 session.Save(entity);
                 session.Flush();
 
-                entity.Values.Add(new ComponentType { Integer = 7, String = "8" });
+                entity.Values.Add("8");
                 session.Flush();
 
-                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
+                var auditedEntity = session.Query<EntityWithListOfPrimitiveTypesAuditHistory>().Single(h => h.Id == 42);
                 Assert.AreEqual(42, auditedEntity.Id);
 
-                var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
+                var auditedCollection = session.Query<EntityWithListOfPrimitiveTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 Assert.That(auditedCollection.Count, Is.EqualTo(2));
 
                 var originalIndex0 = auditedCollection[0];
                 var insertedIndex1 = auditedCollection[1];
 
-                Assert.AreEqual("8", insertedIndex1.Value.String);
+                Assert.AreEqual("8", insertedIndex1.Value);
                 Assert.AreNotEqual(originalIndex0.StartDatestamp, insertedIndex1.StartDatestamp);
                 Assert.IsNull(insertedIndex1.EndDatestamp);
             }
@@ -138,14 +127,10 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         {
             using (var session = db.CreateSession())
             {
-                var entity = new EntityWithListOfValueTypes
+                var entity = new EntityWithListOfPrimitiveTypes
                 {
                     Id = 42,
-                    Values =
-                    {
-                        new ComponentType { Integer = 2, String = "2" },
-                        new ComponentType { Integer = 7, String = "8" }
-                    }
+                    Values = { "2", "8" }
                 };
                 session.Save(entity);
                 session.Flush();
@@ -155,10 +140,10 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
                 entity.Values[1] = temp;
                 session.Flush();
 
-                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
+                var auditedEntity = session.Query<EntityWithListOfPrimitiveTypesAuditHistory>().Single(h => h.Id == 42);
                 Assert.AreEqual(42, auditedEntity.Id);
 
-                var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
+                var auditedCollection = session.Query<EntityWithListOfPrimitiveTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 Assert.That(auditedCollection.Count, Is.EqualTo(4));
 
                 var originalIndex0 = auditedCollection[0];
@@ -166,8 +151,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
                 var reorderedIndex0 = auditedCollection[2];
                 var reorderedIndex1 = auditedCollection[3];
 
-                Assert.AreEqual("8", reorderedIndex0.Value.String);
-                Assert.AreEqual("2", reorderedIndex1.Value.String);
+                Assert.AreEqual("8", reorderedIndex0.Value);
+                Assert.AreEqual("2", reorderedIndex1.Value);
 
                 Assert.IsNotNull(originalIndex0.EndDatestamp);
                 Assert.IsNotNull(originalIndex1.EndDatestamp);
@@ -181,14 +166,10 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         {
             using (var session = db.CreateSession())
             {
-                var entity = new EntityWithListOfValueTypes
+                var entity = new EntityWithListOfPrimitiveTypes
                 {
                     Id = 42,
-                    Values =
-                    {
-                        new ComponentType { Integer = 2, String = "2" },
-                        new ComponentType { Integer = 7, String = "8" }
-                    }
+                    Values = { "2", "8" }
                 };
                 session.Save(entity);
                 session.Flush();
@@ -196,12 +177,12 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
                 entity.Values.RemoveAt(1);
                 session.Flush();
 
-                var audited = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
+                var audited = session.Query<EntityWithListOfPrimitiveTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
 
                 Assert.That(audited.Count, Is.EqualTo(2));
 
                 var item = audited.ElementAt(1);
-                Assert.AreEqual("8", item.Value.String);
+                Assert.AreEqual("8", item.Value);
                 Assert.IsNotNull(item.EndDatestamp);
             }
         }
@@ -211,14 +192,10 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         {
             using (var session = db.CreateSession())
             {
-                var entity = new EntityWithListOfValueTypes
+                var entity = new EntityWithListOfPrimitiveTypes
                 {
                     Id = 42,
-                    Values =
-                    {
-                        new ComponentType { Integer = 2, String = "2" },
-                        new ComponentType { Integer = 7, String = "8" }
-                    }
+                    Values = { "2", "8" }
                 };
                 session.Save(entity);
                 session.Flush();
@@ -226,17 +203,17 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
                 entity.Values.RemoveAt(0);
                 session.Flush();
 
-                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
+                var auditedEntity = session.Query<EntityWithListOfPrimitiveTypesAuditHistory>().Single(h => h.Id == 42);
                 Assert.AreEqual(42, auditedEntity.Id);
 
-                var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
+                var auditedCollection = session.Query<EntityWithListOfPrimitiveTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 Assert.That(auditedCollection.Count, Is.EqualTo(3));
 
                 var originalIndex0 = auditedCollection[0];
                 var originalIndex1 = auditedCollection[1];
                 var remainingIndex0 = auditedCollection[2];
 
-                Assert.AreEqual("8", remainingIndex0.Value.String);
+                Assert.AreEqual("8", remainingIndex0.Value);
 
                 Assert.IsNotNull(originalIndex0.EndDatestamp);
                 Assert.IsNotNull(originalIndex1.EndDatestamp);
@@ -247,19 +224,16 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         private static void Configure(Configuration cfg)
         {
             var mapper = new ModelMapper();
-            mapper.Class<EntityWithListOfValueTypes>(e =>
+            mapper.Class<EntityWithListOfPrimitiveTypes>(e =>
             {
                 e.Id(i => i.Id, i => i.Generator(new AssignedGeneratorDef()));
                 e.List(i => i.Values,
-                    c => { c.Table("EntityWithListOfValueTypesValues"); },
-                    r => r.Component(c =>
-                    {
-                        c.Property(x => x.String);
-                        c.Property(x => x.Integer);
-                    }));
+                    c => { c.Table("EntityWithListOfPrimitiveTypesValues"); },
+                    r => r.Element()
+                    );
                 e.Version(i => i.VersionId, v => { });
             });
-            mapper.Class<EntityWithListOfValueTypesAuditHistory>(e =>
+            mapper.Class<EntityWithListOfPrimitiveTypesAuditHistory>(e =>
             {
                 e.Id(i => i.AuditId, i => i.Generator(new HighLowGeneratorDef()));
                 e.Property(i => i.Id);
@@ -269,21 +243,18 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
                 e.Property(i => i.AuditedOperation, p => p.Type<AuditedOperationEnumType>());
                 e.Mutable(false);
             });
-            mapper.Class<EntityWithListOfValueTypesValuesAuditHistory>(e =>
+            mapper.Class<EntityWithListOfPrimitiveTypesValuesAuditHistory>(e =>
             {
                 e.Id(i => i.AuditId, i => i.Generator(new HighLowGeneratorDef()));
                 e.Property(i => i.StartDatestamp, p => p.Type<DateTimeOffsetAsIntegerUserType>());
                 e.Property(i => i.EndDatestamp, p => p.Type<DateTimeOffsetAsIntegerUserType>());
                 e.Property(i => i.Key);
                 e.Property(i => i.OwnerId);
-                e.Component(i => i.Value, c =>
-                {
-                    c.Property(i => i.String);
-                    c.Property(i => i.Integer);
-                });
+                e.Property(i => i.Value);
                 e.Mutable(false);
             });
-            cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
+            var hbm = mapper.CompileMappingForAllExplicitlyAddedEntities();
+            cfg.AddMapping(hbm);
 
             new AuditConfigurer(new DynamicAuditEntryFactory()).IntegrateWithNHibernate(cfg);
         }

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Bluewire.NHibernate.Audit.Attributes;
 
 namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany

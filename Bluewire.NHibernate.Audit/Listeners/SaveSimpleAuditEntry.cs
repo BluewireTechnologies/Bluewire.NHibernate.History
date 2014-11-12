@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 using Bluewire.NHibernate.Audit.Model;
+using Iesi.Collections;
 using NHibernate;
 using NHibernate.Event;
 using NHibernate.Persister.Entity;
@@ -45,7 +46,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             @event.Session.Save(auditEntry);
         }
 
-        public void OnDelete(DeleteEvent @event, Iesi.Collections.ISet transientEntities)
+        public void OnDelete(DeleteEvent @event, ISet transientEntities)
         {
             //OnDelete(@event);
         }

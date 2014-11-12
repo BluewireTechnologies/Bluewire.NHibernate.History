@@ -78,7 +78,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToOne
                 session.Flush();
                 Assume.That(entity.VersionId, Is.Not.EqualTo(initialVersion));
 
-                var audited = session.Query<EntityWithManyToOneAuditHistory>().SingleOrDefault(h => h.Id == 42 && h.VersionId == entity.VersionId);
+                var audited = session.Query<EntityWithManyToOneAuditHistory>().Single(h => h.Id == 42 && h.VersionId == entity.VersionId);
 
                 Assert.AreEqual(42, audited.Id);
                 Assert.AreEqual(entity.VersionId, audited.VersionId);

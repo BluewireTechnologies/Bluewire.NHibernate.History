@@ -23,17 +23,15 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Simple
         [Test]
         public void SavingSimpleEntityIsAudited()
         {
-            const int ID = 42;
-
             using (var session = db.CreateSession())
             {
-                var entity = new SimpleEntity { Id = ID, Value = "Initial value" };
+                var entity = new SimpleEntity { Id = 42, Value = "Initial value" };
                 session.Save(entity);
                 session.Flush();
 
-                var audited = session.Query<SimpleEntityAuditHistory>().Single(h => h.Id == ID);
+                var audited = session.Query<SimpleEntityAuditHistory>().Single(h => h.Id == 42);
 
-                Assert.AreEqual(ID, audited.Id);
+                Assert.AreEqual(42, audited.Id);
                 Assert.AreEqual(entity.VersionId, audited.VersionId);
                 Assert.AreEqual(entity.Value, audited.Value);
                 Assert.AreEqual(null, audited.PreviousVersionId);
@@ -44,11 +42,9 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Simple
         [Test]
         public void UpdatingSimpleEntityIsAudited()
         {
-            const int ID = 42;
-
             using (var session = db.CreateSession())
             {
-                var entity = new SimpleEntity { Id = ID, Value = "Initial value" };
+                var entity = new SimpleEntity { Id = 42, Value = "Initial value" };
                 session.Save(entity);
                 session.Flush();
                 var initialVersion = entity.VersionId;
@@ -57,9 +53,9 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Simple
                 session.Flush();
                 Assume.That(entity.VersionId, Is.Not.EqualTo(initialVersion));
 
-                var audited = session.Query<SimpleEntityAuditHistory>().SingleOrDefault(h => h.Id == ID && h.VersionId == entity.VersionId);
+                var audited = session.Query<SimpleEntityAuditHistory>().Single(h => h.Id == 42 && h.VersionId == entity.VersionId);
 
-                Assert.AreEqual(ID, audited.Id);
+                Assert.AreEqual(42, audited.Id);
                 Assert.AreEqual(entity.VersionId, audited.VersionId);
                 Assert.AreEqual(entity.Value, audited.Value);
                 Assert.AreEqual(initialVersion, audited.PreviousVersionId);
@@ -70,24 +66,22 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Simple
         [Test]
         public void DeletingSimpleEntityIsAudited()
         {
-            const int ID = 42;
-
             using (var session = db.CreateSession())
             {
-                var entity = new SimpleEntity { Id = ID, Value = "Initial value" };
+                var entity = new SimpleEntity { Id = 42, Value = "Initial value" };
                 session.Save(entity);
                 session.Flush();
 
                 session.Delete(entity);
                 session.Flush();
 
-                var audited = session.Query<SimpleEntityAuditHistory>().Where(h => h.Id == ID).ToList();
+                var audited = session.Query<SimpleEntityAuditHistory>().Where(h => h.Id == 42).ToList();
 
                 Assert.That(audited.Count, Is.EqualTo(2));
 
                 var deletion = audited.ElementAt(1);
 
-                Assert.AreEqual(ID, deletion.Id);
+                Assert.AreEqual(42, deletion.Id);
                 Assert.IsNull(deletion.VersionId);
                 Assert.AreEqual(entity.Value, deletion.Value);
                 Assert.AreEqual(entity.VersionId, deletion.PreviousVersionId);

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Text;
 using Bluewire.NHibernate.Audit.Attributes;
 using Iesi.Collections.Generic;
 

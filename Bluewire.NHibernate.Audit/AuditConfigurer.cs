@@ -25,8 +25,6 @@ namespace Bluewire.NHibernate.Audit
 
         public void IntegrateWithNHibernate(Configuration cfg)
         {
-            cfg.BuildMappings(); // Must do this first, to get collection information.
-
             var modelBuilder = new AuditModelBuilder();
             modelBuilder.AddFromConfiguration(cfg);
             var model = modelBuilder.GetValidatedModel(auditEntryFactory);

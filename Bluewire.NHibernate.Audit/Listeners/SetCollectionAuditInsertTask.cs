@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Bluewire.NHibernate.Audit.Model;
 using NHibernate;
 using NHibernate.Collection;
@@ -16,8 +15,8 @@ namespace Bluewire.NHibernate.Audit.Listeners
         public ICollectionPersister Persister { get; private set; }
         private readonly IPersistentCollection collection;
         private readonly SessionAuditInfo sessionAuditInfo;
-        private readonly AuditModel model;
         private readonly CollectionEntry collectionEntry;
+        private readonly IAuditableRelationModel createModel;
 
         public SetCollectionAuditInsertTask(CollectionEntry collectionEntry, IPersistentCollection collection, SessionAuditInfo sessionAuditInfo, AuditModel model)
         {
@@ -26,11 +25,13 @@ namespace Bluewire.NHibernate.Audit.Listeners
             this.collectionEntry = collectionEntry;
             this.collection = collection;
             this.sessionAuditInfo = sessionAuditInfo;
-            this.model = model;
 
             Persister = collectionEntry.CurrentPersister;
             if (Persister == null) throw new ArgumentException("No CurrentPersister for collection.", "collectionEntry");
             if (Persister.HasIndex) throw new ArgumentException(String.Format("This is a keyed collection: {0}", Persister.Role));
+
+            if (!model.TryGetModelForPersister(Persister, out createModel)) throw new ArgumentException(String.Format("No audit model defined for {0}", Persister.Role));
+
             Debug.Assert(!Persister.IsOneToMany);
         }
 
@@ -54,20 +55,16 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         public void Execute(IEventSource session)
         {
-            IAuditableRelationModel createModel;
-            if (model.TryGetModelForPersister(Persister, out createModel))
+            var innerSession = session.GetSession(EntityMode.Poco);
+            foreach (var insertion in insertions)
             {
-                var innerSession = session.GetSession(EntityMode.Poco);
-                foreach (var insertion in insertions)
-                {
-                    var entry = (ISetRelationAuditHistory)Activator.CreateInstance(createModel.AuditEntryType);
-                    entry.Value = model.GenerateRelationAuditValue(createModel, insertion);
-                    entry.OwnerId = collectionEntry.CurrentKey;
-                    entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
-                    innerSession.Save(entry);
-                }
-                innerSession.Flush();
+                var entry = (ISetRelationAuditHistory)Activator.CreateInstance(createModel.AuditEntryType);
+                entry.Value = createModel.GetAuditableElement(insertion, session);
+                entry.OwnerId = collectionEntry.CurrentKey;
+                entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
+                innerSession.Save(entry);
             }
+            innerSession.Flush();
         }
     }
 }

@@ -19,12 +19,5 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Util
         {
             return (IAuditHistory)Mapper.DynamicMap(entity, entityType, auditEntryType);
         }
-
-
-        public object Create(object entry, Type relationAuditValueType)
-        {
-            if (relationAuditValueType.IsInstanceOfType(entry)) return entry;
-            return Mapper.DynamicMap(entry, entry.GetType(), relationAuditValueType);
-        }
     }
 }

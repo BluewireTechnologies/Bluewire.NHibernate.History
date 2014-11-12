@@ -1,8 +1,9 @@
 ﻿using System;
+using Bluewire.NHibernate.Audit.UnitTests;
 using log4net.Config;
 using NUnit.Framework;
 
-[assembly: Bluewire.NHibernate.Audit.UnitTests.EnableLog4NetAttribute]
+[assembly: EnableLog4Net]
 
 namespace Bluewire.NHibernate.Audit.UnitTests
 {

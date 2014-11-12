@@ -1,5 +1,4 @@
-﻿using Bluewire.NHibernate.Audit.UnitTests.Simple;
-using Bluewire.NHibernate.Audit.UnitTests.Util;
+﻿using Bluewire.NHibernate.Audit.UnitTests.Util;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Mapping.ByCode;

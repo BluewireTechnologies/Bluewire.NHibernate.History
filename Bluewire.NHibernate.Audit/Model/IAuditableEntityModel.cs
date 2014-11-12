@@ -1,4 +1,5 @@
 ﻿using System;
+using NHibernate.Engine;
 
 namespace Bluewire.NHibernate.Audit.Model
 {
@@ -19,5 +20,10 @@ namespace Bluewire.NHibernate.Audit.Model
         /// The type of value stored against each audited change. Usually the same as the element type of the audited collection, or its ID type if a many-to-many.
         /// </summary>
         Type AuditValueType { get; }
+
+        /// <summary>
+        /// Get an auditable representation of a collection element.
+        /// </summary>
+        object GetAuditableElement(object collectionElement, ISessionImplementor session);
     }
 }

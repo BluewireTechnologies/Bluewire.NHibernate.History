@@ -65,6 +65,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EnableLog4NetAttribute.cs" />
+    <Compile Include="ManyToMany\ReferencedEntity.cs" />
+    <Compile Include="ManyToMany\EntityWithListOfReferencesPersistenceTests.cs" />
     <Compile Include="ManyToOne\EntityWithManyToOne.cs" />
     <Compile Include="ManyToOne\EntityWithManyToOnePersistenceTests.cs" />
     <Compile Include="ManyToMany\EntityWithListOfReferences.cs" />

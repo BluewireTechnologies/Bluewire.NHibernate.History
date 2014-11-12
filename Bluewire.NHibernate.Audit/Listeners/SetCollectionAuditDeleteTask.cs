@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Bluewire.Common.Extensions;
 using Bluewire.NHibernate.Audit.Model;
 using Bluewire.NHibernate.Audit.Support;
 using NHibernate.AdoNet;
@@ -21,6 +20,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
         private readonly SessionAuditInfo sessionAuditInfo;
         private readonly AuditModel model;
         private readonly CollectionEntry collectionEntry;
+        private readonly IAuditableRelationModel deleteModel;
 
         public SetCollectionAuditDeleteTask(CollectionEntry collectionEntry, IPersistentCollection collection, SessionAuditInfo sessionAuditInfo, AuditModel model)
         {
@@ -34,6 +34,9 @@ namespace Bluewire.NHibernate.Audit.Listeners
             Persister = collectionEntry.LoadedPersister;
             if (Persister == null) throw new ArgumentException("No LoadedPersister for collection.", "collectionEntry");
             if (Persister.HasIndex) throw new ArgumentException(String.Format("This is a keyed collection: {0}", Persister.Role));
+            
+            if (!model.TryGetModelForPersister(Persister, out deleteModel)) throw new ArgumentException(String.Format("No audit model defined for {0}", Persister.Role));
+
             Debug.Assert(!Persister.IsOneToMany);
         }
 
@@ -65,21 +68,17 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         public void Execute(IEventSource session)
         {
-            IAuditableRelationModel deleteModel;
-            if (model.TryGetModelForPersister(Persister, out deleteModel))
-            {
-                var auditMapping = model.GetAuditClassMapping(deleteModel.AuditEntryType);
-                var auditDelete = new AuditDeleteCommand(session.Factory, deleteModel, auditMapping);
+            var auditMapping = model.GetAuditClassMapping(deleteModel.AuditEntryType);
+            var auditDelete = new AuditDeleteCommand(session.Factory, deleteModel, auditMapping);
 
-                foreach (var deletion in deletions)
-                {
-                    var entry = (ISetRelationAuditHistory)Activator.CreateInstance(deleteModel.AuditEntryType);
-                    entry.Value = model.GenerateRelationAuditValue(deleteModel, deletion);
-                    var expectation = Expectations.AppropriateExpectation(ExecuteUpdateResultCheckStyle.Count);
-                    var cmd = session.Batcher.PrepareBatchCommand(auditDelete.Command.CommandType, auditDelete.Command.Text, auditDelete.Command.ParameterTypes);
-                    auditDelete.PopulateCommand(session, cmd, collectionEntry.LoadedKey, entry, sessionAuditInfo.OperationDatestamp);
-                    session.Batcher.AddToBatch(expectation);
-                }
+            foreach (var deletion in deletions)
+            {
+                var entry = (ISetRelationAuditHistory)Activator.CreateInstance(deleteModel.AuditEntryType);
+                entry.Value = deleteModel.GetAuditableElement(deletion, session);
+                var expectation = Expectations.AppropriateExpectation(ExecuteUpdateResultCheckStyle.Count);
+                var cmd = session.Batcher.PrepareBatchCommand(auditDelete.Command.CommandType, auditDelete.Command.Text, auditDelete.Command.ParameterTypes);
+                auditDelete.PopulateCommand(session, cmd, collectionEntry.LoadedKey, entry, sessionAuditInfo.OperationDatestamp);
+                session.Batcher.AddToBatch(expectation);
             }
         }
 

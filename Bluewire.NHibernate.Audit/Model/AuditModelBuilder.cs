@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using NHibernate.Cfg;
+using NHibernate.Engine;
 using NHibernate.Mapping;
 using NHibernate.Type;
 
@@ -16,10 +17,10 @@ namespace Bluewire.NHibernate.Audit.Model
             simpleModels.Add(new SimpleEntityModel(classMapping.MappedClass, classMapping.MappedClass.GetAuditAttribute().AuditEntryType));
         }
 
-        private void TryAddCollection(Collection mapping)
+        private void TryAddCollection(IMapping allMappings, Collection mapping)
         {
             var propertyInfo = GetPropertyForCollection(mapping);
-            if(propertyInfo.GetAuditRelationAttribute() != null) relationModels.Add(new AuditableRelationModel(propertyInfo, new InferredRelationAuditInfo(mapping)));
+            if (propertyInfo.GetAuditRelationAttribute() != null) relationModels.Add(CreateRelationModel(propertyInfo, new InferredRelationAuditInfo(mapping), allMappings));
         }
 
         private PropertyInfo GetPropertyForCollection(Collection mapping)
@@ -54,6 +55,10 @@ namespace Bluewire.NHibernate.Audit.Model
 
         public void AddFromConfiguration(Configuration cfg)
         {
+            cfg.BuildMappings(); // Must do this first, to get collection information.
+
+            var allMappings = cfg.BuildMapping();
+
             var simpleTypes = cfg
                    .ClassMappings
                    .Where(m => m.MappedClass.IsAuditable())
@@ -61,7 +66,7 @@ namespace Bluewire.NHibernate.Audit.Model
 
             foreach (var c in cfg.CollectionMappings.Where(m => m.Owner.MappedClass.IsAuditable()))
             {
-                TryAddCollection(c);
+                TryAddCollection(allMappings, c);
             }
 
             var relationAuditTypes = cfg.ClassMappings.Where(m => IsRelationEntryType(m.MappedClass));
@@ -97,16 +102,41 @@ namespace Bluewire.NHibernate.Audit.Model
             }
         }
 
+        private IAuditableRelationModel CreateRelationModel(PropertyInfo propertyInfo, InferredRelationAuditInfo mappingInfo, IMapping allMappings)
+        {
+            var relationAttr = propertyInfo.GetAuditRelationAttribute();
+            if (relationAttr == null) throw new AuditConfigurationException(propertyInfo.DeclaringType, String.Format("Property {0} of type {1} does not declare audit history.", propertyInfo.Name, propertyInfo.DeclaringType));
+
+            var manyToOne = mappingInfo.ElementType as ManyToOneType;
+            if (manyToOne == null)
+            {
+                var auditValueType = relationAttr.AuditValueType ?? mappingInfo.ElementType.ReturnedClass;
+                return new AuditableRelationModel(mappingInfo.Role, relationAttr.AuditEntryType, auditValueType, new ValueTypeIdentityResolver());
+            }
+            else
+            {
+                if (!manyToOne.IsReferenceToPrimaryKey) throw new InvalidOperationException("Cannot audit a many-to-many collection which uses a key property other than the primary key.");
+                if (relationAttr.AuditValueType != null) throw new InvalidOperationException("Cannot override the audited value for a collection of entities. The primary key will always be used.");
+                var auditValueType = manyToOne.GetIdentifierOrUniqueKeyType(allMappings).ReturnedClass;
+                return new AuditableRelationModel(mappingInfo.Role, relationAttr.AuditEntryType, auditValueType, new ReferenceTypeIdentityResolver(manyToOne));
+            }
+        }
+
         class AuditableRelationModel : IAuditableRelationModel
         {
-            public AuditableRelationModel(PropertyInfo propertyInfo, InferredRelationAuditInfo mappingInfo)
+            private readonly IElementIdentityResolver elementIdentityResolver;
+
+            public AuditableRelationModel(string collectionRole, Type auditEntryType, Type auditValueType, IElementIdentityResolver elementIdentityResolver)
             {
-                var relationAttr = propertyInfo.GetAuditRelationAttribute();
-                if (relationAttr == null) throw new AuditConfigurationException(propertyInfo.DeclaringType, String.Format("Property {0} of type {1} does not declare audit history.", propertyInfo.Name, propertyInfo.DeclaringType));
-            
-                CollectionRole = mappingInfo.Role;
-                AuditEntryType = relationAttr.AuditEntryType;
-                AuditValueType = relationAttr.AuditValueType ?? mappingInfo.ElementType.ReturnedClass;
+                this.elementIdentityResolver = elementIdentityResolver;
+                CollectionRole = collectionRole;
+                AuditEntryType = auditEntryType;
+                AuditValueType = auditValueType;
+            }
+
+            public object GetAuditableElement(object collectionElement, ISessionImplementor session)
+            {
+                return elementIdentityResolver.Resolve(collectionElement, session);
             }
 
             public string CollectionRole { get; private set; }
@@ -114,7 +144,8 @@ namespace Bluewire.NHibernate.Audit.Model
             public Type AuditValueType { get; private set; }
         }
 
-        class InferredRelationAuditInfo
+
+        public class InferredRelationAuditInfo
         {
             public InferredRelationAuditInfo(Collection mapping)
             {
@@ -136,14 +167,9 @@ namespace Bluewire.NHibernate.Audit.Model
 
             public Type GetExpectedBaseType(Type elementType)
             {
-                if (KeyType == null)
-                {
-                    return AuditEntryBaseDefinition.MakeGenericType(OwningEntityIdType.ReturnedClass, elementType);
-                }
-                else
-                {
-                    return AuditEntryBaseDefinition.MakeGenericType(OwningEntityIdType.ReturnedClass, KeyType.ReturnedClass, elementType);
-                }
+                return KeyType == null
+                    ? AuditEntryBaseDefinition.MakeGenericType(OwningEntityIdType.ReturnedClass, elementType)
+                    : AuditEntryBaseDefinition.MakeGenericType(OwningEntityIdType.ReturnedClass, KeyType.ReturnedClass, elementType);
             }
 
             public string Role { get; private set; }

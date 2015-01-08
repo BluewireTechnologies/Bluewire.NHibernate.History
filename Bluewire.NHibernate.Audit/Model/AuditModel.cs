@@ -29,6 +29,11 @@ namespace Bluewire.NHibernate.Audit.Model
             return entityModels.ContainsKey(entityType);
         }
 
+        public bool IsAuditable(ICollectionPersister collectionPersister)
+        {
+            return relationModels.ContainsKey(collectionPersister.Role);
+        }
+
         public IAuditHistory GenerateAuditEntry(IAuditableEntityModel entityModel, object entity)
         {
             var auditEntry = auditEntryFactory.Create(entity, entityModel.EntityType, entityModel.AuditEntryType);

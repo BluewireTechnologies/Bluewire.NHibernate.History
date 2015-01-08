@@ -22,6 +22,8 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         protected override void CollectionWasCreated(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
         {
+            if (!model.IsAuditable(collectionEntry.CurrentPersister)) return;
+
             var task = GetInsertTask(collectionEntry, collection, session);
             task.InsertAll();
             task.Execute(session);
@@ -29,6 +31,8 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         protected override void CollectionWasModified(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
         {
+            if (!model.IsAuditable(collectionEntry.CurrentPersister)) return;
+
             var task = GetInsertTask(collectionEntry, collection, session);
             var index = 0;
             foreach (var entry in collection.Entries(task.Persister))

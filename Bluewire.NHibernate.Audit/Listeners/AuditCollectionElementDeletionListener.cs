@@ -19,6 +19,8 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         protected override void CollectionWasDestroyed(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
         {
+            if (!model.IsAuditable(collectionEntry.LoadedPersister)) return;
+
             var task = GetDeleteTask(collectionEntry, collection, session);
             task.DeleteAll();
             task.Execute(session);
@@ -30,6 +32,8 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         protected override void CollectionWasModified(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
         {
+            if (!model.IsAuditable(collectionEntry.LoadedPersister)) return;
+
             var task = GetDeleteTask(collectionEntry, collection, session);
 
             var deletions = collection.GetDeletes(task.Persister, false).Cast<object>();

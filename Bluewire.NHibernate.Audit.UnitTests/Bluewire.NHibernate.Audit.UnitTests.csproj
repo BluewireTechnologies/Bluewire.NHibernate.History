@@ -81,6 +81,8 @@
     <Compile Include="OneToMany\EntityWithMapOfValueTypes.cs" />
     <Compile Include="ManyToMany\EntityWithSetOfReferences.cs" />
     <Compile Include="OneToMany\EntityWithSetOfValueTypes.cs" />
+    <Compile Include="Simple\EntityWithUnauditedCollectionPersistenceTests.cs" />
+    <Compile Include="Simple\EntityWithUnauditedCollection.cs" />
     <Compile Include="Util\DynamicAuditEntryFactory.cs" />
     <Compile Include="Util\PersistentDatabase.cs" />
     <Compile Include="Simple\SimpleEntity.cs" />

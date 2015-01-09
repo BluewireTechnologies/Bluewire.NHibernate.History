@@ -77,7 +77,7 @@
     <Compile Include="Listeners\AfterFlush.cs" />
     <Compile Include="Listeners\BeforeFlush.cs" />
     <Compile Include="Listeners\ConcurrencyCheckShouldPreferObjectVersionOverSessionRecordedVersion.cs" />
-    <Compile Include="Listeners\SaveSimpleAuditEntry.cs" />
+    <Compile Include="Listeners\AuditEntityListener.cs" />
     <Compile Include="Model\AuditModel.cs" />
     <Compile Include="Model\AuditModelBuilder.cs" />
     <Compile Include="AuditOperation.cs" />

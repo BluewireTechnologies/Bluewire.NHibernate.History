@@ -25,12 +25,17 @@ namespace Bluewire.NHibernate.Audit
 
         public void IntegrateWithNHibernate(Configuration cfg)
         {
+            this.IntegrateWithNHibernate(cfg, cfg.EventListeners);
+        }
+
+        public void IntegrateWithNHibernate(Configuration cfg, EventListeners eventListeners)
+        {
             var modelBuilder = new AuditModelBuilder();
             modelBuilder.AddFromConfiguration(cfg);
             var model = modelBuilder.GetValidatedModel(auditEntryFactory);
 
             var sessions = new SessionsAuditInfo(clock);
-            RegisterEventListeners(cfg.EventListeners, model, sessions);
+            RegisterEventListeners(eventListeners, model, sessions);
         }
 
         private static void RegisterEventListeners(EventListeners listeners, AuditModel model, SessionsAuditInfo sessions)

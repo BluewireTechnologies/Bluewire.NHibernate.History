@@ -1,4 +1,6 @@
+using System;
 using System.Linq;
+using Bluewire.Common.Time;
 using Bluewire.NHibernate.Audit.Support;
 using Bluewire.NHibernate.Audit.UnitTests.Util;
 using NHibernate.Cfg;
@@ -12,6 +14,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
     public class EntityWithListOfValueTypesPersistenceTests
     {
         private TemporaryDatabase db;
+        private MockClock clock = new MockClock();
 
         public EntityWithListOfValueTypesPersistenceTests()
         {
@@ -78,6 +81,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
                 session.Save(entity);
                 session.Flush();
 
+                clock.Advance(TimeSpan.FromSeconds(1));
+
                 entity.Values[1].String = "8";
                 session.Flush();
 
@@ -114,6 +119,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
                 session.Save(entity);
                 session.Flush();
 
+                clock.Advance(TimeSpan.FromSeconds(1));
+
                 entity.Values.Add(new ComponentType { Integer = 7, String = "8" });
                 session.Flush();
 
@@ -148,6 +155,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
                 };
                 session.Save(entity);
                 session.Flush();
+
+                clock.Advance(TimeSpan.FromSeconds(1));
 
                 var temp = entity.Values[0];
                 entity.Values[0] = entity.Values[1];
@@ -192,6 +201,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
                 session.Save(entity);
                 session.Flush();
 
+                clock.Advance(TimeSpan.FromSeconds(1));
+
                 entity.Values.RemoveAt(1);
                 session.Flush();
 
@@ -222,6 +233,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
                 session.Save(entity);
                 session.Flush();
 
+                clock.Advance(TimeSpan.FromSeconds(1));
+
                 entity.Values.RemoveAt(0);
                 session.Flush();
 
@@ -243,7 +256,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
             }
         }
 
-        private static void Configure(Configuration cfg)
+        private void Configure(Configuration cfg)
         {
             var mapper = new ModelMapper();
             mapper.Class<EntityWithListOfValueTypes>(e =>
@@ -284,7 +297,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
             });
             cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
 
-            new AuditConfigurer(new DynamicAuditEntryFactory()).IntegrateWithNHibernate(cfg);
+            new AuditConfigurer(new DynamicAuditEntryFactory(), clock).IntegrateWithNHibernate(cfg);
         }
     }
 }

@@ -1,4 +1,6 @@
+using System;
 using System.Linq;
+using Bluewire.Common.Time;
 using Bluewire.NHibernate.Audit.Support;
 using Bluewire.NHibernate.Audit.UnitTests.Util;
 using NHibernate.Cfg;
@@ -12,6 +14,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToOne
     public class EntityWithManyToOnePersistenceTests
     {
         private TemporaryDatabase db;
+        private MockClock clock = new MockClock();
 
         public EntityWithManyToOnePersistenceTests()
         {
@@ -72,6 +75,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToOne
                 session.Flush();
                 var initialVersion = entity.VersionId;
 
+                clock.Advance(TimeSpan.FromSeconds(1));
+
                 var secondUnaudited = new UnauditedEntity { Id = 4 };
                 session.Save(secondUnaudited);
                 entity.Reference = secondUnaudited;
@@ -99,6 +104,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToOne
                 session.Save(entity);
                 session.Flush();
 
+                clock.Advance(TimeSpan.FromSeconds(1));
+
                 session.Delete(entity);
                 session.Flush();
 
@@ -116,7 +123,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToOne
             }
         }
 
-        private static void Configure(Configuration cfg)
+        private void Configure(Configuration cfg)
         {
             var mapper = new ModelMapper();
             mapper.Class<UnauditedEntity>(e =>
@@ -142,7 +149,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToOne
             });
             cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
 
-            new AuditConfigurer(new DynamicAuditEntryFactory()).IntegrateWithNHibernate(cfg);
+            new AuditConfigurer(new DynamicAuditEntryFactory(), clock).IntegrateWithNHibernate(cfg);
         }
     }
 }

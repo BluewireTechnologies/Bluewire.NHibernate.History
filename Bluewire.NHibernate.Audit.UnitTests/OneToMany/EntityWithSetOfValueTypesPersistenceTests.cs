@@ -1,4 +1,6 @@
+using System;
 using System.Linq;
+using Bluewire.Common.Time;
 using Bluewire.NHibernate.Audit.Support;
 using Bluewire.NHibernate.Audit.UnitTests.Util;
 using NHibernate.Cfg;
@@ -9,11 +11,12 @@ using NUnit.Framework;
 namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
 {
     [TestFixture]
-    public class EntityWithSetfValueTypesPersistenceTests
+    public class EntityWithSetOfValueTypesPersistenceTests
     {
         private TemporaryDatabase db;
+        private MockClock clock = new MockClock();
 
-        public EntityWithSetfValueTypesPersistenceTests()
+        public EntityWithSetOfValueTypesPersistenceTests()
         {
             db = TemporaryDatabase.Configure(Configure);
         }
@@ -79,6 +82,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
                 session.Save(entity);
                 session.Flush();
 
+                clock.Advance(TimeSpan.FromSeconds(1));
+
                 modifiable.String = "8";
                 session.Flush();
 
@@ -121,6 +126,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
                 session.Save(entity);
                 session.Flush();
 
+                clock.Advance(TimeSpan.FromSeconds(1));
+
                 entity.Values.Add(addable);
                 session.Flush();
 
@@ -157,6 +164,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
                 session.Save(entity);
                 session.Flush();
 
+                clock.Advance(TimeSpan.FromSeconds(1));
+
                 entity.Values.Remove(removable);
                 session.Flush();
 
@@ -170,7 +179,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
             }
         }
         
-        private static void Configure(Configuration cfg)
+        private void Configure(Configuration cfg)
         {
             var mapper = new ModelMapper();
             mapper.Class<EntityWithSetOfValueTypes>(e =>
@@ -210,7 +219,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
             });
             cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
 
-            new AuditConfigurer(new DynamicAuditEntryFactory()).IntegrateWithNHibernate(cfg);
+            new AuditConfigurer(new DynamicAuditEntryFactory(), clock).IntegrateWithNHibernate(cfg);
         }
     }
 }

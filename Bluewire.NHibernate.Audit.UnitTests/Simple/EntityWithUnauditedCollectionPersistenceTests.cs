@@ -1,4 +1,5 @@
 using System.Linq;
+using Bluewire.Common.Time;
 using Bluewire.NHibernate.Audit.Support;
 using Bluewire.NHibernate.Audit.UnitTests.ManyToMany;
 using Bluewire.NHibernate.Audit.UnitTests.Util;
@@ -13,6 +14,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Simple
     public class EntityWithUnauditedCollectionPersistenceTests
     {
         private TemporaryDatabase db;
+        private MockClock clock = new MockClock();
 
         public EntityWithUnauditedCollectionPersistenceTests()
         {
@@ -46,7 +48,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Simple
             }
         }
 
-        private static void Configure(Configuration cfg)
+        private void Configure(Configuration cfg)
         {
             var mapper = new ModelMapper();
             mapper.Class<ReferencableEntity>(e =>
@@ -81,7 +83,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Simple
             });
             cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
 
-            new AuditConfigurer(new DynamicAuditEntryFactory()).IntegrateWithNHibernate(cfg);
+            new AuditConfigurer(new DynamicAuditEntryFactory(), clock).IntegrateWithNHibernate(cfg);
         }
     }
 }

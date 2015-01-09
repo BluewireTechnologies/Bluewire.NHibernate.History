@@ -14,7 +14,9 @@ namespace Bluewire.NHibernate.Audit.Model
     {
         public void AddSimpleType(PersistentClass classMapping)
         {
-            simpleModels.Add(new SimpleEntityModel(classMapping.MappedClass, classMapping.MappedClass.GetAuditAttribute().AuditEntryType));
+            var auditAttribute = classMapping.MappedClass.GetAuditAttribute();
+            if (!classMapping.IsVersioned || classMapping.Version == null) throw new AuditConfigurationException(classMapping.MappedClass, "The NHibernate mapping for this type does not define a property to use for versioning.");
+            simpleModels.Add(new SimpleEntityModel(classMapping.MappedClass, auditAttribute.AuditEntryType));
         }
 
         private void TryAddCollection(IMapping allMappings, Collection mapping)

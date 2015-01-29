@@ -36,9 +36,9 @@
     <Reference Include="AutoMapper.Net4">
       <HintPath>..\packages\AutoMapper.3.2.1\lib\net40\AutoMapper.Net4.dll</HintPath>
     </Reference>
-    <Reference Include="Bluewire.Common, Version=8.0.52694.0, Culture=neutral, PublicKeyToken=79cab3b4ccd030ec, processorArchitecture=MSIL">
+    <Reference Include="Bluewire.Common, Version=8.0.52701.0, Culture=neutral, PublicKeyToken=79cab3b4ccd030ec, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Bluewire.Common.8.0.52694\lib\net40\Bluewire.Common.dll</HintPath>
+      <HintPath>..\packages\Bluewire.Common.8.0.52701\lib\net40\Bluewire.Common.dll</HintPath>
     </Reference>
     <Reference Include="Iesi.Collections">
       <HintPath>..\packages\Iesi.Collections.3.3.1.4000\lib\Net35\Iesi.Collections.dll</HintPath>

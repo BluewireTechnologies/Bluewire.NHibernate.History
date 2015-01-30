@@ -24,7 +24,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         private void CheckEntityVersion(ISessionImplementor session, object entity, EntityEntry entry, object id)
         {
-            var entityPersister = session.GetEntityPersister(null, entity);
+            var entityPersister = session.GetEntityPersister(entry.EntityName, entity);
             if (!entityPersister.IsVersioned) return;
 
             var version = entityPersister.GetVersion(entity, session.EntityMode);

@@ -1,6 +1,10 @@
-﻿using Bluewire.NHibernate.Audit.UnitTests.Util;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Bluewire.NHibernate.Audit.Listeners;
+using Bluewire.NHibernate.Audit.UnitTests.Util;
 using NHibernate;
 using NHibernate.Cfg;
+using NHibernate.Event;
 using NHibernate.Mapping.ByCode;
 using NUnit.Framework;
 

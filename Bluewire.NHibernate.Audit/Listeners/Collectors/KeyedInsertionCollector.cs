@@ -9,17 +9,17 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
 {
     public class KeyedInsertionCollector : InsertionCollector
     {
-        public KeyedInsertionCollector(CollectionEntry collectionEntry, IPersistentCollection collection) : base(collectionEntry, collection)
+        public KeyedInsertionCollector(CollectionEntry collectionEntry) : base(collectionEntry)
         {
             if (!Persister.HasIndex) throw new ArgumentException(String.Format("Not a keyed collection: {0}", Persister.Role));
         }
 
         readonly List<KeyValuePair<object, object>> insertions = new List<KeyValuePair<object, object>>();
-        
-        protected override void Insert(object entry, int index)
+
+        public override void Insert(IPersistentCollection collection, object entry, int index)
         {
-            var key = Collection.GetIndex(entry, index, Persister);
-            var item = Collection.GetElement(entry);
+            var key = collection.GetIndex(entry, index, Persister);
+            var item = collection.GetElement(entry);
             insertions.Add(new KeyValuePair<object, object>(key, item));
         }
 

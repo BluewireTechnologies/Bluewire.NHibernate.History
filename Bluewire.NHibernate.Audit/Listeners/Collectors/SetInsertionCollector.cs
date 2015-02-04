@@ -9,16 +9,16 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
 {
     public class SetInsertionCollector : InsertionCollector
     {
-        public SetInsertionCollector(CollectionEntry collectionEntry, IPersistentCollection collection) : base(collectionEntry, collection)
+        public SetInsertionCollector(CollectionEntry collectionEntry) : base(collectionEntry)
         {
             if (Persister.HasIndex) throw new ArgumentException(String.Format("This is a keyed collection: {0}", Persister.Role));
         }
 
         readonly List<object> insertions = new List<object>();
 
-        protected override void Insert(object entry, int index)
+        public override void Insert(IPersistentCollection collection, object entry, int index)
         {
-            var item = Collection.GetElement(entry);
+            var item = collection.GetElement(entry);
             insertions.Add(item);
         }
 

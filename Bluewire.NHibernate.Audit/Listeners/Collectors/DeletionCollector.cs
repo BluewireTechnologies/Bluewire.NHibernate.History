@@ -8,46 +8,27 @@ using NHibernate.Persister.Collection;
 
 namespace Bluewire.NHibernate.Audit.Listeners.Collectors
 {
-    public class DeletionCollector
+    public class DeletionCollector : IChangeReceiver
     {
-        private readonly CollectionEntry collectionEntry;
-        private readonly IPersistentCollection collection;
-
         public object OwnerKey { get; private set; }
         public ICollectionPersister Persister { get; private set; }
 
-        public DeletionCollector(CollectionEntry collectionEntry, IPersistentCollection collection)
+        public DeletionCollector(CollectionEntry collectionEntry)
         {
             Persister = collectionEntry.LoadedPersister;
             OwnerKey = collectionEntry.LoadedKey;
             if (Persister == null) throw new ArgumentException("No LoadedPersister for collection.", "collectionEntry");
-
-            this.collectionEntry = collectionEntry;
-            this.collection = collection;
         }
 
         readonly List<object> deletions = new List<object>();
 
-        public void DeleteAll()
-        {
-            var emptySnapshot = collectionEntry.IsSnapshotEmpty(collection);
-            if (emptySnapshot) return;
-
-            var index = 0;
-            foreach (var item in collection.Entries(Persister))
-            {
-                Delete(item, index);
-                index++;
-            }
-        }
-
-        private void Delete(object entry, int index)
+        public void Delete(IPersistentCollection collection, object entry, int index)
         {
             var key = collection.GetIndex(entry, index, Persister);
             deletions.Add(key);
         }
 
-        private void Delete(object key)
+        public void Delete(IPersistentCollection collection, object key)
         {
             deletions.Add(key);
         }
@@ -57,24 +38,6 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
         public IEnumerable<object> Enumerate()
         {
             return deletions;
-        }
-
-        public void CollectDeletions()
-        {
-            var deleted = collection.GetDeletes(Persister, false).Cast<object>();
-            foreach (var d in deleted)
-            {
-                Delete(d);
-            }
-            var index = 0;
-            foreach (var entry in collection.Entries(Persister))
-            {
-                if (collection.NeedsUpdating(entry, index, Persister.ElementType))
-                {
-                    Delete(entry, index);
-                }
-                ++index;
-            }
         }
 
         public void Apply(IEventSource session, ValueCollectionAuditTasks task)
@@ -87,6 +50,15 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
             {
                 task.ExecuteSetDeletion(session, this);
             }
+        }
+
+        public void Insert(IPersistentCollection collection, object entry, int index)
+        {
+        }
+
+        public void Update(IPersistentCollection collection, object entry, int index)
+        {
+            Delete(collection, entry, index);
         }
     }
 }

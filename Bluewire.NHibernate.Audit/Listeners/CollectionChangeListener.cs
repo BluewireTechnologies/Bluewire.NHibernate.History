@@ -43,15 +43,5 @@ namespace Bluewire.NHibernate.Audit.Listeners
         /// <param name="collection"></param>
         /// <param name="session"></param>
         public abstract void CollectionWasModified(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session);
-
-
-        protected static InsertionCollector GetInsertCollector(CollectionEntry collectionEntry, IPersistentCollection collection)
-        {
-            if (collectionEntry.CurrentPersister.HasIndex)
-            {
-                return new KeyedInsertionCollector(collectionEntry, collection);
-            }
-            return new SetInsertionCollector(collectionEntry, collection);
-        }
     }
 }

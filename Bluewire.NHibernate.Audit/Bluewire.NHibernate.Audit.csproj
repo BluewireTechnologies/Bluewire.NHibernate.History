@@ -63,6 +63,8 @@
     <Compile Include="Listeners\AuditCollectionListener.cs" />
     <Compile Include="Listeners\AuditDeleteCommandBase.cs" />
     <Compile Include="Listeners\CollectionChangeListener.cs" />
+    <Compile Include="Listeners\Collectors\ChangeCollector.cs" />
+    <Compile Include="Listeners\Collectors\IChangeReceiver.cs" />
     <Compile Include="Listeners\Collectors\InsertionCollector.cs" />
     <Compile Include="Listeners\Collectors\DeletionCollector.cs" />
     <Compile Include="Listeners\ValueCollectionAuditTasks.cs" />

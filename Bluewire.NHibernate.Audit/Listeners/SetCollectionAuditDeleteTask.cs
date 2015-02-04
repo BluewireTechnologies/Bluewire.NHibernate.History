@@ -73,8 +73,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
             foreach (var deletion in deletions)
             {
-                var entry = (ISetRelationAuditHistory)Activator.CreateInstance(deleteModel.AuditEntryType);
-                entry.Value = deleteModel.GetAuditableElement(deletion, session);
+                var entry = model.GenerateRelationAuditEntry(deleteModel, deletion, session, Persister);
                 var expectation = Expectations.AppropriateExpectation(ExecuteUpdateResultCheckStyle.Count);
                 var cmd = session.Batcher.PrepareBatchCommand(auditDelete.Command.CommandType, auditDelete.Command.Text, auditDelete.Command.ParameterTypes);
                 auditDelete.PopulateCommand(session, cmd, collectionEntry.LoadedKey, entry, sessionAuditInfo.OperationDatestamp);

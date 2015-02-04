@@ -22,8 +22,8 @@ namespace Bluewire.NHibernate.Audit.Model
         Type AuditValueType { get; }
 
         /// <summary>
-        /// Get an auditable representation of a collection element.
+        /// Gets an auditable representation of a collection element.
         /// </summary>
-        object GetAuditableElement(object collectionElement, ISessionImplementor session);
+        IRelationAuditValueResolver AuditValueResolver { get; }
     }
 }

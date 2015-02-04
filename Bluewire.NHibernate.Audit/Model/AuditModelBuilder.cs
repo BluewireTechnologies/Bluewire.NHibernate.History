@@ -113,37 +113,31 @@ namespace Bluewire.NHibernate.Audit.Model
             if (manyToOne == null)
             {
                 var auditValueType = relationAttr.AuditValueType ?? mappingInfo.ElementType.ReturnedClass;
-                return new AuditableRelationModel(mappingInfo.Role, relationAttr.AuditEntryType, auditValueType, new ValueTypeIdentityResolver());
+                return new AuditableRelationModel(mappingInfo.Role, relationAttr.AuditEntryType, auditValueType, new ComponentCollectionAuditValueResolver());
             }
             else
             {
                 if (!manyToOne.IsReferenceToPrimaryKey) throw new InvalidOperationException("Cannot audit a many-to-many collection which uses a key property other than the primary key.");
                 if (relationAttr.AuditValueType != null) throw new InvalidOperationException("Cannot override the audited value for a collection of entities. The primary key will always be used.");
                 var auditValueType = manyToOne.GetIdentifierOrUniqueKeyType(allMappings).ReturnedClass;
-                return new AuditableRelationModel(mappingInfo.Role, relationAttr.AuditEntryType, auditValueType, new ReferenceTypeIdentityResolver(manyToOne));
+                return new AuditableRelationModel(mappingInfo.Role, relationAttr.AuditEntryType, auditValueType, new ReferenceRelationAuditValueResolver(manyToOne));
             }
         }
 
         class AuditableRelationModel : IAuditableRelationModel
         {
-            private readonly IElementIdentityResolver elementIdentityResolver;
-
-            public AuditableRelationModel(string collectionRole, Type auditEntryType, Type auditValueType, IElementIdentityResolver elementIdentityResolver)
+            public AuditableRelationModel(string collectionRole, Type auditEntryType, Type auditValueType, IRelationAuditValueResolver relationAuditEntryResolver)
             {
-                this.elementIdentityResolver = elementIdentityResolver;
+                AuditValueResolver = relationAuditEntryResolver;
                 CollectionRole = collectionRole;
                 AuditEntryType = auditEntryType;
                 AuditValueType = auditValueType;
             }
 
-            public object GetAuditableElement(object collectionElement, ISessionImplementor session)
-            {
-                return elementIdentityResolver.Resolve(collectionElement, session);
-            }
-
             public string CollectionRole { get; private set; }
             public Type AuditEntryType { get; private set; }
             public Type AuditValueType { get; private set; }
+            public IRelationAuditValueResolver AuditValueResolver { get; private set; }
         }
 
 

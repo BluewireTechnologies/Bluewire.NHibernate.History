@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using NHibernate;
+using NHibernate.Engine;
 using NHibernate.Mapping;
 using NHibernate.Persister.Collection;
 using NHibernate.Persister.Entity;
@@ -38,6 +39,14 @@ namespace Bluewire.NHibernate.Audit.Model
         {
             var auditEntry = auditEntryFactory.Create(entity, entityModel.EntityType, entityModel.AuditEntryType);
             Debug.Assert(entityModel.AuditEntryType.IsInstanceOfType(auditEntry));
+            return auditEntry;
+        }
+
+        public IRelationAuditHistory GenerateRelationAuditEntry(IAuditableRelationModel relationModel, object element, ISessionImplementor session, ICollectionPersister persister)
+        {
+            var auditEntry = (IRelationAuditHistory)Activator.CreateInstance(relationModel.AuditEntryType);
+            Debug.Assert(relationModel.AuditEntryType.IsInstanceOfType(auditEntry));
+            auditEntry.Value = relationModel.AuditValueResolver.Resolve(element, session, persister.ElementType.ReturnedClass, relationModel.AuditValueType, auditEntryFactory);
             return auditEntry;
         }
 

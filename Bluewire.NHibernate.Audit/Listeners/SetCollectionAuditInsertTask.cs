@@ -15,6 +15,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
         public ICollectionPersister Persister { get; private set; }
         private readonly IPersistentCollection collection;
         private readonly SessionAuditInfo sessionAuditInfo;
+        private readonly AuditModel model;
         private readonly CollectionEntry collectionEntry;
         private readonly IAuditableRelationModel createModel;
 
@@ -25,6 +26,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             this.collectionEntry = collectionEntry;
             this.collection = collection;
             this.sessionAuditInfo = sessionAuditInfo;
+            this.model = model;
 
             Persister = collectionEntry.CurrentPersister;
             if (Persister == null) throw new ArgumentException("No CurrentPersister for collection.", "collectionEntry");
@@ -58,8 +60,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var innerSession = session.GetSession(EntityMode.Poco);
             foreach (var insertion in insertions)
             {
-                var entry = (ISetRelationAuditHistory)Activator.CreateInstance(createModel.AuditEntryType);
-                entry.Value = createModel.GetAuditableElement(insertion, session);
+                var entry = model.GenerateRelationAuditEntry(createModel, insertion, session, Persister);
                 entry.OwnerId = collectionEntry.CurrentKey;
                 entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
                 innerSession.Save(entry);

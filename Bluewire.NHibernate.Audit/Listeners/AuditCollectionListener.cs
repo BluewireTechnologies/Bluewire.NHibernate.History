@@ -9,19 +9,27 @@ namespace Bluewire.NHibernate.Audit.Listeners
     /// Maps NHibernate's collection-related events onto a more audit-friendly model.
     /// </summary>
     /// <remarks>
-    /// For audit purposes, details about elements being copied or moved between collections are not relevant.
+    /// For most audit purposes, details about elements being copied or moved between collections are not relevant.
     /// The only things we care about are:
     ///  * Initial creation of a collection (insert all elements)
     ///  * Deletion of a collection (mark all elements as expired)
     ///  * Modifications to a collection (insert and/or expire on a per-element basis)
     /// 
-    /// This base class encapsulates my understanding of NHibernate's collection lifecycles.
+    /// This class encapsulates my understanding of NHibernate's collection lifecycles.
     /// Most of it was reverse-engineered from CollectionUpdateAction and AbstractCollectionPersister.
-    /// Note that the concept of 'UpdateRows' is not relevant to audit; that's handled as a delete and
-    /// insert.
+    /// Note that the concept of 'UpdateRows' is not relevant to value-type collections; that's
+    /// handled as a delete and insert. Listeners which do care about this distinction need to correlate
+    /// entries to reverse-engineer what was done to the collection.
     /// </remarks>
-    public abstract class AuditCollectionListenerBase : IPreCollectionRecreateEventListener, IPreCollectionUpdateEventListener, IPreCollectionRemoveEventListener
+    public class AuditCollectionListener : IPreCollectionRecreateEventListener, IPreCollectionUpdateEventListener, IPreCollectionRemoveEventListener
     {
+        private readonly CollectionChangeListener[] children;
+
+        public AuditCollectionListener(params CollectionChangeListener[] children)
+        {
+            this.children = children;
+        }
+
         public void OnPreUpdateCollection(PreCollectionUpdateEvent @event)
         {
             var collection = @event.Collection;
@@ -40,8 +48,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             else if (collection.NeedsRecreate(collectionEntry.CurrentPersister))
             {
                 if (hasFilters) throw new HibernateException("cannot recreate collection while filter is enabled");
-                CollectionWasDestroyed(collectionEntry, @event.Collection, @event.Session);
-                CollectionWasCreated(collectionEntry, @event.Collection, @event.Session);
+                CollectionWasMoved(collectionEntry, @event.Collection, @event.Session);
             }
             else
             {
@@ -62,31 +69,42 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var collectionEntry = @event.Session.PersistenceContext.GetCollectionEntry(@event.Collection);
             if (collectionEntry.LoadedPersister != null)
             {
-                CollectionWasDestroyed(collectionEntry, @event.Collection, @event.Session);
+                CollectionWasMoved(collectionEntry, @event.Collection, @event.Session);
             }
-            CollectionWasCreated(collectionEntry, @event.Collection, @event.Session);
+            else
+            {
+                CollectionWasCreated(collectionEntry, @event.Collection, @event.Session);
+            }
         }
 
+
+        /// <summary>
+        /// All entries in the collection were deleted and recreated in another collection.
+        /// </summary>
+        protected virtual void CollectionWasMoved(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
+        {
+            foreach (var c in children) c.CollectionWasMoved(collectionEntry, collection, session);
+        }
         /// <summary>
         /// All entries in the collection were deleted and not recreated elsewhere.
         /// </summary>
-        /// <param name="collectionEntry"></param>
-        /// <param name="collection"></param>
-        /// <param name="session"></param>
-        protected abstract void CollectionWasDestroyed(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session);
+        private void CollectionWasDestroyed(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
+        {
+            foreach (var c in children) c.CollectionWasDestroyed(collectionEntry, collection, session);
+        }
         /// <summary>
         /// The collection was populated from empty.
         /// </summary>
-        /// <param name="collectionEntry"></param>
-        /// <param name="collection"></param>
-        /// <param name="session"></param>
-        protected abstract void CollectionWasCreated(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session);
+        private void CollectionWasCreated(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
+        {
+            foreach (var c in children) c.CollectionWasCreated(collectionEntry, collection, session);
+        }
         /// <summary>
         /// One or more entries in the collection were removed, added or modified.
         /// </summary>
-        /// <param name="collectionEntry"></param>
-        /// <param name="collection"></param>
-        /// <param name="session"></param>
-        protected abstract void CollectionWasModified(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session);
+        private void CollectionWasModified(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
+        {
+            foreach (var c in children) c.CollectionWasModified(collectionEntry, collection, session);
+        }
     }
 }

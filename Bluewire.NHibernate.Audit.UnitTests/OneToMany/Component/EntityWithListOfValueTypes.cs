@@ -2,23 +2,23 @@
 using System.Collections.Generic;
 using Bluewire.NHibernate.Audit.Attributes;
 
-namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
+namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Component
 {
-    [AuditableEntity(typeof(EntityWithMapOfValueTypesAuditHistory))]
-    public class EntityWithMapOfValueTypes
+    [AuditableEntity(typeof(EntityWithListOfValueTypesAuditHistory))]
+    public class EntityWithListOfValueTypes
     {
-        public EntityWithMapOfValueTypes()
+        public EntityWithListOfValueTypes()
         {
-            Values = new Dictionary<string, ComponentType>();
+            Values = new List<ComponentType>();
         }
 
         public virtual int Id { get; set; }
-        [AuditableRelation(typeof(EntityWithMapOfValueTypesValuesAuditHistory))]
-        public virtual IDictionary<string, ComponentType> Values { get; protected set; }
+        [AuditableRelation(typeof(EntityWithListOfValueTypesValuesAuditHistory))]
+        public virtual IList<ComponentType> Values { get; protected set; }
         public virtual int VersionId { get; set; }
     }
 
-    public class EntityWithMapOfValueTypesAuditHistory : IAuditHistory
+    public class EntityWithListOfValueTypesAuditHistory : IAuditHistory
     {
         public virtual int Id { get; set; }
         public virtual int? VersionId { get; set; }
@@ -46,7 +46,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         public virtual AuditedOperation AuditedOperation { get; set; }
     }
 
-    public class EntityWithMapOfValueTypesValuesAuditHistory : KeyedRelationAuditHistoryEntry<int, string, ComponentType>
+    public class EntityWithListOfValueTypesValuesAuditHistory : KeyedRelationAuditHistoryEntry<int, int, ComponentType>
     {
     }
 }

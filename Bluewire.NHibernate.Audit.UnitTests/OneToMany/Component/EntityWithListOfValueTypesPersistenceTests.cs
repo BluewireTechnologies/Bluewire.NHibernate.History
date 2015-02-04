@@ -8,7 +8,7 @@ using NHibernate.Linq;
 using NHibernate.Mapping.ByCode;
 using NUnit.Framework;
 
-namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
+namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Component
 {
     [TestFixture]
     public class EntityWithListOfValueTypesPersistenceTests

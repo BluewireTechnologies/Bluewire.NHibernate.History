@@ -1,4 +1,4 @@
-﻿namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
+﻿namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Component
 {
     public class ComponentType
     {

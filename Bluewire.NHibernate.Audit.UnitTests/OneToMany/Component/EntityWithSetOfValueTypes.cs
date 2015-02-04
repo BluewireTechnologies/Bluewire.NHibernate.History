@@ -1,24 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using Bluewire.NHibernate.Audit.Attributes;
+using Iesi.Collections.Generic;
 
-namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
+namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Component
 {
-    [AuditableEntity(typeof(EntityWithListOfPrimitiveTypesAuditHistory))]
-    public class EntityWithListOfPrimitiveTypes
+    [AuditableEntity(typeof(EntityWithSetOfValueTypesAuditHistory))]
+    public class EntityWithSetOfValueTypes
     {
-        public EntityWithListOfPrimitiveTypes()
+        public EntityWithSetOfValueTypes()
         {
-            Values = new List<string>();
+            Values = new HashedSet<ComponentType>();
         }
 
         public virtual int Id { get; set; }
-        [AuditableRelation(typeof(EntityWithListOfPrimitiveTypesValuesAuditHistory))]
-        public virtual IList<string> Values { get; protected set; }
+        [AuditableRelation(typeof(EntityWithSetOfValueTypesValuesAuditHistory))]
+        public virtual ISet<ComponentType> Values { get; protected set; }
         public virtual int VersionId { get; set; }
     }
 
-    public class EntityWithListOfPrimitiveTypesAuditHistory : IAuditHistory
+    public class EntityWithSetOfValueTypesAuditHistory : IAuditHistory
     {
         public virtual int Id { get; set; }
         public virtual int? VersionId { get; set; }
@@ -37,7 +37,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
             get { return Id; }
         }
 
-        object IAuditHistory.PreviousVersionId {
+        object IAuditHistory.PreviousVersionId
+        {
             get { return PreviousVersionId; }
             set { PreviousVersionId = (int?)value; }
         }
@@ -46,7 +47,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany
         public virtual AuditedOperation AuditedOperation { get; set; }
     }
 
-    public class EntityWithListOfPrimitiveTypesValuesAuditHistory : KeyedRelationAuditHistoryEntry<int, int, string>
+    public class EntityWithSetOfValueTypesValuesAuditHistory : SetRelationAuditHistoryEntry<int, ComponentType>
     {
     }
 }

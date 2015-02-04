@@ -35,7 +35,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             foreach (var insertion in collector.Enumerate())
             {
                 var entry = model.GenerateRelationAuditEntry(createModel, insertion, session, collector.Persister);
-                entry.OwnerId = collector.Key;
+                entry.OwnerId = collector.OwnerKey;
                 entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
                 innerSession.Save(entry);
             }
@@ -52,9 +52,9 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var innerSession = session.GetSession(EntityMode.Poco);
             foreach (var insertion in collector.Enumerate())
             {
-                var entry = (IKeyedRelationAuditHistory)model.GenerateRelationAuditEntry(createModel, insertion.Item1, session, collector.Persister);
-                entry.OwnerId = collector.Key;
-                entry.Key = insertion.Item2;
+                var entry = (IKeyedRelationAuditHistory)model.GenerateRelationAuditEntry(createModel, insertion.Value, session, collector.Persister);
+                entry.OwnerId = collector.OwnerKey;
+                entry.Key = insertion.Key;
                 entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
                 innerSession.Save(entry);
             }
@@ -77,7 +77,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
                 var entry = model.GenerateRelationAuditEntry(deleteModel, deletion, session, collector.Persister);
                 var expectation = Expectations.AppropriateExpectation(ExecuteUpdateResultCheckStyle.Count);
                 var cmd = session.Batcher.PrepareBatchCommand(auditDelete.Command.CommandType, auditDelete.Command.Text, auditDelete.Command.ParameterTypes);
-                auditDelete.PopulateCommand(session, cmd, collector.Key, entry, sessionAuditInfo.OperationDatestamp);
+                auditDelete.PopulateCommand(session, cmd, collector.OwnerKey, entry, sessionAuditInfo.OperationDatestamp);
                 session.Batcher.AddToBatch(expectation);
             }
         }
@@ -96,7 +96,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             {
                 var expectation = Expectations.AppropriateExpectation(ExecuteUpdateResultCheckStyle.Count);
                 var cmd = session.Batcher.PrepareBatchCommand(auditDelete.Command.CommandType, auditDelete.Command.Text, auditDelete.Command.ParameterTypes);
-                auditDelete.PopulateCommand(session, cmd, collector.Key, deletion, sessionAuditInfo.OperationDatestamp);
+                auditDelete.PopulateCommand(session, cmd, collector.OwnerKey, deletion, sessionAuditInfo.OperationDatestamp);
                 session.Batcher.AddToBatch(expectation);
             }
         }

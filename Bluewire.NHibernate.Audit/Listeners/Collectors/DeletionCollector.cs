@@ -13,13 +13,13 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
         private readonly CollectionEntry collectionEntry;
         private readonly IPersistentCollection collection;
 
-        public object Key { get; private set; }
+        public object OwnerKey { get; private set; }
         public ICollectionPersister Persister { get; private set; }
 
         public DeletionCollector(CollectionEntry collectionEntry, IPersistentCollection collection)
         {
             Persister = collectionEntry.LoadedPersister;
-            Key = collectionEntry.LoadedKey;
+            OwnerKey = collectionEntry.LoadedKey;
             if (Persister == null) throw new ArgumentException("No LoadedPersister for collection.", "collectionEntry");
 
             this.collectionEntry = collectionEntry;

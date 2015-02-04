@@ -12,13 +12,13 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
 
         protected InsertionCollector(CollectionEntry collectionEntry, IPersistentCollection collection)
         {
-            Key = collectionEntry.CurrentKey;
+            OwnerKey = collectionEntry.CurrentKey;
             Persister = collectionEntry.CurrentPersister;
             if (Persister == null) throw new ArgumentException("No CurrentPersister for collection.", "collectionEntry");
             this.Collection = collection;
         }
 
-        public object Key { get; private set; }
+        public object OwnerKey { get; private set; }
         public ICollectionPersister Persister { get; private set; }
 
         public void InsertAll()

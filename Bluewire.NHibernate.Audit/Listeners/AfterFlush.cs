@@ -14,7 +14,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         public void OnFlush(FlushEvent @event)
         {
-            sessions.Lookup(@event.Session).EndFlush();
+            sessions.Lookup(@event.Session).EndFlush(@event.Session);
         }
     }
 }

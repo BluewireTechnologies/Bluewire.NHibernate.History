@@ -44,7 +44,8 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
             Debug.Assert(Equals(auditEntry.Id, @event.EntityEntry.EntityKey.Identifier));
             Debug.Assert(!Equals(auditEntry.VersionId, auditEntry.PreviousVersionId));
-            @event.Session.Save(auditEntry);
+
+            sessionAuditInfo.CurrentModel.QueueInsert(auditEntry);
         }
 
         public void OnDelete(DeleteEvent @event, ISet transientEntities)
@@ -67,7 +68,8 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
             Debug.Assert(Equals(auditEntry.Id, persister.GetIdentifier(@event.Entity, EntityMode.Poco)));
             Debug.Assert(!Equals(auditEntry.VersionId, auditEntry.PreviousVersionId));
-            @event.Session.Save(auditEntry);
+
+            sessionAuditInfo.CurrentModel.QueueInsert(auditEntry);
         }
 
         private static void AuditAdd(IEntityAuditHistory auditEntry, FlushEntityEvent @event)

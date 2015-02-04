@@ -33,15 +33,13 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
             Debug.Assert(!collector.Persister.IsOneToMany);
 
-            var innerSession = session.GetSession(EntityMode.Poco);
             foreach (var insertion in collector.Enumerate())
             {
                 var entry = model.GenerateRelationAuditEntry(createModel, insertion, session, collector.Persister);
                 entry.OwnerId = collector.OwnerKey;
                 entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
-                innerSession.Save(entry);
+                sessionAuditInfo.CurrentModel.QueueInsert(entry);
             }
-            innerSession.Flush();
         }
 
         public void ExecuteKeyedInsertion(IEventSource session, KeyedInsertionCollector collector)
@@ -51,16 +49,14 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
             Debug.Assert(!collector.Persister.IsOneToMany);
 
-            var innerSession = session.GetSession(EntityMode.Poco);
             foreach (var insertion in collector.Enumerate())
             {
                 var entry = (IKeyedRelationAuditHistory)model.GenerateRelationAuditEntry(createModel, insertion.Value, session, collector.Persister);
                 entry.OwnerId = collector.OwnerKey;
                 entry.Key = insertion.Key;
                 entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
-                innerSession.Save(entry);
+                sessionAuditInfo.CurrentModel.QueueInsert(entry);
             }
-            innerSession.Flush();
         }
 
         public void ExecuteSetDeletion(IEventSource session, DeletionCollector collector)
@@ -77,10 +73,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             foreach (var deletion in collector.Enumerate())
             {
                 var entry = model.GenerateRelationAuditEntry(deleteModel, deletion, session, collector.Persister);
-                var expectation = Expectations.AppropriateExpectation(ExecuteUpdateResultCheckStyle.Count);
-                var cmd = session.Batcher.PrepareBatchCommand(auditDelete.Command.CommandType, auditDelete.Command.Text, auditDelete.Command.ParameterTypes);
-                auditDelete.PopulateCommand(session, cmd, collector.OwnerKey, entry, sessionAuditInfo.OperationDatestamp);
-                session.Batcher.AddToBatch(expectation);
+                sessionAuditInfo.CurrentModel.QueueWork(new  AuditDeleteCommandWorkItem<AuditSetDeleteCommand>(auditDelete, collector.OwnerKey, entry));
             }
         }
 
@@ -96,14 +89,11 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
             foreach (var deletion in collector.Enumerate())
             {
-                var expectation = Expectations.AppropriateExpectation(ExecuteUpdateResultCheckStyle.Count);
-                var cmd = session.Batcher.PrepareBatchCommand(auditDelete.Command.CommandType, auditDelete.Command.Text, auditDelete.Command.ParameterTypes);
-                auditDelete.PopulateCommand(session, cmd, collector.OwnerKey, deletion, sessionAuditInfo.OperationDatestamp);
-                session.Batcher.AddToBatch(expectation);
+                sessionAuditInfo.CurrentModel.QueueWork(new AuditDeleteCommandWorkItem<AuditKeyedDeleteCommand>(auditDelete, collector.OwnerKey, deletion));
             }
         }
 
-        private SessionAuditInfo GetCurrentSessionInfo(IEventSource session)
+        private ISessionSnapshot GetCurrentSessionInfo(IEventSource session)
         {
             var sessionAuditInfo = sessionsAuditInfo.Lookup(session);
             sessionAuditInfo.AssertIsFlushing();
@@ -116,6 +106,28 @@ namespace Bluewire.NHibernate.Audit.Listeners
             if (!model.TryGetModelForPersister(persister, out relationModel))
                 throw new ArgumentException(String.Format("No audit model defined for {0}", persister.Role));
             return relationModel;
+        }
+
+        class AuditDeleteCommandWorkItem<T> : IWorkItem where T : AuditDeleteCommandBase
+        {
+            private readonly T commandPrototype;
+            private readonly object ownerKey;
+            private readonly object deletion;
+
+            public AuditDeleteCommandWorkItem(T commandPrototype, object ownerKey, object deletion)
+            {
+                this.commandPrototype = commandPrototype;
+                this.ownerKey = ownerKey;
+                this.deletion = deletion;
+            }
+
+            public void Execute(ISessionImplementor session, ISessionSnapshot snapshot)
+            {
+                var expectation = Expectations.AppropriateExpectation(ExecuteUpdateResultCheckStyle.Count);
+                var cmd = session.Batcher.PrepareBatchCommand(commandPrototype.Command.CommandType, commandPrototype.Command.Text, commandPrototype.Command.ParameterTypes);
+                commandPrototype.PopulateCommand(session, cmd, ownerKey, deletion, snapshot.OperationDatestamp);
+                session.Batcher.AddToBatch(expectation);
+            }
         }
 
         class AuditSetDeleteCommand : AuditDeleteCommandBase

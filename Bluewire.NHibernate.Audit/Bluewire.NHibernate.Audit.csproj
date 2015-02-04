@@ -81,6 +81,11 @@
     <Compile Include="Model\ReferenceRelationAuditValueResolver.cs" />
     <Compile Include="Model\ComponentCollectionAuditValueResolver.cs" />
     <Compile Include="SetRelationAuditHistoryEntry.cs" />
+    <Compile Include="Runtime\DeferredAuditModel.cs" />
+    <Compile Include="Runtime\IDeferredAudit.cs" />
+    <Compile Include="Runtime\IFixup.cs" />
+    <Compile Include="Runtime\ISessionSnapshot.cs" />
+    <Compile Include="Runtime\IWorkItem.cs" />
     <Compile Include="Support\CommandParameteriser.cs" />
     <Compile Include="Listeners\Collectors\SetInsertionCollector.cs" />
     <Compile Include="Listeners\Collectors\KeyedInsertionCollector.cs" />

@@ -55,10 +55,12 @@
   <ItemGroup>
     <Compile Include="Attributes\AuditableEntityAttribute.cs" />
     <Compile Include="Attributes\AuditableRelationAttribute.cs" />
-    <Compile Include="AuditableEntityExtensions.cs" />
+    <Compile Include="Model\AuditableEntityExtensions.cs" />
     <Compile Include="AuditConfigurationException.cs" />
     <Compile Include="AuditConfigurer.cs" />
     <Compile Include="AuditedOperationEnumType.cs" />
+    <Compile Include="IEntityAuditHistory.cs" />
+    <Compile Include="KeyedRelationAuditHistoryEntry.cs" />
     <Compile Include="Listeners\AuditValueCollectionListener.cs" />
     <Compile Include="Listeners\AuditCollectionListener.cs" />
     <Compile Include="Listeners\AuditDeleteCommandBase.cs" />
@@ -68,13 +70,18 @@
     <Compile Include="Listeners\Collectors\InsertionCollector.cs" />
     <Compile Include="Listeners\Collectors\DeletionCollector.cs" />
     <Compile Include="Listeners\ValueCollectionAuditTasks.cs" />
+    <Compile Include="Meta\IKeyedRelationAuditHistory.cs" />
+    <Compile Include="Meta\IRelationAuditHistory.cs" />
+    <Compile Include="Meta\ISetRelationAuditHistory.cs" />
+    <Compile Include="Model\IAuditableRelationModel.cs" />
     <Compile Include="Model\IRelationAuditValueResolver.cs" />
     <Compile Include="Model\ReferenceRelationAuditValueResolver.cs" />
     <Compile Include="Model\ComponentCollectionAuditValueResolver.cs" />
+    <Compile Include="SetRelationAuditHistoryEntry.cs" />
     <Compile Include="Support\CommandParameteriser.cs" />
     <Compile Include="Listeners\Collectors\SetInsertionCollector.cs" />
     <Compile Include="Listeners\Collectors\KeyedInsertionCollector.cs" />
-    <Compile Include="SessionsAuditInfo.cs" />
+    <Compile Include="Runtime\SessionsAuditInfo.cs" />
     <Compile Include="Support\DateTimeOffsetAsIntegerUserType.cs" />
     <Compile Include="Listeners\AfterFlush.cs" />
     <Compile Include="Listeners\BeforeFlush.cs" />
@@ -82,18 +89,19 @@
     <Compile Include="Listeners\AuditEntityListener.cs" />
     <Compile Include="Model\AuditModel.cs" />
     <Compile Include="Model\AuditModelBuilder.cs" />
-    <Compile Include="AuditOperation.cs" />
+    <Compile Include="AuditedOperation.cs" />
     <Compile Include="Model\IAuditableEntityModel.cs" />
-    <Compile Include="IAuditHistory.cs" />
+    <Compile Include="Meta\IAuditRecord.cs" />
     <Compile Include="Model\IAuditEntryFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SessionAuditInfo.cs" />
+    <Compile Include="Runtime\SessionAuditInfo.cs" />
     <Compile Include="Support\WeakDictionary.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

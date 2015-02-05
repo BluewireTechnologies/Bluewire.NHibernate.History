@@ -22,7 +22,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Simple
         public virtual IList<ReferencableEntity> Entities { get; protected set; }
     }
 
-    public class EntityWithUnauditedCollectionAuditHistory : IAuditHistory
+    public class EntityWithUnauditedCollectionAuditHistory : IEntityAuditHistory
     {
         public virtual int Id { get; protected set; }
         public virtual string Value { get; set; }
@@ -31,18 +31,18 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Simple
         public virtual long AuditId { get; protected set; }
         public virtual int? PreviousVersionId { get; protected set; }
 
-        object IAuditHistory.VersionId
+        object IEntityAuditHistory.VersionId
         {
             get { return VersionId; }
             set { VersionId = (int?)value; }
         }
 
-        object IAuditHistory.Id
+        object IEntityAuditHistory.Id
         {
             get { return Id; }
         }
 
-        object IAuditHistory.PreviousVersionId
+        object IEntityAuditHistory.PreviousVersionId
         {
             get { return PreviousVersionId; }
             set { PreviousVersionId = (int?)value; }

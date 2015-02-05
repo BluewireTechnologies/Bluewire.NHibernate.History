@@ -16,7 +16,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToOne
         public virtual int VersionId { get; set; }
     }
 
-    public class EntityWithManyToOneAuditHistory : IAuditHistory
+    public class EntityWithManyToOneAuditHistory : IEntityAuditHistory
     {
         public virtual int Id { get; protected set; }
         public virtual int? ReferenceId { get; set; }
@@ -25,18 +25,18 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToOne
         public virtual long AuditId { get; protected set; }
         public virtual int? PreviousVersionId { get; protected set; }
 
-        object IAuditHistory.VersionId
+        object IEntityAuditHistory.VersionId
         {
             get { return VersionId; }
             set { VersionId = (int?)value; }
         }
 
-        object IAuditHistory.Id
+        object IEntityAuditHistory.Id
         {
             get { return Id; }
         }
 
-        object IAuditHistory.PreviousVersionId
+        object IEntityAuditHistory.PreviousVersionId
         {
             get { return PreviousVersionId; }
             set { PreviousVersionId = (int?)value; }

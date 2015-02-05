@@ -2,7 +2,7 @@
 using Bluewire.NHibernate.Audit.Support;
 using NHibernate.Engine;
 
-namespace Bluewire.NHibernate.Audit
+namespace Bluewire.NHibernate.Audit.Runtime
 {
     public class SessionsAuditInfo
     {

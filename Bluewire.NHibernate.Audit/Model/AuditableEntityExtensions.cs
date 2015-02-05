@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using Bluewire.NHibernate.Audit.Attributes;
 
-namespace Bluewire.NHibernate.Audit
+namespace Bluewire.NHibernate.Audit.Model
 {
     public static class AuditableEntityExtensions
     {

@@ -15,9 +15,9 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Util
             return true;
         }
 
-        public IAuditHistory Create(object entity, Type entityType, Type auditEntryType)
+        public IEntityAuditHistory Create(object entity, Type entityType, Type auditEntryType)
         {
-            return (IAuditHistory)Mapper.DynamicMap(entity, entityType, auditEntryType);
+            return (IEntityAuditHistory)Mapper.DynamicMap(entity, entityType, auditEntryType);
         }
 
 

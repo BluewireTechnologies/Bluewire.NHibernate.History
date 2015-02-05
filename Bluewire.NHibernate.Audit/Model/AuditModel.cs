@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Bluewire.NHibernate.Audit.Meta;
 using NHibernate;
 using NHibernate.Engine;
 using NHibernate.Mapping;
@@ -35,7 +36,7 @@ namespace Bluewire.NHibernate.Audit.Model
             return relationModels.ContainsKey(collectionPersister.Role);
         }
 
-        public IAuditHistory GenerateAuditEntry(IAuditableEntityModel entityModel, object entity)
+        public IEntityAuditHistory GenerateAuditEntry(IAuditableEntityModel entityModel, object entity)
         {
             var auditEntry = auditEntryFactory.Create(entity, entityModel.EntityType, entityModel.AuditEntryType);
             Debug.Assert(entityModel.AuditEntryType.IsInstanceOfType(auditEntry));

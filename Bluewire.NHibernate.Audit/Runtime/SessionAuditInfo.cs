@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Threading;
 using Bluewire.Common.Time;
 
-namespace Bluewire.NHibernate.Audit
+namespace Bluewire.NHibernate.Audit.Runtime
 {
     public class SessionAuditInfo
     {

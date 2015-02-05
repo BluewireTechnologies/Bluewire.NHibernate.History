@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Bluewire.NHibernate.Audit.Listeners.Collectors;
 using Bluewire.NHibernate.Audit.Model;
+using Bluewire.NHibernate.Audit.Runtime;
 using NHibernate.Collection;
 using NHibernate.Engine;
 using NHibernate.Event;

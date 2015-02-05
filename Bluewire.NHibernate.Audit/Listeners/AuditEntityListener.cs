@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 using Bluewire.NHibernate.Audit.Model;
+using Bluewire.NHibernate.Audit.Runtime;
 using Iesi.Collections;
 using NHibernate;
 using NHibernate.Event;
@@ -69,21 +70,21 @@ namespace Bluewire.NHibernate.Audit.Listeners
             @event.Session.Save(auditEntry);
         }
 
-        private static void AuditAdd(IAuditHistory auditEntry, FlushEntityEvent @event)
+        private static void AuditAdd(IEntityAuditHistory auditEntry, FlushEntityEvent @event)
         {
             auditEntry.AuditedOperation = AuditedOperation.Add;
             auditEntry.PreviousVersionId = null;
             auditEntry.VersionId = @event.EntityEntry.Persister.GetVersion(@event.Entity, EntityMode.Poco);
         }
 
-        private static void AuditUpdate(IAuditHistory auditEntry, FlushEntityEvent @event)
+        private static void AuditUpdate(IEntityAuditHistory auditEntry, FlushEntityEvent @event)
         {
             auditEntry.AuditedOperation = AuditedOperation.Update;
             auditEntry.PreviousVersionId = @event.EntityEntry.Version;
             auditEntry.VersionId = @event.PropertyValues[@event.EntityEntry.Persister.VersionProperty];
         }
 
-        private static void AuditDelete(IAuditHistory auditEntry, DeleteEvent @event, IEntityPersister persister)
+        private static void AuditDelete(IEntityAuditHistory auditEntry, DeleteEvent @event, IEntityPersister persister)
         {
             auditEntry.AuditedOperation = AuditedOperation.Delete;
             auditEntry.PreviousVersionId = persister.GetVersion(@event.Entity, EntityMode.Poco);

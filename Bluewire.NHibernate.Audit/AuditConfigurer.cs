@@ -3,6 +3,7 @@ using Bluewire.Common.Extensions;
 using Bluewire.Common.Time;
 using Bluewire.NHibernate.Audit.Listeners;
 using Bluewire.NHibernate.Audit.Model;
+using Bluewire.NHibernate.Audit.Runtime;
 using NHibernate.Cfg;
 using NHibernate.Event;
 

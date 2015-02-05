@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Bluewire.NHibernate.Audit.Meta;
 using NHibernate.Cfg;
 using NHibernate.Engine;
 using NHibernate.Mapping;
@@ -48,7 +49,7 @@ namespace Bluewire.NHibernate.Audit.Model
         }
         private bool IsEntityEntryType(Type type)
         {
-            return typeof(IAuditHistory).IsAssignableFrom(type);
+            return typeof(IEntityAuditHistory).IsAssignableFrom(type);
         }
 
         private readonly List<SimpleEntityModel> simpleModels = new List<SimpleEntityModel>();
@@ -98,7 +99,7 @@ namespace Bluewire.NHibernate.Audit.Model
 
             public SimpleEntityModel(Type entityType, Type auditEntryType)
             {
-                if (!typeof(IAuditHistory).IsAssignableFrom(auditEntryType)) throw new AuditConfigurationException(entityType, String.Format("The type {0} does not implement IAuditHistory", auditEntryType.FullName));
+                if (!typeof(IEntityAuditHistory).IsAssignableFrom(auditEntryType)) throw new AuditConfigurationException(entityType, String.Format("The type {0} does not implement IAuditHistory", auditEntryType.FullName));
                 EntityType = entityType;
                 AuditEntryType = auditEntryType;
             }

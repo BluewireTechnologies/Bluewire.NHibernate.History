@@ -71,6 +71,8 @@
     <Compile Include="ManyToOne\EntityWithManyToOne.cs" />
     <Compile Include="ManyToOne\EntityWithManyToOnePersistenceTests.cs" />
     <Compile Include="ManyToMany\EntityWithListOfReferences.cs" />
+    <Compile Include="Model\AuditEntityModelFactoryTests.cs" />
+    <Compile Include="Model\AuditRelationModelFactoryTests.cs" />
     <Compile Include="OneToMany\Component\ComponentType.cs" />
     <Compile Include="OneToMany\Element\EntityWithListOfPrimitiveTypesPersistenceTests.cs" />
     <Compile Include="OneToMany\Element\EntityWithListOfPrimitiveTypes.cs" />

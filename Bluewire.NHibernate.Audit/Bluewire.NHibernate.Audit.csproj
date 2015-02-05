@@ -73,7 +73,10 @@
     <Compile Include="Meta\IKeyedRelationAuditHistory.cs" />
     <Compile Include="Meta\IRelationAuditHistory.cs" />
     <Compile Include="Meta\ISetRelationAuditHistory.cs" />
+    <Compile Include="Model\AuditEntityModelFactory.cs" />
+    <Compile Include="Model\AuditRelationModelFactory.cs" />
     <Compile Include="Model\IAuditableRelationModel.cs" />
+    <Compile Include="Model\InferredRelationAuditInfo.cs" />
     <Compile Include="Model\IRelationAuditValueResolver.cs" />
     <Compile Include="Model\ReferenceRelationAuditValueResolver.cs" />
     <Compile Include="Model\ComponentCollectionAuditValueResolver.cs" />

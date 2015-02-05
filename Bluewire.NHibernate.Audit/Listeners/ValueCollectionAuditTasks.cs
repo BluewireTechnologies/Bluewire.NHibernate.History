@@ -31,7 +31,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var sessionAuditInfo = GetCurrentSessionInfo(session);
             var createModel = GetRelationModel(collector.Persister);
 
-            Debug.Assert(!collector.Persister.IsOneToMany);
+            //Debug.Assert(!collector.Persister.IsOneToMany);
 
             var innerSession = session.GetSession(EntityMode.Poco);
             foreach (var insertion in collector.Enumerate())
@@ -49,7 +49,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var sessionAuditInfo = GetCurrentSessionInfo(session);
             var createModel = GetRelationModel(collector.Persister);
 
-            Debug.Assert(!collector.Persister.IsOneToMany);
+            //Debug.Assert(!collector.Persister.IsOneToMany);
 
             var innerSession = session.GetSession(EntityMode.Poco);
             foreach (var insertion in collector.Enumerate())
@@ -69,7 +69,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var deleteModel = GetRelationModel(collector.Persister);
             if (collector.Persister.HasIndex) throw new ArgumentException(String.Format("This is a keyed collection: {0}", collector.Persister.Role));
 
-            Debug.Assert(!collector.Persister.IsOneToMany);
+            //Debug.Assert(!collector.Persister.IsOneToMany);
 
             var auditMapping = model.GetAuditClassMapping(deleteModel.AuditEntryType);
             var auditDelete = new AuditSetDeleteCommand(session.Factory, deleteModel, auditMapping);
@@ -90,7 +90,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var sessionAuditInfo = GetCurrentSessionInfo(session);
             var deleteModel = GetRelationModel(collector.Persister);
 
-            Debug.Assert(!collector.Persister.IsOneToMany);
+            //Debug.Assert(!collector.Persister.IsOneToMany);
             var auditMapping = model.GetAuditClassMapping(deleteModel.AuditEntryType);
             var auditDelete = new AuditKeyedDeleteCommand(session.Factory, auditMapping);
 

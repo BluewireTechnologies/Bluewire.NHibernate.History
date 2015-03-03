@@ -84,6 +84,7 @@
     <Compile Include="OneToMany\Component\EntityWithMapOfValueTypes.cs" />
     <Compile Include="ManyToMany\EntityWithSetOfReferences.cs" />
     <Compile Include="OneToMany\Component\EntityWithSetOfValueTypes.cs" />
+    <Compile Include="OneToMany\Entity\OrphanedEntityDeletionTests.cs" />
     <Compile Include="OneToMany\Entity\EntityWithSetOfEntityTypesPersistenceTests.cs" />
     <Compile Include="OneToMany\Entity\EntityWithSetOfEntityTypes.cs" />
     <Compile Include="OneToMany\Entity\EntityWithListOfEntityTypes.cs" />

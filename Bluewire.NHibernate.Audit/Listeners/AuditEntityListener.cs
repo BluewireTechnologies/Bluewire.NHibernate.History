@@ -49,7 +49,10 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         public void OnDelete(DeleteEvent @event, ISet transientEntities)
         {
-            //OnDelete(@event);
+            // This OnDelete overload is called when deleting orphaned entities, ie. when removing from
+            // a one-to-many relation. Should be safe to delegate straight to the standard deletion behaviour.
+
+            OnDelete(@event);
         }
 
         public void OnDelete(DeleteEvent @event)

@@ -80,6 +80,7 @@
     <Compile Include="Model\IRelationAuditValueResolver.cs" />
     <Compile Include="Model\ReferenceRelationAuditValueResolver.cs" />
     <Compile Include="Model\ComponentCollectionAuditValueResolver.cs" />
+    <Compile Include="Serialisation.cs" />
     <Compile Include="SetRelationAuditHistoryEntry.cs" />
     <Compile Include="Support\CommandParameteriser.cs" />
     <Compile Include="Listeners\Collectors\SetInsertionCollector.cs" />

@@ -12,6 +12,8 @@ Audit/History plugin for NHibernate
  * Audit entry classes must be persistence-mapped by the consuming application. There is no automatic mapping functionality yet.
  * There is no internal support for soft deletion. This is an application-level detail rather than a persistence concern. Deleted entities will still have audit history, but cannot be fetched or undeleted.
    * If you want soft deletion, add an IsDeleted boolean property and Update the entity instead of Delete-ing it. Possibly add an event listener to ban the use of Session.Delete against that entity type.
+ * Audit datestamps must be stored and serialised to millisecond accuracy. This means that SQL Server's 'datetime' type cannot be used for audit tables, and datestamps can never be roundtripped through the Javascript Date type.
+   * There is a Serialisation.AuditDatestampFormat constant which defines a date format sufficient for retaining fidelity when serialising as a string.
 
 Audit Entry Structure 
 =====================

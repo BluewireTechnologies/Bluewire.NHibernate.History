@@ -40,8 +40,19 @@ namespace Bluewire.NHibernate.Audit.Runtime
         {
             get
             {
-                return flushDatestamp.Value ?? clock.Now;
+
+                return flushDatestamp.Value ?? NowAtRoundTrippablePrecision();
             }
+        }
+
+        private DateTimeOffset NowAtRoundTrippablePrecision()
+        {
+            // We cannot rely on all systems preserving the precision of a DateTimeOffset.
+            // In particular, databases may truncate nanoseconds or microseconds. We can
+            // reasonably demand millisecond accuracy, though this does mean that the
+            // 'datetime' type in SQL Server cannot be used (only accurate to about 3ms).
+            var now = clock.Now;
+            return new DateTimeOffset(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, now.Millisecond, now.Offset);
         }
 
         public void BeginFlush()
@@ -52,7 +63,7 @@ namespace Bluewire.NHibernate.Audit.Runtime
                 if (flushDepth <= 1)
                 {
                     Debug.Assert(flushDatestamp.Value == null);
-                    flushDatestamp.Value = clock.Now;
+                    flushDatestamp.Value = NowAtRoundTrippablePrecision();
                 }
                 else
                 {

@@ -23,7 +23,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
         {
             if (!model.IsAuditable(collectionEntry.LoadedPersister)) return;
 
-            var deletionCollector = new DeletionCollector(collectionEntry);
+            var deletionCollector = GetDeleteCollector(collectionEntry);
             var collector = new ChangeCollector(collectionEntry, collection);
 
             collector.DeleteAll(deletionCollector);
@@ -50,7 +50,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             // Deletion, then insertion.
             if (model.IsAuditable(collectionEntry.LoadedPersister))
             {
-                var deletionCollector = new DeletionCollector(collectionEntry);
+                var deletionCollector = GetDeleteCollector(collectionEntry);
                 collector.Collect(deletionCollector);
 
                 deletionCollector.Apply(session, auditTask);
@@ -70,6 +70,15 @@ namespace Bluewire.NHibernate.Audit.Listeners
                 return new KeyedInsertionCollector(collectionEntry);
             }
             return new SetInsertionCollector(collectionEntry);
+        }
+
+        private static DeletionCollector GetDeleteCollector(CollectionEntry collectionEntry)
+        {
+            if (collectionEntry.LoadedPersister.HasIndex)
+            {
+                return new KeyedDeletionCollector(collectionEntry);
+            }
+            return new SetDeletionCollector(collectionEntry);
         }
     }
 }

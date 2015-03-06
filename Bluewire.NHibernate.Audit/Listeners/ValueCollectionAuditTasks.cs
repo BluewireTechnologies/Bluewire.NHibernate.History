@@ -63,7 +63,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             innerSession.Flush();
         }
 
-        public void ExecuteSetDeletion(IEventSource session, DeletionCollector collector)
+        public void ExecuteSetDeletion(IEventSource session, SetDeletionCollector collector)
         {
             var sessionAuditInfo = GetCurrentSessionInfo(session);
             var deleteModel = GetRelationModel(collector.Persister);
@@ -84,7 +84,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             }
         }
 
-        public void ExecuteKeyedDeletion(IEventSource session, DeletionCollector collector)
+        public void ExecuteKeyedDeletion(IEventSource session, KeyedDeletionCollector collector)
         {
             if (!collector.Persister.HasIndex) throw new ArgumentException(String.Format("Not a keyed collection: {0}", collector.Persister.Role));
             var sessionAuditInfo = GetCurrentSessionInfo(session);

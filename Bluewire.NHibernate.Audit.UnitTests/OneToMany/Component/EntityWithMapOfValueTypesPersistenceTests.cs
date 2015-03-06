@@ -220,7 +220,37 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Component
                 Assert.IsNotNull(item.EndDatestamp);
             }
         }
-        
+
+        [Test]
+        public void DeletingOwnerEntityDeletedCollection()
+        {
+            using (var session = db.CreateSession())
+            {
+                var entity = new EntityWithMapOfValueTypes
+                {
+                    Id = 42,
+                    Values =
+                    {
+                        { "A", new ComponentType { Integer = 2, String = "2" } },
+                        { "B", new ComponentType { Integer = 7, String = "8" } }
+                    }
+                };
+
+                session.Save(entity);
+                session.Flush();
+
+                clock.Advance(TimeSpan.FromSeconds(1));
+
+                session.Delete(entity);
+                session.Flush();
+
+                var audited = session.Query<EntityWithMapOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
+
+                Assert.That(audited.Count, Is.EqualTo(2));
+                Assert.That(audited.Select(x => x.EndDatestamp), Has.All.Not.Null);
+            }
+        }
+
         private void Configure(Configuration cfg)
         {
             var mapper = new ModelMapper();

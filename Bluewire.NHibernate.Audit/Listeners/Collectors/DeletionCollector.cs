@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using NHibernate.Collection;
 using NHibernate.Engine;
 using NHibernate.Event;
@@ -8,50 +6,24 @@ using NHibernate.Persister.Collection;
 
 namespace Bluewire.NHibernate.Audit.Listeners.Collectors
 {
-    public class DeletionCollector : IChangeReceiver
+    public abstract class DeletionCollector : IChangeReceiver
     {
-        public object OwnerKey { get; private set; }
-        public ICollectionPersister Persister { get; private set; }
-
-        public DeletionCollector(CollectionEntry collectionEntry)
+        protected DeletionCollector(CollectionEntry collectionEntry)
         {
             Persister = collectionEntry.LoadedPersister;
             OwnerKey = collectionEntry.LoadedKey;
             if (Persister == null) throw new ArgumentException("No LoadedPersister for collection.", "collectionEntry");
+
         }
 
-        readonly List<object> deletions = new List<object>();
+        public object OwnerKey { get; private set; }
 
-        public void Delete(IPersistentCollection collection, object entry, int index)
-        {
-            var key = collection.GetIndex(entry, index, Persister);
-            deletions.Add(key);
-        }
+        public ICollectionPersister Persister { get; private set; }
 
-        public void Delete(IPersistentCollection collection, object key)
-        {
-            deletions.Add(key);
-        }
-
-        public bool IsEmpty { get { return !deletions.Any(); } }
-
-        public IEnumerable<object> Enumerate()
-        {
-            return deletions;
-        }
-
-        public void Apply(IEventSource session, ValueCollectionAuditTasks task)
-        {
-            if (Persister.HasIndex)
-            {
-                task.ExecuteKeyedDeletion(session, this);
-            }
-            else
-            {
-                task.ExecuteSetDeletion(session, this);
-            }
-        }
-
+        public abstract void Delete(IPersistentCollection collection, object entry, int index);
+        public abstract void Delete(IPersistentCollection collection, object key);
+        public abstract void Apply(IEventSource session, ValueCollectionAuditTasks task);
+        
         public void Insert(IPersistentCollection collection, object entry, int index)
         {
         }

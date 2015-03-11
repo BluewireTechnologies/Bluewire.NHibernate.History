@@ -1,5 +1,6 @@
 using System;
 using AutoMapper;
+using Bluewire.NHibernate.Audit.Meta;
 using Bluewire.NHibernate.Audit.Model;
 
 namespace Bluewire.NHibernate.Audit.UnitTests.Util

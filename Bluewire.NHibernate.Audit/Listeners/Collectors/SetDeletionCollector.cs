@@ -4,7 +4,6 @@ using System.Linq;
 using NHibernate.Collection;
 using NHibernate.Engine;
 using NHibernate.Event;
-using NHibernate.Persister.Collection;
 
 namespace Bluewire.NHibernate.Audit.Listeners.Collectors
 {

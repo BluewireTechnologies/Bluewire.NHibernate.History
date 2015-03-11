@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Bluewire.NHibernate.Audit.Attributes;
 using Bluewire.NHibernate.Audit.Meta;
 using Bluewire.NHibernate.Audit.Model;

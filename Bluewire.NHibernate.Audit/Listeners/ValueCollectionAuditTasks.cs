@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using Bluewire.NHibernate.Audit.Listeners.Collectors;
 using Bluewire.NHibernate.Audit.Meta;

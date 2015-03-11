@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Linq;
+using Bluewire.NHibernate.Audit.Meta;
 using Bluewire.NHibernate.Audit.Model;
 using Bluewire.NHibernate.Audit.Runtime;
 using Iesi.Collections;

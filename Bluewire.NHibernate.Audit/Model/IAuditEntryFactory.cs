@@ -1,4 +1,5 @@
 ﻿using System;
+using Bluewire.NHibernate.Audit.Meta;
 
 namespace Bluewire.NHibernate.Audit.Model
 {

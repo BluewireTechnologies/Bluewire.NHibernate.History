@@ -1,5 +1,4 @@
-﻿using Bluewire.NHibernate.Audit.Listeners.Collectors;
-using NHibernate.Collection;
+﻿using NHibernate.Collection;
 using NHibernate.Engine;
 using NHibernate.Event;
 

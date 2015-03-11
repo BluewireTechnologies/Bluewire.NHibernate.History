@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using Bluewire.NHibernate.Audit.Attributes;
 using Bluewire.NHibernate.Audit.UnitTests.ManyToMany;
 
@@ -22,33 +19,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Simple
         public virtual IList<ReferencableEntity> Entities { get; protected set; }
     }
 
-    public class EntityWithUnauditedCollectionAuditHistory : IEntityAuditHistory
+    public class EntityWithUnauditedCollectionAuditHistory : EntityAuditHistoryBase<int, int>
     {
-        public virtual int Id { get; protected set; }
         public virtual string Value { get; set; }
-        public virtual int? VersionId { get; protected set; }
-
-        public virtual long AuditId { get; protected set; }
-        public virtual int? PreviousVersionId { get; protected set; }
-
-        object IEntityAuditHistory.VersionId
-        {
-            get { return VersionId; }
-            set { VersionId = (int?)value; }
-        }
-
-        object IEntityAuditHistory.Id
-        {
-            get { return Id; }
-        }
-
-        object IEntityAuditHistory.PreviousVersionId
-        {
-            get { return PreviousVersionId; }
-            set { PreviousVersionId = (int?)value; }
-        }
-
-        public virtual DateTimeOffset AuditDatestamp { get; set; }
-        public virtual AuditedOperation AuditedOperation { get; set; }
     }
 }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Bluewire.NHibernate.Audit
+﻿namespace Bluewire.NHibernate.Audit
 {
     public static class Serialisation
     {

@@ -91,6 +91,14 @@
     <Compile Include="OneToMany\Entity\EntityWithListOfEntityTypes.cs" />
     <Compile Include="OneToMany\Entity\EntityWithListOfEntityTypesPersistenceTests.cs" />
     <Compile Include="OneToMany\Entity\OneToManyEntity.cs" />
+    <Compile Include="Query\LinqIntegration.cs" />
+    <Compile Include="Query\LinqIntegrationTests.cs" />
+    <Compile Include="Query\ListRelationSnapshotQueryTests.cs" />
+    <Compile Include="Query\MapRelationSnapshotQueryTests.cs" />
+    <Compile Include="Query\EntitySnapshotQueryTests.cs" />
+    <Compile Include="Query\MockAuditHistory.cs" />
+    <Compile Include="Query\MockSnapshotContext.cs" />
+    <Compile Include="Query\SetRelationSnapshotQueryTests.cs" />
     <Compile Include="Simple\EntityWithUnauditedCollectionPersistenceTests.cs" />
     <Compile Include="Simple\EntityWithUnauditedCollection.cs" />
     <Compile Include="Util\ClockAuditDatestampProvider.cs" />

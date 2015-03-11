@@ -93,6 +93,7 @@
     <Compile Include="OneToMany\Entity\OneToManyEntity.cs" />
     <Compile Include="Simple\EntityWithUnauditedCollectionPersistenceTests.cs" />
     <Compile Include="Simple\EntityWithUnauditedCollection.cs" />
+    <Compile Include="Util\ClockAuditDatestampProvider.cs" />
     <Compile Include="Util\DynamicAuditEntryFactory.cs" />
     <Compile Include="Util\PersistentDatabase.cs" />
     <Compile Include="Simple\SimpleEntity.cs" />

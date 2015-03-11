@@ -1,6 +1,7 @@
 ﻿using System;
 using Bluewire.Common.Time;
 using Bluewire.NHibernate.Audit.Runtime;
+using Bluewire.NHibernate.Audit.UnitTests.Util;
 using NUnit.Framework;
 
 namespace Bluewire.NHibernate.Audit.UnitTests
@@ -22,7 +23,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests
 
             var clock = new MockClock(new DateTimeOffset(date + timeNanosecondAccuracy));
 
-            var auditInfo = new SessionAuditInfo(clock);
+            var auditInfo = new SessionAuditInfo(new ClockAuditDatestampProvider(clock));
 
             var serialised = auditInfo.OperationDatestamp.ToString(Serialisation.AuditDatestampFormat);
             var roundtripped = DateTimeOffset.Parse(serialised);

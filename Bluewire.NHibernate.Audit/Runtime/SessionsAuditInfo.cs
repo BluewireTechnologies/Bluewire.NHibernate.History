@@ -1,23 +1,22 @@
-﻿using Bluewire.Common.Time;
-using Bluewire.NHibernate.Audit.Support;
+﻿using Bluewire.NHibernate.Audit.Support;
 using NHibernate.Engine;
 
 namespace Bluewire.NHibernate.Audit.Runtime
 {
     public class SessionsAuditInfo
     {
-        private readonly IClock clock;
+        private readonly IAuditDatestampProvider datestampProvider;
 
-        public SessionsAuditInfo(IClock clock)
+        public SessionsAuditInfo(IAuditDatestampProvider datestampProvider)
         {
-            this.clock = clock;
+            this.datestampProvider = datestampProvider;
         }
 
         private readonly WeakDictionary<ISessionImplementor, SessionAuditInfo> sessionInfos = new WeakDictionary<ISessionImplementor, SessionAuditInfo>();
 
         public SessionAuditInfo Lookup(ISessionImplementor session)
         {
-            return sessionInfos.GetOrAdd(session, () => new SessionAuditInfo(clock));
+            return sessionInfos.GetOrAdd(session, () => new SessionAuditInfo(datestampProvider));
         }
 
     }

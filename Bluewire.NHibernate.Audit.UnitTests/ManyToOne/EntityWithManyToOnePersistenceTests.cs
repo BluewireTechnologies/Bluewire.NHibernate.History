@@ -149,7 +149,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToOne
             });
             cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
 
-            new AuditConfigurer(new DynamicAuditEntryFactory(), clock).IntegrateWithNHibernate(cfg);
+            new AuditConfigurer(new DynamicAuditEntryFactory(), new ClockAuditDatestampProvider(clock)).IntegrateWithNHibernate(cfg);
         }
     }
 }

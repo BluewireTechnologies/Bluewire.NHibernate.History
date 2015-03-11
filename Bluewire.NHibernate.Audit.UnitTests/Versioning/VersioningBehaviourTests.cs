@@ -1,4 +1,5 @@
-﻿using Bluewire.NHibernate.Audit.UnitTests.Util;
+﻿using Bluewire.Common.Time;
+using Bluewire.NHibernate.Audit.UnitTests.Util;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Mapping.ByCode;
@@ -131,7 +132,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Versioning
                 e.Version(i => i.VersionId, v => { });
             });
             cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
-            new AuditConfigurer(new DynamicAuditEntryFactory()).IntegrateWithNHibernate(cfg);
+            new AuditConfigurer(new DynamicAuditEntryFactory(), new ClockAuditDatestampProvider(new Clock())).IntegrateWithNHibernate(cfg);
         }
     }
 

@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using Bluewire.Common.Time;
 
 namespace Bluewire.NHibernate.Audit.Runtime
 {
     public class SessionAuditInfo
     {
-        private readonly IClock clock;
+        private readonly IAuditDatestampProvider datestampProvider;
         private readonly Dictionary<object, EntityState> entityStates = new Dictionary<object, EntityState>();
 
         public EntityState GetState(object entity)
@@ -25,9 +24,9 @@ namespace Bluewire.NHibernate.Audit.Runtime
         private readonly ThreadLocal<DateTimeOffset?> flushDatestamp = new ThreadLocal<DateTimeOffset?>();
         private int flushDepth;
 
-        public SessionAuditInfo(IClock clock)
+        public SessionAuditInfo(IAuditDatestampProvider datestampProvider)
         {
-            this.clock = clock;
+            this.datestampProvider = datestampProvider;
         }
 
         public void AssertIsFlushing()
@@ -51,7 +50,7 @@ namespace Bluewire.NHibernate.Audit.Runtime
             // In particular, databases may truncate nanoseconds or microseconds. We can
             // reasonably demand millisecond accuracy, though this does mean that the
             // 'datetime' type in SQL Server cannot be used (only accurate to about 3ms).
-            var now = clock.Now;
+            var now = datestampProvider.GetDatestampForNow();
             return new DateTimeOffset(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, now.Millisecond, now.Offset);
         }
 

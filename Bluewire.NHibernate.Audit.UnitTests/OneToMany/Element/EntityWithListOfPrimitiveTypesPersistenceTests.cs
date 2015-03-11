@@ -268,7 +268,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Element
             var hbm = mapper.CompileMappingForAllExplicitlyAddedEntities();
             cfg.AddMapping(hbm);
 
-            new AuditConfigurer(new DynamicAuditEntryFactory(), clock).IntegrateWithNHibernate(cfg);
+            new AuditConfigurer(new DynamicAuditEntryFactory(), new ClockAuditDatestampProvider(clock)).IntegrateWithNHibernate(cfg);
         }
     }
 }

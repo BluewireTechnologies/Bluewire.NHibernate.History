@@ -140,6 +140,43 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Component
         }
 
         [Test]
+        public void InsertingNullElementIntoCollectionIsAudited()
+        {
+            using (var session = db.CreateSession())
+            {
+                var entity = new EntityWithListOfValueTypes
+                {
+                    Id = 42,
+                    Values =
+                    {
+                        new ComponentType { Integer = 2, String = "2" }
+                    }
+                };
+                session.Save(entity);
+                session.Flush();
+
+                clock.Advance(TimeSpan.FromSeconds(1));
+
+                entity.Values.Insert(0, null); // Note that appending nulls to a list is completely ignored by NHibernate.
+                session.Flush();
+
+                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
+                Assert.AreEqual(42, auditedEntity.Id);
+
+                var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
+                Assert.That(auditedCollection.Count, Is.EqualTo(2));
+
+                var originalIndex0 = auditedCollection[0];
+                var updatedIndex1 = auditedCollection[1];
+
+                // Inserting a null is recorded as updating the key values of subsequent entries.
+                Assert.AreEqual("2", updatedIndex1.Value.String);
+                Assert.AreNotEqual(originalIndex0.StartDatestamp, updatedIndex1.StartDatestamp);
+                Assert.IsNull(updatedIndex1.EndDatestamp);
+            }
+        }
+
+        [Test]
         public void ReorderingCollectionIsAudited()
         {
             using (var session = db.CreateSession())

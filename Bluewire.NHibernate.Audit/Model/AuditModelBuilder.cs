@@ -69,7 +69,14 @@ namespace Bluewire.NHibernate.Audit.Model
                    .Where(m => m.MappedClass.IsAuditable())
                    .Where(m => !m.SubclassIterator.Any() && m.RootClazz == m);
 
+            var subclassTypes = cfg
+                   .ClassMappings
+                   .Where(m => m.MappedClass.IsAuditable())
+                   .Where(m => !m.MappedClass.IsAbstract)
+                   .Where(m => m.RootClazz != m);
+
             foreach (var t in simpleTypes) AddEntityType(t);
+            foreach (var t in subclassTypes) AddEntityType(t);
 
             foreach (var c in cfg.CollectionMappings.Where(m => m.Owner.MappedClass.IsAuditable()))
             {

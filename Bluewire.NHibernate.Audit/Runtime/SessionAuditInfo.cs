@@ -26,11 +26,10 @@ namespace Bluewire.NHibernate.Audit.Runtime
         /// same thing as 'thread-locked'. Passing a session between threads is perfectly safe as long
         /// as only a single thread attempts to use it at a time. This makes it possible to make use of
         /// .NET 4.5's async capabilities without problem.
-        /// The following member is ThreadLocal, however, which means that it is NOT safe for async use!
-        /// Should probably be AsyncLocal when we update this library's framework version.
-        /// Don't use LogicalCallContext for this prior to .NET 4.5! It does not flow correctly for async.
+        /// Use of AsyncLocal here SHOULD be a detail since we aren't expecting a flush to ever await,
+        /// but it's better to get it right now than suffer strange bugs later...
         /// </summary>
-        private readonly ThreadLocal<DateTimeOffset?> flushDatestamp = new ThreadLocal<DateTimeOffset?>();
+        private readonly AsyncLocal<DateTimeOffset?> flushDatestamp = new AsyncLocal<DateTimeOffset?>();
         private int flushDepth;
 
         public SessionAuditInfo(IAuditDatestampProvider datestampProvider)

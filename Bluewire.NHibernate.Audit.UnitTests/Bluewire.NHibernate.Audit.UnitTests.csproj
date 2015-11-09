@@ -101,6 +101,7 @@
     <Compile Include="Query\MockAuditHistory.cs" />
     <Compile Include="Query\MockSnapshotContext.cs" />
     <Compile Include="Query\SetRelationSnapshotQueryTests.cs" />
+    <Compile Include="Simple\ExplicitSnapshotPersistenceTests.cs" />
     <Compile Include="Simple\EntityWithUnauditedCollectionPersistenceTests.cs" />
     <Compile Include="Simple\EntityWithUnauditedCollection.cs" />
     <Compile Include="Util\ClockAuditDatestampProvider.cs" />

@@ -53,6 +53,7 @@
     <Compile Include="Attributes\AuditableRelationAttribute.cs" />
     <Compile Include="EntityAuditHistoryBase.cs" />
     <Compile Include="IAuditDatestampProvider.cs" />
+    <Compile Include="IAuditInfo.cs" />
     <Compile Include="Listeners\Collectors\DeletionCollector.cs" />
     <Compile Include="Listeners\Collectors\SetDeletionCollector.cs" />
     <Compile Include="Meta\IEntityAuditHistory.cs" />

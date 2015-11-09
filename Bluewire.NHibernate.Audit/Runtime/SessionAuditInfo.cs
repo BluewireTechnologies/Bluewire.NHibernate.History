@@ -21,6 +21,15 @@ namespace Bluewire.NHibernate.Audit.Runtime
             return state;
         }
 
+        /// <summary>
+        /// WARNING: Strictly, NHibernate defines its sessions to be 'not threadsafe' which is not the
+        /// same thing as 'thread-locked'. Passing a session between threads is perfectly safe as long
+        /// as only a single thread attempts to use it at a time. This makes it possible to make use of
+        /// .NET 4.5's async capabilities without problem.
+        /// The following member is ThreadLocal, however, which means that it is NOT safe for async use!
+        /// Should probably be AsyncLocal when we update this library's framework version.
+        /// Don't use LogicalCallContext for this prior to .NET 4.5! It does not flow correctly for async.
+        /// </summary>
         private readonly ThreadLocal<DateTimeOffset?> flushDatestamp = new ThreadLocal<DateTimeOffset?>();
         private int flushDepth;
 
@@ -29,17 +38,17 @@ namespace Bluewire.NHibernate.Audit.Runtime
             this.datestampProvider = datestampProvider;
         }
 
+        public bool IsFlushing { get { return flushDatestamp.Value != null; } }
+
         public void AssertIsFlushing()
         {
-            var v = flushDatestamp.Value;
-            if (v == null) throw new InvalidOperationException("No flush in progress when one was expected.");
+            if (!IsFlushing) throw new InvalidOperationException("No flush in progress when one was expected.");
         }
 
         public DateTimeOffset OperationDatestamp
         {
             get
             {
-
                 return flushDatestamp.Value ?? NowAtRoundTrippablePrecision();
             }
         }

@@ -4,6 +4,9 @@ using Bluewire.NHibernate.Audit.Model;
 using Bluewire.NHibernate.Audit.Runtime;
 using NHibernate.Cfg;
 using NHibernate.Event;
+using System;
+using NHibernate;
+using System.Diagnostics;
 
 namespace Bluewire.NHibernate.Audit
 {
@@ -18,12 +21,12 @@ namespace Bluewire.NHibernate.Audit
             this.datestampProvider = datestampProvider;
         }
 
-        public void IntegrateWithNHibernate(Configuration cfg)
+        public IAuditInfo IntegrateWithNHibernate(Configuration cfg)
         {
-            this.IntegrateWithNHibernate(cfg, cfg.EventListeners);
+            return this.IntegrateWithNHibernate(cfg, cfg.EventListeners);
         }
 
-        public void IntegrateWithNHibernate(Configuration cfg, EventListeners eventListeners)
+        public IAuditInfo IntegrateWithNHibernate(Configuration cfg, EventListeners eventListeners)
         {
             var modelBuilder = new AuditModelBuilder();
             modelBuilder.AddFromConfiguration(cfg);
@@ -31,6 +34,36 @@ namespace Bluewire.NHibernate.Audit
 
             var sessions = new SessionsAuditInfo(datestampProvider);
             RegisterEventListeners(eventListeners, model, sessions);
+
+            return new NHibernateAuditIntegrationInstance(sessions);
+        }
+
+        class NHibernateAuditIntegrationInstance : IAuditInfo
+        {
+            private SessionsAuditInfo sessions;
+
+            public NHibernateAuditIntegrationInstance(SessionsAuditInfo sessions)
+            {
+                this.sessions = sessions;
+            }
+
+            public DateTimeOffset CommitSnapshot(ISession session)
+            {
+                var sessionAuditInfo = sessions.Lookup(session.GetSessionImplementation());
+                if (sessionAuditInfo.IsFlushing) throw new InvalidOperationException("A session flush is currently in progress. This method cannot be called during a flush, eg. from an NHibernate event listener.");
+                sessionAuditInfo.BeginFlush();
+                try
+                {
+                    Debug.Assert(sessionAuditInfo.IsFlushing);
+                    session.Flush();
+                    Debug.Assert(sessionAuditInfo.IsFlushing);
+                    return sessionAuditInfo.OperationDatestamp;
+                }
+                finally
+                {
+                    sessionAuditInfo.EndFlush();
+                }
+            }
         }
 
         private static void RegisterEventListeners(EventListeners listeners, AuditModel model, SessionsAuditInfo sessions)
@@ -52,7 +85,6 @@ namespace Bluewire.NHibernate.Audit
             listeners.PreCollectionRemoveEventListeners = listeners.PreCollectionRemoveEventListeners.Concat(new[] { collectionAuditListener }).ToArray();
             listeners.PreCollectionUpdateEventListeners = listeners.PreCollectionUpdateEventListeners.Concat(new[] { collectionAuditListener }).ToArray();
         }
-
     }
 
 }

@@ -84,8 +84,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToMany
                 entity.Entities.Add(b);
                 session.Flush();
 
-                var auditedEntity = session.Query<EntityWithListOfReferencesAuditHistory>().Single(h => h.Id == 42);
-                Assert.AreEqual(42, auditedEntity.Id);
+                var auditedEntities = session.Query<EntityWithListOfReferencesAuditHistory>().Where(h => h.Id == 42).ToList();
+                Assert.That(auditedEntities.Count, Is.AtLeast(2));
 
                 var auditedCollection = session.Query<EntityWithListOfReferencesEntitiesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 Assert.That(auditedCollection.Count, Is.EqualTo(2));
@@ -121,9 +121,9 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToMany
                 entity.Entities[0] = entity.Entities[1];
                 entity.Entities[1] = temp;
                 session.Flush();
-
-                var auditedEntity = session.Query<EntityWithListOfReferencesAuditHistory>().Single(h => h.Id == 42);
-                Assert.AreEqual(42, auditedEntity.Id);
+                
+                var auditedEntities = session.Query<EntityWithListOfReferencesAuditHistory>().Where(h => h.Id == 42).ToList();
+                Assert.That(auditedEntities.Count, Is.AtLeast(2));
 
                 var auditedCollection = session.Query<EntityWithListOfReferencesEntitiesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 Assert.That(auditedCollection.Count, Is.EqualTo(4));
@@ -195,8 +195,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToMany
                 entity.Entities.RemoveAt(0);
                 session.Flush();
 
-                var auditedEntity = session.Query<EntityWithListOfReferencesAuditHistory>().Single(h => h.Id == 42);
-                Assert.AreEqual(42, auditedEntity.Id);
+                var auditedEntities = session.Query<EntityWithListOfReferencesAuditHistory>().Where(h => h.Id == 42).ToList();
+                Assert.That(auditedEntities.Count, Is.AtLeast(2));
 
                 var auditedCollection = session.Query<EntityWithListOfReferencesEntitiesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 Assert.That(auditedCollection.Count, Is.EqualTo(3));

@@ -23,7 +23,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         public void OnFlushEntity(FlushEntityEvent @event)
         {
-            if (@event.EntityEntry.ExistsInDatabase && (@event.DirtyProperties == null || !@event.DirtyProperties.Any())) return;
+            if (!IsDirty(@event)) return;
 
             IAuditableEntityModel entityModel;
             if (!model.TryGetModelForPersister(@event.EntityEntry.Persister, out entityModel)) return;
@@ -46,6 +46,14 @@ namespace Bluewire.NHibernate.Audit.Listeners
             Debug.Assert(Equals(auditEntry.Id, @event.EntityEntry.EntityKey.Identifier));
             Debug.Assert(!Equals(auditEntry.VersionId, auditEntry.PreviousVersionId));
             @event.Session.Save(auditEntry);
+        }
+
+        private bool IsDirty(FlushEntityEvent @event)
+        {
+            if (!@event.EntityEntry.ExistsInDatabase) return true;
+            if (@event.HasDirtyCollection) return true;
+            if (@event.DirtyProperties != null && @event.DirtyProperties.Any()) return true;
+            return false;
         }
 
         public void OnDelete(DeleteEvent @event, ISet transientEntities)

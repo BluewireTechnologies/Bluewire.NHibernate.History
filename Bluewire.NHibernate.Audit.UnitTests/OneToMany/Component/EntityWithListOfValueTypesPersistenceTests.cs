@@ -86,8 +86,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Component
                 entity.Values[1].String = "8";
                 session.Flush();
 
-                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
-                Assert.AreEqual(42, auditedEntity.Id);
+                var auditedEntities = session.Query<EntityWithListOfValueTypesAuditHistory>().Where(h => h.Id == 42).ToList();
+                Assert.That(auditedEntities.Count, Is.AtLeast(2));
 
                 var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 Assert.That(auditedCollection.Count, Is.EqualTo(3));
@@ -124,8 +124,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Component
                 entity.Values.Add(new ComponentType { Integer = 7, String = "8" });
                 session.Flush();
 
-                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
-                Assert.AreEqual(42, auditedEntity.Id);
+                var auditedEntities = session.Query<EntityWithListOfValueTypesAuditHistory>().Where(h => h.Id == 42).ToList();
+                Assert.That(auditedEntities.Count, Is.AtLeast(2));
 
                 var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 Assert.That(auditedCollection.Count, Is.EqualTo(2));
@@ -160,8 +160,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Component
                 entity.Values.Insert(0, null); // Note that appending nulls to a list is completely ignored by NHibernate.
                 session.Flush();
 
-                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
-                Assert.AreEqual(42, auditedEntity.Id);
+                var auditedEntities = session.Query<EntityWithListOfValueTypesAuditHistory>().Where(h => h.Id == 42).ToList();
+                Assert.That(auditedEntities.Count, Is.AtLeast(2));
 
                 var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 Assert.That(auditedCollection.Count, Is.EqualTo(2));
@@ -200,8 +200,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Component
                 entity.Values[1] = temp;
                 session.Flush();
 
-                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
-                Assert.AreEqual(42, auditedEntity.Id);
+                var auditedEntities = session.Query<EntityWithListOfValueTypesAuditHistory>().Where(h => h.Id == 42).ToList();
+                Assert.That(auditedEntities.Count, Is.AtLeast(2));
 
                 var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 Assert.That(auditedCollection.Count, Is.EqualTo(4));
@@ -275,8 +275,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Component
                 entity.Values.RemoveAt(0);
                 session.Flush();
 
-                var auditedEntity = session.Query<EntityWithListOfValueTypesAuditHistory>().Single(h => h.Id == 42);
-                Assert.AreEqual(42, auditedEntity.Id);
+                var auditedEntities = session.Query<EntityWithListOfValueTypesAuditHistory>().Where(h => h.Id == 42).ToList();
+                Assert.That(auditedEntities.Count, Is.AtLeast(2));
 
                 var auditedCollection = session.Query<EntityWithListOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 Assert.That(auditedCollection.Count, Is.EqualTo(3));

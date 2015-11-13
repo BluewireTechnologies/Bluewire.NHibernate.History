@@ -129,8 +129,8 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Entity
                 entity.Entities.Add(new OneToManyEntity { Id = 7, Value = "8" });
                 session.Flush();
 
-                var auditedEntity = session.Query<EntityWithSetOfEntityTypesAuditHistory>().Single(h => h.Id == 42);
-                Assert.AreEqual(42, auditedEntity.Id);
+                var auditedEntities = session.Query<EntityWithSetOfEntityTypesAuditHistory>().Where(h => h.Id == 42).ToList();
+                Assert.That(auditedEntities.Count, Is.AtLeast(2));
 
                 var auditedCollection = session.Query<EntityWithSetOfEntityTypesEntitiesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
                 Assert.That(auditedCollection.Count, Is.EqualTo(2));

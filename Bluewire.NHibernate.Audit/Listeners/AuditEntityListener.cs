@@ -66,18 +66,20 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
         public void OnDelete(DeleteEvent @event)
         {
-            var persister = @event.Session.GetEntityPersister(@event.EntityName, @event.Entity);
+            var entity = @event.Session.PersistenceContext.UnproxyAndReassociate(@event.Entity);
+
+            var persister = @event.Session.GetEntityPersister(@event.EntityName, entity);
             IAuditableEntityModel entityModel;
             if (!model.TryGetModelForPersister(persister, out entityModel)) return;
 
             var sessionAuditInfo = sessions.Lookup(@event.Session);
 
-            var auditEntry = model.GenerateAuditEntry(entityModel, @event.Entity);
+            var auditEntry = model.GenerateAuditEntry(entityModel, entity);
             auditEntry.AuditDatestamp = sessionAuditInfo.OperationDatestamp;
 
             AuditDelete(auditEntry, @event, persister);
 
-            Debug.Assert(Equals(auditEntry.Id, persister.GetIdentifier(@event.Entity, EntityMode.Poco)));
+            Debug.Assert(Equals(auditEntry.Id, persister.GetIdentifier(entity, EntityMode.Poco)));
             Debug.Assert(!Equals(auditEntry.VersionId, auditEntry.PreviousVersionId));
             @event.Session.Save(auditEntry);
         }

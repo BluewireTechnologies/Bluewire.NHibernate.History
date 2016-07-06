@@ -116,6 +116,7 @@
     <Compile Include="Simple\ExplicitSnapshotPersistenceTests.cs" />
     <Compile Include="Simple\EntityWithUnauditedCollectionPersistenceTests.cs" />
     <Compile Include="Simple\EntityWithUnauditedCollection.cs" />
+    <Compile Include="Simple\ProxyPersistenceTests.cs" />
     <Compile Include="Util\ClockAuditDatestampProvider.cs" />
     <Compile Include="Util\DynamicAuditEntryFactory.cs" />
     <Compile Include="Util\PersistentDatabase.cs" />

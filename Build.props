@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <ItemGroup>
+        <!-- Full list of NuGet package projects -->
+        <NugetProjects Include="Bluewire.NHibernate.Audit\Bluewire.NHibernate.Audit.csproj" />
+        
+        <!-- Full list of NUnit test projects -->
+        <NUnitProjects Include="Bluewire.NHibernate.Audit.UnitTests\Bluewire.NHibernate.Audit.UnitTests.csproj" />
+    </ItemGroup>
+</Project>

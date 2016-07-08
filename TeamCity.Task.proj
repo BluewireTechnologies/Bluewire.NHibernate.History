@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="BuildAndTest" ToolsVersion="12.0">
+    
+    <!--
+        
+    TeamCity Build for Bluewire.NHibernate.Audit and related packages.
+    
+    Inputs:
+      * OutputDirectory:  location for final build output
+      
+    Outputs:
+      * Everything in OutputDirectory
+     
+    -->
+    
+    <Import Project="Common.props" />
+    <Import Project="Common.targets" />
+    
+    <PropertyGroup>
+        <Configuration>Release</Configuration>
+        <WorkingDirectory>$(MSBuildProjectDirectory)</WorkingDirectory>
+    </PropertyGroup>
+    
+    <ItemDefinitionGroup>
+        <NugetProjects></NugetProjects>
+        <NUnitProjects></NUnitProjects>
+        <OutputBinaries></OutputBinaries>
+    </ItemDefinitionGroup>
+    
+    <Import Project="Build.props" />
+    
+    <Target DependsOnTargets="ValidateParameters;PrepareOutputDirectory" Name="Build">
+        <MSBuild Projects="@(NugetProjects)" Targets="Build" ToolsVersion="$(PreferredMSBuildToolsVersion)" BuildInParallel="true" Properties="Configuration=$(Configuration)" />
+    </Target>
+    
+    <Target Name="BuildAndTest" DependsOnTargets="Build;RunNUnitTests">
+    </Target>
+    
+    <Target Name="BuildAndPackage" DependsOnTargets="BuildAndTest">
+        <MSBuild Projects="@(NugetProjects)" Targets="BuildPackage" ToolsVersion="$(PreferredMSBuildToolsVersion)" BuildInParallel="true" Properties="RunNuGetPack=true;Configuration=$(Configuration);NugetPackageTargetDir=$(OutputDirectory)"/>
+        <Copy SourceFiles="@(OutputBinaries)" DestinationFiles="@(OutputBinaries->'$(OutputDirectory)\%(FileName)%(Extension)')" />
+    </Target>
+    
+    <Target Name="PrepareOutputDirectory" DependsOnTargets="ValidateParameters">
+        <MakeDir Directories="$(OutputDirectory)" />
+    </Target>
+    
+    <Target Name="ValidateParameters">
+        <Error Text="OutputDirectory was not specified" Condition="'$(OutputDirectory)' == ''" />
+        
+        <!-- Make paths absolute -->
+        <CombinePath BasePath="$(MSBuildProjectDirectory)" Paths="$(OutputDirectory)">
+            <Output TaskParameter="CombinedPaths" PropertyName="OutputDirectory" />
+        </CombinePath>
+    </Target>
+</Project>

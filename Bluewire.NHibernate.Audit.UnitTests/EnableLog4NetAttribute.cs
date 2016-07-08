@@ -2,6 +2,7 @@
 using Bluewire.NHibernate.Audit.UnitTests;
 using log4net.Config;
 using NUnit.Framework;
+using NUnit.Framework.Interfaces;
 
 [assembly: EnableLog4Net]
 
@@ -11,11 +12,11 @@ namespace Bluewire.NHibernate.Audit.UnitTests
     public class EnableLog4NetAttribute :  Attribute, ITestAction
     {
 
-        public void AfterTest(TestDetails testDetails)
+        public void AfterTest(ITest testDetails)
         {
         }
 
-        public void BeforeTest(TestDetails testDetails)
+        public void BeforeTest(ITest testDetails)
         {
             BasicConfigurator.Configure();
         }

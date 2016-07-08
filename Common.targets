@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <Target Name="PrepareNUnitRunner">
+    <!--
+        If we're not running on a TeamCity server, look for the NUnit tools directory.
+        LastMatch is used so that we get the highest version of runner available.
+    -->
+    <ItemGroup>
+        <NUnitPaths Include="packages\Nunit*\tools\nunit3-console.exe" />
+    </ItemGroup>
+    <FindInList List="@(NUnitPaths)" FindLastMatch="true" ItemSpecToFind="%(NUnitPaths.Identity)" >
+        <Output TaskParameter="ItemFound" PropertyName="NUnitRunnerPath"/>
+    </FindInList>
+    <Message Text="NUnit runner paths: @(NUnitPaths)" />
+    <Error Condition="'$(NUnitRunnerPath)' == ''" Text="Could not find NUnit runner executable." />
+    <Error Condition="!Exists('$(NUnitRunnerPath)')" Text="Could not find NUnit runner executable." />
+    
+    <Message Text="Using NUnit at: $(NUnitRunnerPath)" />
+  </Target>
+  
+  <Target Name="BuildNUnitTestAssemblies" Condition="'@(NUnitProjects)' != ''">
+    <MSBuild Projects="@(NUnitProjects)" Targets="Build" ToolsVersion="$(PreferredMSBuildToolsVersion)" BuildInParallel="true" Properties="Configuration=Release" >
+        <Output TaskParameter="TargetOutputs" ItemName="NUnitProjectAssemblies" />
+    </MSBuild>
+    <Error Condition="'@(NUnitProjectAssemblies)' == ''" Text="NUnit projects were found, but the build produced no assemblies." />
+    
+    <ConvertToAbsolutePath Paths="@(NUnitProjects)">
+        <Output TaskParameter="AbsolutePaths" ItemName="NUnitProjectsAbsolute" />
+    </ConvertToAbsolutePath>
+    <ItemGroup>
+        <NUnitProjectsOutputs Include="%(NUnitProjectAssemblies.MSBuildSourceProjectFile)">
+            <TargetPath>%(NUnitProjectAssemblies.Identity)</TargetPath>
+        </NUnitProjectsOutputs>
+        <NUnitTestProjects Include="%(Identity)">
+            <DependsOn>@(NUnitProjectsAbsolute->'%(DependsOn)')</DependsOn>
+            <TargetPath>@(NUnitProjectsOutputs->'%(TargetPath)')</TargetPath>
+        </NUnitTestProjects>
+    </ItemGroup>
+  </Target>
+  
+  <Target Name="RunNUnitTests" Condition="'$(NUnitToolsPath)'==''" Inputs="@(NUnitTestProjects)" Outputs="%(Identity).skip" DependsOnTargets="PrepareNUnitRunner;BuildNUnitTestAssemblies">
+    <Message Text="%(NUnitTestProjects.Identity):" />
+    <Message Text="     %(NUnitTestProjects.TargetPath)" />
+    <Message Text="     %(NUnitTestProjects.DependsOn)" />
+    
+    <MSBuild Projects="%(NUnitTestProjects.Identity)" Condition="'%(NUnitTestProjects.DependsOn)'!=''" Targets="%(NUnitTestProjects.DependsOn)" />
+
+    <Exec Command='"$(NUnitRunnerPath)" --teamcity "%(NUnitTestProjects.TargetPath)"' />
+  </Target>
+</Project>

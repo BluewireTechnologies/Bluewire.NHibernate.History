@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <PreferredMSBuildToolsVersion>14.0</PreferredMSBuildToolsVersion>
+    <PowerShellExe Condition="'$(PowerShellExe)' == ''">%WINDIR%\System32\WindowsPowerShell\v1.0\powershell.exe</PowerShellExe>
+    <PowerShellInvocation>&quot;$(PowerShellExe)&quot; -Version 2.0 -NonInteractive -ExecutionPolicy Unrestricted</PowerShellInvocation>
+  </PropertyGroup>
+  
+</Project>

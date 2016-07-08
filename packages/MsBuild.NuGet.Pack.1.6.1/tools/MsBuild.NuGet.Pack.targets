@@ -1,0 +1,85 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="MsBuild.NuGet.Pack.MergeNuSpecTask" AssemblyFile="MsBuild.NuGet.Pack.dll" />
+  <UsingTask TaskName="MsBuild.NuGet.Pack.BuildNuSpecTask" AssemblyFile="MsBuild.NuGet.Pack.dll" />
+  <UsingTask TaskName="MsBuild.NuGet.Pack.PublishPackageTask" AssemblyFile="MsBuild.NuGet.Pack.dll" />
+
+  <!-- Hook into the AfterBuild activity -->
+  <PropertyGroup>
+    <BuildDependsOn>
+      $(BuildDependsOn);
+      BuildPackage;
+      PublishPackage
+    </BuildDependsOn>
+  </PropertyGroup>
+  
+  <!--
+  Configuration properties - you can override these from the command line
+  -->
+  <PropertyGroup>
+    <MsBuildNuGetPackImported>true</MsBuildNuGetPackImported>
+
+    <RunNuGetPack Condition="'$(RunNuGetPack)'==''">false</RunNuGetPack>
+    <IncludeBuildVersion Condition="'$(IncludeBuildVersion)'==''">false</IncludeBuildVersion>
+    <UseBuildVersionAsPatch Condition="'$(UseBuildVersionAsPatch)'==''">false</UseBuildVersionAsPatch>
+    <FileExclusionPattern Condition="'$(FileExclusionPattern)'==''">*.CodeAnalysisLog.xml;*.lastcodeanalysissucceeded;*Test*.*</FileExclusionPattern>
+    
+    <NuGetExePath Condition="'$(NuGetExePath)' == ''">$(MSBuildThisFileDirectory)\nuget.exe</NuGetExePath>
+	  <NuSpecFileName Condition="'$(NuSpecFileName)' == ''">$(MSBuildProjectName).nuspec</NuSpecFileName>
+    <ProjectFile Condition="'$(ProjectFile)' == ''">$(MSBuildProjectFile)</ProjectFile>
+    <ProjectDirectory Condition="'$(ProjectDirectory)' == ''">$(MSBuildProjectDirectory)</ProjectDirectory>
+    <NuSpecPath>$(TargetDir)\$(NuSpecFileName)</NuSpecPath>
+
+    <RunNuGetPublish Condition="'$(RunNuGetPublish)'==''">false</RunNuGetPublish>
+    <NuGetServer Condition="'$(NuGetServer)' == ''"></NuGetServer>
+    <NuGetApiKey Condition="'$(NuGetApiKey)' == ''"></NuGetApiKey>
+    
+  </PropertyGroup>
+
+  <!-- 
+  Create Octopus Deploy package
+  -->
+  <Target Name="BuildPackage" Condition="$(RunNuGetPack)">
+    
+    <Error Condition="!Exists($(NuGetExePath))" Text="The NuGet commandline was not found at '$(NuGetExePath)'" />
+
+    <PropertyGroup>
+      <NugetPackageTargetDir Condition="'$(NugetPackageTargetDir)' == ''">$(TargetDir)</NugetPackageTargetDir>
+    </PropertyGroup>
+
+    <MergeNuSpecTask
+      NuSpecPath="$(NuSpecPath)"
+      ProjectDirectory="$(ProjectDirectory)"
+      ProjectFile="$(ProjectFile)"
+      PrimaryOutputAssembly="$(TargetPath)"
+      IncludeBuildVersion="$(IncludeBuildVersion)"
+      UseBuildVersionAsPatch="$(UseBuildVersionAsPatch)"
+      FileExclusionPattern="$(FileExclusionPattern)"
+      TargetFrameworkVersion="$(TargetFrameworkVersion)"
+      TargetFrameworkProfile="$(TargetFrameworkProfile)" />
+
+    <BuildNuSpecTask
+      NuGetPath="$(NuGetExePath)"
+      NuSpecPath="$(NuSpecPath)"
+      ProjectDirectory="$(ProjectDirectory)"
+      OutDir="$(NugetPackageTargetDir)" />
+
+  </Target>
+
+  <Target Name="PublishPackage" Condition="$(RunNuGetPublish)">
+
+    <Error Condition="!Exists($(NuGetExePath))" Text="The NuGet commandline was not found at '$(NuGetExePath)'" />
+
+    <PropertyGroup>
+      <NugetPackageTargetDir Condition="'$(NugetPackageTargetDir)' == ''">$(TargetDir)</NugetPackageTargetDir>
+    </PropertyGroup>
+
+    <PublishPackageTask
+      NuGetPath="$(NuGetExePath)"
+      NuSpecPath="$(NuSpecPath)"
+      Server="$(NuGetServer)"
+      ApiKey="$(NuGetApiKey)"
+      OutDir="$(NugetPackageTargetDir)" />
+
+  </Target>
+  
+</Project>

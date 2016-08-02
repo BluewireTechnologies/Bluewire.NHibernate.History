@@ -81,6 +81,7 @@
     <Compile Include="EnableLog4NetAttribute.cs" />
     <Compile Include="Inheritance\DerivedEntity.cs" />
     <Compile Include="Inheritance\DerivedEntityPersistenceTests.cs" />
+    <Compile Include="ManyToMany\EntityWithSetOfReferencesPersistenceTests.cs" />
     <Compile Include="ManyToMany\ReferencedEntity.cs" />
     <Compile Include="ManyToMany\EntityWithListOfReferencesPersistenceTests.cs" />
     <Compile Include="ManyToOne\EntityWithManyToOne.cs" />

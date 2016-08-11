@@ -1,9 +1,9 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Bluewire.NHibernate.Audit.Meta;
 using Bluewire.NHibernate.Audit.Model;
 using Bluewire.NHibernate.Audit.Runtime;
-using Iesi.Collections;
 using NHibernate;
 using NHibernate.Event;
 using NHibernate.Persister.Entity;
@@ -56,7 +56,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             return false;
         }
 
-        public void OnDelete(DeleteEvent @event, ISet transientEntities)
+        public void OnDelete(DeleteEvent @event, ISet<object> transientEntities)
         {
             // This OnDelete overload is called when deleting orphaned entities, ie. when removing from
             // a one-to-many relation. Should be safe to delegate straight to the standard deletion behaviour.

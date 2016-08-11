@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Bluewire.NHibernate.Audit.Attributes;
-using Iesi.Collections.Generic;
 
 namespace Bluewire.NHibernate.Audit.UnitTests.Query
 {
@@ -13,7 +10,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Query
         public Entity()
         {
             List = new List<string>();
-            Set = new HashedSet<string>();
+            Set = new HashSet<string>();
             Map = new Dictionary<string, string>();
         }
 
@@ -24,7 +21,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Query
         [AuditableRelation(typeof(EntityMapValuesAuditHistory))]
         public virtual IDictionary<string, string> Map { get; protected set; }
         [AuditableRelation(typeof(EntitySetValuesAuditHistory))]
-        public virtual Iesi.Collections.Generic.ISet<string> Set { get; protected set; }
+        public virtual ISet<string> Set { get; protected set; }
 
         public virtual int VersionId { get; set; }
     }

@@ -1,5 +1,5 @@
-﻿using Bluewire.NHibernate.Audit.Attributes;
-using Iesi.Collections.Generic;
+﻿using System.Collections.Generic;
+using Bluewire.NHibernate.Audit.Attributes;
 
 namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Entity
 {
@@ -8,7 +8,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Entity
     {
         public EntityWithSetOfEntityTypes()
         {
-            Entities = new HashedSet<OneToManyEntity>();
+            Entities = new HashSet<OneToManyEntity>();
         }
 
         public virtual int Id { get; set; }

@@ -31,3 +31,9 @@ Define an EntityAuditHistory like:
  * AuditDatestamp DateTimeOffset
  * AuditedOperation Int32 (enum:AuditedOperation)
  * <properties...>
+
+
+Interval Trees
+==============
+
+Intended for use in 'current' data or denormalised copies of history data. There is no intrinsic support for adding these to history entities since updating becomes problematic.

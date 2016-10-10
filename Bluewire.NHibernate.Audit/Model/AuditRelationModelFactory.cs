@@ -39,14 +39,22 @@ namespace Bluewire.NHibernate.Audit.Model
             if (!manyToOne.IsReferenceToPrimaryKey) throw new InvalidOperationException("Cannot audit a many-to-many collection which uses a key property other than the primary key.");
             if (relationAttr.AuditValueType != null) throw new InvalidOperationException("Cannot override the audited value for a collection of entities. The primary key will always be used.");
             var auditValueType = manyToOne.GetIdentifierOrUniqueKeyType(allMappings).ReturnedClass;
-            return new AuditableRelationModel(mappingInfo.Role, relationAttr.AuditEntryType, auditValueType, new ReferenceRelationAuditValueResolver(manyToOne));
+
+            var snapshotProperties = RitSnapshotPropertyModel32.CollectPropertiesOnType(relationAttr.AuditEntryType).ToArray();
+            if(snapshotProperties.Length > 1) throw new AuditConfigurationException(entityType, "The collection audit record type {0} declares multiple [AuditInterval] properties. At present, only one is supported.", relationAttr.AuditEntryType.FullName);
+
+            return new AuditableRelationModel(mappingInfo.Role, relationAttr.AuditEntryType, auditValueType, new ReferenceRelationAuditValueResolver(manyToOne)) { RitProperty = snapshotProperties.SingleOrDefault() };
         }
 
         public static IAuditableRelationModel CreateComponentRelationModel(Type entityType, AuditableRelationAttribute relationAttr, InferredRelationAuditInfo mappingInfo)
         {
             CheckThatAuditEntryIsAppropriateForCollectionType(entityType, relationAttr, mappingInfo);
             var auditValueType = DetermineAuditValueType(mappingInfo, relationAttr, entityType);
-            return new AuditableRelationModel(mappingInfo.Role, relationAttr.AuditEntryType, auditValueType, new ComponentCollectionAuditValueResolver());
+
+            var snapshotProperties = RitSnapshotPropertyModel32.CollectPropertiesOnType(relationAttr.AuditEntryType).ToArray();
+            if(snapshotProperties.Length > 1) throw new AuditConfigurationException(entityType, "The collection audit record type {0} declares multiple [AuditInterval] properties. At present, only one is supported.", relationAttr.AuditEntryType.FullName);
+
+            return new AuditableRelationModel(mappingInfo.Role, relationAttr.AuditEntryType, auditValueType, new ComponentCollectionAuditValueResolver()) { RitProperty = snapshotProperties.SingleOrDefault() };
         }
 
         public static Type DetermineAuditValueType(InferredRelationAuditInfo inferred, AuditableRelationAttribute attribute, Type entityType)
@@ -86,6 +94,8 @@ namespace Bluewire.NHibernate.Audit.Model
             public Type AuditEntryType { get; private set; }
             public Type AuditValueType { get; private set; }
             public IRelationAuditValueResolver AuditValueResolver { get; private set; }
+
+            public RitSnapshotPropertyModel32 RitProperty { get; set; }
         }
     }
 }

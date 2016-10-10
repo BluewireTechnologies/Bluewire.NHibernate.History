@@ -11,5 +11,10 @@ namespace Bluewire.NHibernate.Audit.Model
         /// * KeyedRelationAuditHistoryEntry&lt;,,&gt; for indexed (list or map) collection history records.
         /// </summary>
         Type AuditEntryType { get; }
+
+        /// <summary>
+        /// Optional RI-Tree property, for snapshot queries.
+        /// </summary>
+        RitSnapshotPropertyModel32 RitProperty { get; }
     }
 }

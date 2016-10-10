@@ -1,4 +1,5 @@
 ﻿using System;
+using Bluewire.IntervalTree;
 using Bluewire.NHibernate.Audit.Attributes;
 using Bluewire.NHibernate.Audit.Meta;
 using Bluewire.NHibernate.Audit.Model;
@@ -98,6 +99,35 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Model
             Assert.Throws<AuditConfigurationException>(() => AuditRelationModelFactory.CreateComponentRelationModel(typeof(object), attribute, inferred));
         }
 
+        [Test]
+        public void CanModelASetAuditTypeWithRitProperty()
+        {
+            var attribute = new AuditableRelationAttribute(typeof(SetAuditEntryTypeWithInterval));
+            var inferred = new InferredRelationAuditInfo("Test", NHibernateUtil.Int32)
+            {
+                ElementType = NHibernateUtil.Entity(typeof(AuditComponentDerived))
+            };
+
+            var model = AuditRelationModelFactory.CreateComponentRelationModel(typeof(object), attribute, inferred);
+            
+            Assert.That(model.RitProperty, Is.Not.Null);
+            Assert.That(model.RitProperty.Property.Name, Is.EqualTo(nameof(SetAuditEntryTypeWithInterval.RitMinutes)));
+            Assert.That(model.RitProperty.IntervalTree, Is.InstanceOf<PerMinuteSnapshotIntervalTree32>());
+        }
+
+        [Test]
+        public void CanModelAKeyedAuditTypeWithRitProperty()
+        {
+            var attribute = new AuditableRelationAttribute(typeof(KeyedAuditEntryTypeWithInterval)) { AuditValueType = typeof(int[]) };
+            var inferred = new InferredRelationAuditInfo("Test", NHibernateUtil.Int32, NHibernateUtil.Int32);
+
+            var model = AuditRelationModelFactory.CreateComponentRelationModel(typeof(object), attribute, inferred);
+            
+            Assert.That(model.RitProperty, Is.Not.Null);
+            Assert.That(model.RitProperty.Property.Name, Is.EqualTo(nameof(KeyedAuditEntryTypeWithInterval.RitMinutes)));
+            Assert.That(model.RitProperty.IntervalTree, Is.InstanceOf<PerMinuteSnapshotIntervalTree32>());
+        }
+
         class AuditComponentBase
         {
         }
@@ -121,6 +151,19 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Model
             public object Key { get; set; }
         }
 
+        class KeyedAuditEntryTypeWithInterval : IKeyedRelationAuditHistory
+        {
+            public long AuditId { get; private set; }
+            public DateTimeOffset StartDatestamp { get; set; }
+            public DateTimeOffset? EndDatestamp { get; set; }
+            public object OwnerId { get; set; }
+            public object Value { get; set; }
+            public object Key { get; set; }
+
+            [AuditInterval(typeof(PerMinuteSnapshotIntervalTree32))]
+            public RitEntry32 RitMinutes { get; set; }
+        }
+
         class SetAuditEntryType : ISetRelationAuditHistory
         {
             public long AuditId { get; private set; }
@@ -128,6 +171,18 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Model
             public DateTimeOffset? EndDatestamp { get; set; }
             public object OwnerId { get; set; }
             public object Value { get; set; }
+        }
+
+        class SetAuditEntryTypeWithInterval : ISetRelationAuditHistory
+        {
+            public long AuditId { get; private set; }
+            public DateTimeOffset StartDatestamp { get; set; }
+            public DateTimeOffset? EndDatestamp { get; set; }
+            public object OwnerId { get; set; }
+            public object Value { get; set; }
+
+            [AuditInterval(typeof(PerMinuteSnapshotIntervalTree32))]
+            public RitEntry32 RitMinutes { get; set; }
         }
     }
 }

@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="Attributes\AuditableEntityAttribute.cs" />
     <Compile Include="Attributes\AuditableRelationAttribute.cs" />
+    <Compile Include="Attributes\AuditIntervalAttribute.cs" />
     <Compile Include="EntityAuditHistoryBase.cs" />
     <Compile Include="IAdvancedAuditInfo.cs" />
     <Compile Include="IAuditDatestampProvider.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="Model\IRelationAuditValueResolver.cs" />
     <Compile Include="Model\ReferenceRelationAuditValueResolver.cs" />
     <Compile Include="Model\ComponentCollectionAuditValueResolver.cs" />
+    <Compile Include="Model\RitSnapshotPropertyModel32.cs" />
     <Compile Include="Query\AuditQueryExtensions.cs" />
     <Compile Include="Query\Model\EntityListRelationSnapshotQueryModel.cs" />
     <Compile Include="Query\Model\EntityMapRelationSnapshotQueryModel.cs" />
@@ -133,6 +135,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Bluewire.IntervalTree\Bluewire.IntervalTree.csproj">
+      <Project>{ebaec8a5-d01f-4a0e-b7aa-c06ecceff748}</Project>
+      <Name>Bluewire.IntervalTree</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\MsBuild.NuGet.Pack.1.6.1\tools\MsBuild.NuGet.Pack.targets" Condition="Exists('..\packages\MsBuild.NuGet.Pack.1.6.1\tools\MsBuild.NuGet.Pack.targets')" />

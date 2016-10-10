@@ -81,6 +81,13 @@
     <Compile Include="EnableLog4NetAttribute.cs" />
     <Compile Include="Inheritance\DerivedEntity.cs" />
     <Compile Include="Inheritance\DerivedEntityPersistenceTests.cs" />
+    <Compile Include="IntervalTree\EntityWithInterval.cs" />
+    <Compile Include="IntervalTree\EntityWithIntervalPersistenceTests.cs" />
+    <Compile Include="IntervalTree\EntityWithListOfEntityTypesWithInterval.cs" />
+    <Compile Include="IntervalTree\EntityWithListOfEntityTypesWithIntervalPersistenceTests.cs" />
+    <Compile Include="IntervalTree\EntityWithSetOfEntityTypesWithInterval.cs" />
+    <Compile Include="IntervalTree\EntityWithSetOfEntityTypesWithIntervalPersistenceTests.cs" />
+    <Compile Include="IntervalTree\RitExpectations.cs" />
     <Compile Include="ManyToMany\EntityWithSetOfReferencesPersistenceTests.cs" />
     <Compile Include="ManyToMany\ReferencedEntity.cs" />
     <Compile Include="ManyToMany\EntityWithListOfReferencesPersistenceTests.cs" />
@@ -144,7 +151,6 @@
       <Name>Bluewire.NHibernate.Audit</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\AutoMapper.3.2.1\tools\AutoMapper.targets" Condition="Exists('..\packages\AutoMapper.3.2.1\tools\AutoMapper.targets')" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.94.0\build\net451\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.94.0\build\net451\System.Data.SQLite.Core.targets')" />

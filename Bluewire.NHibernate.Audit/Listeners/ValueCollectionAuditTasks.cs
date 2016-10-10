@@ -20,11 +20,13 @@ namespace Bluewire.NHibernate.Audit.Listeners
     {
         private readonly SessionsAuditInfo sessionsAuditInfo;
         private readonly AuditModel model;
+        private readonly Rit32Tasks ritTasks;
 
         public ValueCollectionAuditTasks(SessionsAuditInfo sessionsAuditInfo, AuditModel model)
         {
             this.sessionsAuditInfo = sessionsAuditInfo;
             this.model = model;
+            this.ritTasks = new Rit32Tasks(model);
         }
 
         public void ExecuteSetInsertion(IEventSource session, SetInsertionCollector collector)
@@ -40,6 +42,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
                 var entry = model.GenerateRelationAuditEntry(createModel, insertion, session, collector.Persister);
                 entry.OwnerId = collector.OwnerKey;
                 entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
+                if (createModel.RitProperty != null) ritTasks.AssignRitEntry32ForNewRecord(entry, createModel.RitProperty, sessionAuditInfo.OperationDatestamp);
                 innerSession.Save(entry);
             }
             innerSession.Flush();
@@ -57,6 +60,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
                 entry.OwnerId = collector.OwnerKey;
                 entry.Key = insertion.Key;
                 entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
+                if (createModel.RitProperty != null) ritTasks.AssignRitEntry32ForNewRecord(entry, createModel.RitProperty, sessionAuditInfo.OperationDatestamp);
                 innerSession.Save(entry);
             }
             innerSession.Flush();
@@ -88,7 +92,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var deleteModel = GetRelationModel(collector.Persister);
 
             var auditMapping = model.GetAuditClassMapping(deleteModel.AuditEntryType);
-            var auditDelete = new AuditKeyedDeleteCommand(session.Factory, auditMapping);
+            var auditDelete = new AuditKeyedDeleteCommand(session.Factory, deleteModel, auditMapping);
 
             foreach (var deletion in collector.Enumerate())
             {
@@ -124,6 +128,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             private readonly Property owningEntityIdProperty;
             private readonly Property valueProperty;
             private readonly Property endDateProperty;
+            private readonly RitCommandPopulator ritPopulater;
 
             public AuditSetDeleteCommand(ISessionFactoryImplementor factory, IAuditableRelationModel relationModel, PersistentClass auditMapping)
             {
@@ -135,6 +140,12 @@ namespace Bluewire.NHibernate.Audit.Listeners
                 SqlUpdateBuilder
                     .SetTableName(auditMapping.Table.GetQualifiedName(factory.Dialect, factory.Settings.DefaultCatalogName, factory.Settings.DefaultSchemaName))
                     .AddColumns(factory.ColumnNames(endDateProperty.ColumnIterator), endDateProperty.Type);
+
+                if(relationModel.RitProperty != null)
+                {
+                    var ritHelper = new RitEndpointUpdateHelper(factory, auditMapping);
+                    ritPopulater = ritHelper.AddToUpdateBuilder(SqlUpdateBuilder, relationModel.RitProperty);
+                }
 
                 owningEntityIdProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "OwnerId");
                 valueProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "Value");
@@ -151,6 +162,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             {
                 var parameters = new CommandParameteriser(session, cmd);
                 parameters.Set(endDateProperty, deletionDatestamp);
+                ritPopulater?.ApplyParameters(parameters, deletionDatestamp);
 
                 parameters.Set(owningEntityIdProperty, owningEntityId);
                 parameters.Set(valueProperty, valueProperty.GetGetter(relationModel.AuditEntryType).Get(deletion));
@@ -166,8 +178,9 @@ namespace Bluewire.NHibernate.Audit.Listeners
             private readonly Property owningEntityIdProperty;
             private readonly Property endDateProperty;
             private readonly Property indexProperty;
+            private readonly RitCommandPopulator ritPopulater;
 
-            public AuditKeyedDeleteCommand(ISessionFactoryImplementor factory, PersistentClass auditMapping)
+            public AuditKeyedDeleteCommand(ISessionFactoryImplementor factory, IAuditableRelationModel relationModel, PersistentClass auditMapping)
             {
                 SqlUpdateBuilder = new SqlUpdateBuilder(factory.Dialect, factory);
 
@@ -176,6 +189,12 @@ namespace Bluewire.NHibernate.Audit.Listeners
                 SqlUpdateBuilder
                     .SetTableName(auditMapping.Table.GetQualifiedName(factory.Dialect, factory.Settings.DefaultCatalogName, factory.Settings.DefaultSchemaName))
                     .AddColumns(factory.ColumnNames(endDateProperty.ColumnIterator), endDateProperty.Type);
+
+                if(relationModel.RitProperty != null)
+                {
+                    var ritHelper = new RitEndpointUpdateHelper(factory, auditMapping);
+                    ritPopulater = ritHelper.AddToUpdateBuilder(SqlUpdateBuilder, relationModel.RitProperty);
+                }
 
                 owningEntityIdProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "OwnerId");
                 indexProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "Key");
@@ -192,6 +211,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             {
                 var parameters = new CommandParameteriser(session, cmd);
                 parameters.Set(endDateProperty, deletionDatestamp);
+                ritPopulater?.ApplyParameters(parameters, deletionDatestamp);
 
                 parameters.Set(owningEntityIdProperty, owningEntityId);
                 parameters.Set(indexProperty, deletion);

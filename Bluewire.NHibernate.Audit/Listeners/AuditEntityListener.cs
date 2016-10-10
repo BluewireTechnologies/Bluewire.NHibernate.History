@@ -14,11 +14,13 @@ namespace Bluewire.NHibernate.Audit.Listeners
     {
         private readonly SessionsAuditInfo sessions;
         private readonly AuditModel model;
+        private EntityAuditTasks auditTask;
 
         public AuditEntityListener(SessionsAuditInfo sessions, AuditModel model)
         {
             this.sessions = sessions;
             this.model = model;
+            this.auditTask = new EntityAuditTasks(model);
         }
 
         public void OnFlushEntity(FlushEntityEvent @event)
@@ -37,10 +39,12 @@ namespace Bluewire.NHibernate.Audit.Listeners
             if (@event.EntityEntry.ExistsInDatabase)
             {
                 AuditUpdate(auditEntry, @event);
+                auditTask.ApplyRitForUpdate(@event.Session, auditEntry, entityModel, sessionAuditInfo.OperationDatestamp);
             }
             else
             {
                 AuditAdd(auditEntry, @event);
+                auditTask.ApplyRitForAdd(@event.Session, auditEntry, entityModel, sessionAuditInfo.OperationDatestamp);
             }
 
             Debug.Assert(Equals(auditEntry.Id, @event.EntityEntry.EntityKey.Identifier));
@@ -78,6 +82,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             auditEntry.AuditDatestamp = sessionAuditInfo.OperationDatestamp;
 
             AuditDelete(auditEntry, @event, persister);
+            auditTask.ApplyRitForDelete(@event.Session, auditEntry, entityModel, sessionAuditInfo.OperationDatestamp);
 
             Debug.Assert(Equals(auditEntry.Id, persister.GetIdentifier(entity, EntityMode.Poco)));
             Debug.Assert(!Equals(auditEntry.VersionId, auditEntry.PreviousVersionId));

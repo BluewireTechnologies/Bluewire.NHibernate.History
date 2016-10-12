@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
 using Bluewire.NHibernate.Audit.Listeners.Collectors;
 using Bluewire.NHibernate.Audit.Meta;
@@ -11,6 +12,7 @@ using NHibernate.Engine;
 using NHibernate.Event;
 using NHibernate.Mapping;
 using NHibernate.Persister.Collection;
+using NHibernate.SqlCommand;
 
 namespace Bluewire.NHibernate.Audit.Listeners
 {
@@ -48,8 +50,6 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var sessionAuditInfo = GetCurrentSessionInfo(session);
             var createModel = GetRelationModel(collector.Persister);
 
-            //Debug.Assert(!collector.Persister.IsOneToMany);
-
             var innerSession = session.GetSession(EntityMode.Poco);
             foreach (var insertion in collector.Enumerate())
             {
@@ -67,8 +67,6 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var sessionAuditInfo = GetCurrentSessionInfo(session);
             var deleteModel = GetRelationModel(collector.Persister);
             if (collector.Persister.HasIndex) throw new ArgumentException(String.Format("This is a keyed collection: {0}", collector.Persister.Role));
-
-            //Debug.Assert(!collector.Persister.IsOneToMany);
 
             var auditMapping = model.GetAuditClassMapping(deleteModel.AuditEntryType);
             var auditDelete = new AuditSetDeleteCommand(session.Factory, deleteModel, auditMapping);
@@ -89,7 +87,6 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var sessionAuditInfo = GetCurrentSessionInfo(session);
             var deleteModel = GetRelationModel(collector.Persister);
 
-            //Debug.Assert(!collector.Persister.IsOneToMany);
             var auditMapping = model.GetAuditClassMapping(deleteModel.AuditEntryType);
             var auditDelete = new AuditKeyedDeleteCommand(session.Factory, auditMapping);
 
@@ -117,39 +114,86 @@ namespace Bluewire.NHibernate.Audit.Listeners
             return relationModel;
         }
 
-        class AuditSetDeleteCommand : AuditDeleteCommandBase
+        /// <summary>
+        /// Generates a command of the form:
+        ///     update (audit table) set endDatestamp = ? where (owner key) = ? and (entity value) = ...? and endDatestamp is null
+        /// </summary>
+        class AuditSetDeleteCommand
         {
+            private readonly IAuditableRelationModel relationModel;
+            private readonly Property owningEntityIdProperty;
             private readonly Property valueProperty;
-            private readonly Type entryType;
+            private readonly Property endDateProperty;
 
             public AuditSetDeleteCommand(ISessionFactoryImplementor factory, IAuditableRelationModel relationModel, PersistentClass auditMapping)
-                : base(factory, auditMapping)
             {
-                entryType = relationModel.AuditEntryType;
+                this.relationModel = relationModel;
+                SqlUpdateBuilder = new SqlUpdateBuilder(factory.Dialect, factory);
 
+                endDateProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "EndDatestamp");
+
+                SqlUpdateBuilder
+                    .SetTableName(auditMapping.Table.GetQualifiedName(factory.Dialect, factory.Settings.DefaultCatalogName, factory.Settings.DefaultSchemaName))
+                    .AddColumns(factory.ColumnNames(endDateProperty.ColumnIterator), endDateProperty.Type);
+
+                owningEntityIdProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "OwnerId");
                 valueProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "Value");
-                AddPredicateProperty(valueProperty);
+
+                SqlUpdateBuilder.AddWhereFragment(factory.ColumnNames(owningEntityIdProperty.ColumnIterator), owningEntityIdProperty.Type, " = ");
+                SqlUpdateBuilder.AddWhereFragment(factory.ColumnNames(valueProperty.ColumnIterator), valueProperty.Type, " = ");
+                SqlUpdateBuilder.AddWhereFragment(factory.ColumnNames(endDateProperty.ColumnIterator).Single() + " is null");
             }
 
-            protected override void AddParameters(CommandParameteriser parameters, object deletion)
+            private SqlUpdateBuilder SqlUpdateBuilder { get; }
+            public SqlCommandInfo Command => SqlUpdateBuilder.ToSqlCommandInfo();
+
+            public void PopulateCommand(ISessionImplementor session, IDbCommand cmd, object owningEntityId, object deletion, DateTimeOffset deletionDatestamp)
             {
-                parameters.Set(valueProperty, valueProperty.GetGetter(entryType).Get(deletion));
+                var parameters = new CommandParameteriser(session, cmd);
+                parameters.Set(endDateProperty, deletionDatestamp);
+
+                parameters.Set(owningEntityIdProperty, owningEntityId);
+                parameters.Set(valueProperty, valueProperty.GetGetter(relationModel.AuditEntryType).Get(deletion));
             }
         }
 
-        class AuditKeyedDeleteCommand : AuditDeleteCommandBase
+        /// <summary>
+        /// Generates a command of the form:
+        ///     update (audit table) set endDatestamp = ? where (owner key) = ? and (index) = ? and endDatestamp is null
+        /// </summary>
+        class AuditKeyedDeleteCommand
         {
+            private readonly Property owningEntityIdProperty;
+            private readonly Property endDateProperty;
             private readonly Property indexProperty;
 
             public AuditKeyedDeleteCommand(ISessionFactoryImplementor factory, PersistentClass auditMapping)
-                : base(factory, auditMapping)
             {
+                SqlUpdateBuilder = new SqlUpdateBuilder(factory.Dialect, factory);
+
+                endDateProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "EndDatestamp");
+
+                SqlUpdateBuilder
+                    .SetTableName(auditMapping.Table.GetQualifiedName(factory.Dialect, factory.Settings.DefaultCatalogName, factory.Settings.DefaultSchemaName))
+                    .AddColumns(factory.ColumnNames(endDateProperty.ColumnIterator), endDateProperty.Type);
+
+                owningEntityIdProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "OwnerId");
                 indexProperty = auditMapping.PropertyClosureIterator.Single(n => n.Name == "Key");
-                AddPredicateProperty(indexProperty);
+
+                SqlUpdateBuilder.AddWhereFragment(factory.ColumnNames(owningEntityIdProperty.ColumnIterator), owningEntityIdProperty.Type, " = ");
+                SqlUpdateBuilder.AddWhereFragment(factory.ColumnNames(indexProperty.ColumnIterator), indexProperty.Type, " = ");
+                SqlUpdateBuilder.AddWhereFragment(factory.ColumnNames(endDateProperty.ColumnIterator).Single() + " is null");
             }
 
-            protected override void AddParameters(CommandParameteriser parameters, object deletion)
+            private SqlUpdateBuilder SqlUpdateBuilder { get; }
+            public SqlCommandInfo Command => SqlUpdateBuilder.ToSqlCommandInfo();
+
+            public void PopulateCommand(ISessionImplementor session, IDbCommand cmd, object owningEntityId, object deletion, DateTimeOffset deletionDatestamp)
             {
+                var parameters = new CommandParameteriser(session, cmd);
+                parameters.Set(endDateProperty, deletionDatestamp);
+
+                parameters.Set(owningEntityIdProperty, owningEntityId);
                 parameters.Set(indexProperty, deletion);
             }
         }

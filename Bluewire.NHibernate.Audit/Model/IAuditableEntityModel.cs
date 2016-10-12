@@ -2,9 +2,8 @@
 
 namespace Bluewire.NHibernate.Audit.Model
 {
-    public interface IAuditableEntityModel
+    public interface IAuditableEntityModel : IAuditRecordModel
     {
         Type EntityType { get; }
-        Type AuditEntryType { get;  }
     }
 }

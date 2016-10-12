@@ -58,6 +58,7 @@
     <Compile Include="Attributes\AuditableEntityAttribute.cs" />
     <Compile Include="Attributes\AuditableRelationAttribute.cs" />
     <Compile Include="EntityAuditHistoryBase.cs" />
+    <Compile Include="IAdvancedAuditInfo.cs" />
     <Compile Include="IAuditDatestampProvider.cs" />
     <Compile Include="IAuditInfo.cs" />
     <Compile Include="Listeners\Collectors\DeletionCollector.cs" />
@@ -84,6 +85,7 @@
     <Compile Include="Model\AuditEntityModelFactory.cs" />
     <Compile Include="Model\AuditRelationModelFactory.cs" />
     <Compile Include="Model\IAuditableRelationModel.cs" />
+    <Compile Include="Model\IAuditRecordModel.cs" />
     <Compile Include="Model\InferredRelationAuditInfo.cs" />
     <Compile Include="Model\IRelationAuditValueResolver.cs" />
     <Compile Include="Model\ReferenceRelationAuditValueResolver.cs" />

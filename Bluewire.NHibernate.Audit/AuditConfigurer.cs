@@ -35,15 +35,17 @@ namespace Bluewire.NHibernate.Audit
             var sessions = new SessionsAuditInfo(datestampProvider);
             RegisterEventListeners(eventListeners, model, sessions);
 
-            return new NHibernateAuditIntegrationInstance(sessions);
+            return new NHibernateAuditIntegrationInstance(model, sessions);
         }
 
-        class NHibernateAuditIntegrationInstance : IAuditInfo
+        class NHibernateAuditIntegrationInstance : IAuditInfo, IAdvancedAuditInfo
         {
-            private SessionsAuditInfo sessions;
+            private readonly AuditModel model;
+            private readonly SessionsAuditInfo sessions;
 
-            public NHibernateAuditIntegrationInstance(SessionsAuditInfo sessions)
+            public NHibernateAuditIntegrationInstance(AuditModel model, SessionsAuditInfo sessions)
             {
+                this.model = model;
                 this.sessions = sessions;
             }
 
@@ -63,6 +65,20 @@ namespace Bluewire.NHibernate.Audit
                 {
                     sessionAuditInfo.EndFlush();
                 }
+            }
+
+            public IAdvancedAuditInfo Advanced => this;
+
+            Type[] IAdvancedAuditInfo.GetKnownRecordTypes()
+            {
+                return model.AllModels.Keys.ToArray();
+            }
+
+            IAuditRecordModel IAdvancedAuditInfo.FindRecordModel(Type recordType)
+            {
+                IAuditRecordModel recordModel;
+                if(model.AllModels.TryGetValue(recordType, out recordModel)) return recordModel;
+                return null;
             }
         }
 

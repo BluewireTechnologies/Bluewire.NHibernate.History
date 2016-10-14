@@ -1,4 +1,4 @@
-﻿using Bluewire.NHibernate.Audit.Support;
+﻿using System.Runtime.CompilerServices;
 using NHibernate.Engine;
 
 namespace Bluewire.NHibernate.Audit.Runtime
@@ -12,12 +12,11 @@ namespace Bluewire.NHibernate.Audit.Runtime
             this.datestampProvider = datestampProvider;
         }
 
-        private readonly WeakDictionary<ISessionImplementor, SessionAuditInfo> sessionInfos = new WeakDictionary<ISessionImplementor, SessionAuditInfo>();
+        private readonly ConditionalWeakTable<ISessionImplementor, SessionAuditInfo> sessionInfos = new ConditionalWeakTable<ISessionImplementor, SessionAuditInfo>();
 
         public SessionAuditInfo Lookup(ISessionImplementor session)
         {
-            return sessionInfos.GetOrAdd(session, () => new SessionAuditInfo(datestampProvider));
+            return sessionInfos.GetValue(session, s => new SessionAuditInfo(datestampProvider));
         }
-
     }
 }

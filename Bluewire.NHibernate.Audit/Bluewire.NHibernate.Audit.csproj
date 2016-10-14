@@ -125,7 +125,6 @@
     <Compile Include="Model\IAuditEntryFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Runtime\SessionAuditInfo.cs" />
-    <Compile Include="Support\WeakDictionary.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Bluewire.NHibernate.Audit.nuspec">

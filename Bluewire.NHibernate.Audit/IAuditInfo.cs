@@ -25,5 +25,7 @@ namespace Bluewire.NHibernate.Audit
         /// <param name="session"></param>
         /// <returns></returns>
         DateTimeOffset CommitSnapshot(ISession session);
+
+        IAdvancedAuditInfo Advanced { get; }
     }
 }

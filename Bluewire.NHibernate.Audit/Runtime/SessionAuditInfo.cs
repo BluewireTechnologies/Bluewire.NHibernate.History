@@ -21,15 +21,7 @@ namespace Bluewire.NHibernate.Audit.Runtime
             return state;
         }
 
-        /// <summary>
-        /// WARNING: Strictly, NHibernate defines its sessions to be 'not threadsafe' which is not the
-        /// same thing as 'thread-locked'. Passing a session between threads is perfectly safe as long
-        /// as only a single thread attempts to use it at a time. This makes it possible to make use of
-        /// .NET 4.5's async capabilities without problem.
-        /// Use of AsyncLocal here SHOULD be a detail since we aren't expecting a flush to ever await,
-        /// but it's better to get it right now than suffer strange bugs later...
-        /// </summary>
-        private readonly AsyncLocal<DateTimeOffset?> flushDatestamp = new AsyncLocal<DateTimeOffset?>();
+        private DateTimeOffset? flushDatestamp;
         private int flushDepth;
 
         public SessionAuditInfo(IAuditDatestampProvider datestampProvider)
@@ -37,7 +29,7 @@ namespace Bluewire.NHibernate.Audit.Runtime
             this.datestampProvider = datestampProvider;
         }
 
-        public bool IsFlushing { get { return flushDatestamp.Value != null; } }
+        public bool IsFlushing => flushDatestamp != null;
 
         public void AssertIsFlushing()
         {
@@ -48,7 +40,7 @@ namespace Bluewire.NHibernate.Audit.Runtime
         {
             get
             {
-                return flushDatestamp.Value ?? NowAtRoundTrippablePrecision();
+                return flushDatestamp ?? NowAtRoundTrippablePrecision();
             }
         }
 
@@ -69,12 +61,12 @@ namespace Bluewire.NHibernate.Audit.Runtime
                 flushDepth++;
                 if (flushDepth <= 1)
                 {
-                    Debug.Assert(flushDatestamp.Value == null);
-                    flushDatestamp.Value = NowAtRoundTrippablePrecision();
+                    Debug.Assert(flushDatestamp == null);
+                    flushDatestamp = NowAtRoundTrippablePrecision();
                 }
                 else
                 {
-                    Debug.Assert(flushDatestamp.Value != null);
+                    Debug.Assert(flushDatestamp != null);
                 }
             }
         }
@@ -87,12 +79,12 @@ namespace Bluewire.NHibernate.Audit.Runtime
                 flushDepth--;
                 if (flushDepth == 0)
                 {
-                    Debug.Assert(flushDatestamp.Value != null);
-                    flushDatestamp.Value = null;
+                    Debug.Assert(flushDatestamp != null);
+                    flushDatestamp = null;
                 }
                 else
                 {
-                    Debug.Assert(flushDatestamp.Value != null);
+                    Debug.Assert(flushDatestamp != null);
                 }
             }
         }

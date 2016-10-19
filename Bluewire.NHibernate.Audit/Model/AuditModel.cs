@@ -17,6 +17,8 @@ namespace Bluewire.NHibernate.Audit.Model
         private readonly Dictionary<Type, IAuditableEntityModel> entityModels;
         private readonly Dictionary<string, IAuditableRelationModel> relationModels;
         private readonly Dictionary<Type, PersistentClass> auditEntryMappings;
+        private readonly Dictionary<Type, IAuditRecordModel> allModels;
+
 
         public AuditModel(IAuditEntryFactory auditEntryFactory, IEnumerable<IAuditableEntityModel> entityModels, IEnumerable<IAuditableRelationModel> relationModels, IEnumerable<PersistentClass> auditEntryMappings)
         {
@@ -24,6 +26,8 @@ namespace Bluewire.NHibernate.Audit.Model
             this.entityModels = entityModels.ToDictionary(m => m.EntityType);
             this.relationModels = relationModels.ToDictionary(m => m.CollectionRole);
             this.auditEntryMappings = auditEntryMappings.ToDictionary(m => m.MappedClass);
+
+            allModels = this.entityModels.Values.Cast<IAuditRecordModel>().Concat(this.relationModels.Values).ToDictionary(m => m.AuditEntryType);
         }
 
         public bool IsAuditable(Type entityType)
@@ -71,5 +75,7 @@ namespace Bluewire.NHibernate.Audit.Model
         {
             return auditEntryMappings[auditEntryType];
         }
+
+        public IReadOnlyDictionary<Type, IAuditRecordModel> AllModels => allModels;
     }
 }

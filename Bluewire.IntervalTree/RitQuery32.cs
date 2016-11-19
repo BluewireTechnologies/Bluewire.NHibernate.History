@@ -1,4 +1,6 @@
-﻿namespace Bluewire.IntervalTree
+﻿using System.Collections.Generic;
+
+namespace Bluewire.IntervalTree
 {
     /// <summary>
     /// The query identifies three sets (left, middle and right respectively):
@@ -12,7 +14,7 @@
     {
         public int Lower { get; set; }
         public int Upper { get; set; }
-        public int[] LeftNodes { get; set; }
-        public int[] RightNodes { get; set; }
+        public IList<int> LeftNodes { get; set; }
+        public IList<int> RightNodes { get; set; }
     }
 }

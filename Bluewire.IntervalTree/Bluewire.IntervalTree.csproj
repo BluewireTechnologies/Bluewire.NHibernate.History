@@ -46,6 +46,7 @@
     <Compile Include="RitCalculator32.cs" />
     <Compile Include="RitEntry32.cs" />
     <Compile Include="RitEntry32EqualityComparer.cs" />
+    <Compile Include="RitExpressionBuilder.cs" />
     <Compile Include="RitLinqExtensions.cs" />
     <Compile Include="RitQuery32.cs" />
     <Compile Include="RitStatus.cs" />

@@ -135,6 +135,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Bluewire.IntervalTree\Bluewire.IntervalTree.csproj">
+      <Project>{EBAEC8A5-D01F-4A0E-B7AA-C06ECCEFF748}</Project>
+      <Name>Bluewire.IntervalTree</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Bluewire.NHibernate.Audit\Bluewire.NHibernate.Audit.csproj">
       <Project>{3ed898f3-8d4c-4bf7-bcdf-0b1beaef4ceb}</Project>
       <Name>Bluewire.NHibernate.Audit</Name>

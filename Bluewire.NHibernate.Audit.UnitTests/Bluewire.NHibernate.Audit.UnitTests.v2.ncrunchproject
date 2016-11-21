@@ -23,6 +23,5 @@
   <UseCPUArchitecture>AutoDetect</UseCPUArchitecture>
   <MSTestThreadApartmentState>STA</MSTestThreadApartmentState>
   <BuildProcessArchitecture>x86</BuildProcessArchitecture>
-  <AdditionalFilesToInclude>..\packages\System.Data.SQLite.Core.1.0.94.0\**.*</AdditionalFilesToInclude>
   <HiddenWarnings>AbnormalReferenceResolution</HiddenWarnings>
 </ProjectConfiguration>

@@ -24,7 +24,7 @@ namespace Bluewire.IntervalTree
             this.epochYear = epochYear;
         }
 
-        protected override int MapIntervalBoundary(DateTimeOffset value, out bool isExact)
+        protected override int MapIntervalBoundary(DateTimeOffset value, out bool isRoundedDown)
         {
             var yearsBeyondTheEpoch = value.Year - epochYear;
 
@@ -60,16 +60,16 @@ namespace Bluewire.IntervalTree
 
             if(value.Second != 0)
             {
-                isExact = false;
+                isRoundedDown = true;
             }
             else if(value.Millisecond != 0)
             {
-                isExact = false;
+                isRoundedDown = true;
             }
             else
             {
                 // Slow path, within the very millisecond of a minute boundary.
-                isExact = value.TimeOfDay - new TimeSpan(value.Hour, value.Minute, 0) == TimeSpan.Zero;
+                isRoundedDown = value.TimeOfDay - new TimeSpan(value.Hour, value.Minute, 0) != TimeSpan.Zero;
             }
             Debug.Assert((lowBits & yearsShifted) == 0);
             return lowBits | yearsShifted;

@@ -21,6 +21,12 @@ namespace Bluewire.NHibernate.Audit.Model
         private void TryAddCollection(IMapping allMappings, Collection mapping)
         {
             var propertyInfo = GetPropertyForCollection(mapping);
+            if (propertyInfo == null)
+            {
+                // If we can't find the property, then presumably the mapping is invalid. But if NHibernate doesn't complain
+                // then this is a potential bug in Bluewire.NHibernate.Audit.
+                return;
+            }
             var relationAttr = propertyInfo.GetAuditRelationAttribute();
             if (relationAttr != null)
             {
@@ -31,8 +37,8 @@ namespace Bluewire.NHibernate.Audit.Model
         private PropertyInfo GetPropertyForCollection(Collection mapping)
         {
             var propertyName = mapping.Role.Replace(mapping.OwnerEntityName, "").TrimStart('.');
-            var propertyInfo = mapping.Owner.MappedClass.GetProperty(propertyName);
-            Debug.Assert(propertyInfo != null);
+            var propertyInfo = mapping.Owner.MappedClass.GetProperty(propertyName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+            Debug.Assert(propertyInfo != null, $"Unable to find a property called {propertyName} on {mapping.Owner.MappedClass}.");
             return propertyInfo;
         }
 

@@ -114,6 +114,10 @@
     <Compile Include="Query\MockAuditHistory.cs" />
     <Compile Include="Query\MockSnapshotContext.cs" />
     <Compile Include="Query\SetRelationSnapshotQueryTests.cs" />
+    <Compile Include="Simple\EntityWithAuditedNonPublicCollection.cs" />
+    <Compile Include="Simple\EntityWithAuditedNonPublicCollectionPersistenceTests.cs" />
+    <Compile Include="Simple\EntityWithUnauditedNonPublicCollectionPersistenceTests.cs" />
+    <Compile Include="Simple\EntityWithUnauditedNonPublicCollection.cs" />
     <Compile Include="Simple\ExplicitSnapshotPersistenceTests.cs" />
     <Compile Include="Simple\EntityWithUnauditedCollectionPersistenceTests.cs" />
     <Compile Include="Simple\EntityWithUnauditedCollection.cs" />

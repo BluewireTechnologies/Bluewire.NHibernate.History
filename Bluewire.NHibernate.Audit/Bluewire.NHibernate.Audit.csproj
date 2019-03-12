@@ -1,150 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3ED898F3-8D4C-4BF7-BCDF-0B1BEAEF4CEB}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bluewire.NHibernate.Audit</RootNamespace>
-    <AssemblyName>Bluewire.NHibernate.Audit</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
+    <TargetFrameworks>net46</TargetFrameworks>
+    <VersionPrefix>9.2.2</VersionPrefix>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Iesi.Collections, Version=4.0.0.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Iesi.Collections.4.0.0.4000\lib\net40\Iesi.Collections.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="log4net, Version=1.2.12.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\packages\log4net.2.0.2\lib\net40-full\log4net.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NHibernate, Version=4.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
-      <HintPath>..\packages\NHibernate.4.0.4.4000\lib\net40\NHibernate.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <None Remove="*.ncrunchproject" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attributes\AuditableEntityAttribute.cs" />
-    <Compile Include="Attributes\AuditableRelationAttribute.cs" />
-    <Compile Include="EntityAuditHistoryBase.cs" />
-    <Compile Include="IAdvancedAuditInfo.cs" />
-    <Compile Include="IAuditDatestampProvider.cs" />
-    <Compile Include="IAuditInfo.cs" />
-    <Compile Include="Listeners\Collectors\DeletionCollector.cs" />
-    <Compile Include="Listeners\Collectors\SetDeletionCollector.cs" />
-    <Compile Include="Listeners\SessionFactoryImplementorExtensions.cs" />
-    <Compile Include="Meta\IEntityAuditHistory.cs" />
-    <Compile Include="Model\AuditableEntityExtensions.cs" />
-    <Compile Include="AuditConfigurationException.cs" />
-    <Compile Include="AuditConfigurer.cs" />
-    <Compile Include="AuditedOperationEnumType.cs" />
-    <Compile Include="IEntityAuditHistory.cs" />
-    <Compile Include="KeyedRelationAuditHistoryEntry.cs" />
-    <Compile Include="Listeners\AuditValueCollectionListener.cs" />
-    <Compile Include="Listeners\AuditCollectionListener.cs" />
-    <Compile Include="Listeners\CollectionChangeListener.cs" />
-    <Compile Include="Listeners\Collectors\ChangeCollector.cs" />
-    <Compile Include="Listeners\Collectors\IChangeReceiver.cs" />
-    <Compile Include="Listeners\Collectors\InsertionCollector.cs" />
-    <Compile Include="Listeners\Collectors\KeyedDeletionCollector.cs" />
-    <Compile Include="Listeners\ValueCollectionAuditTasks.cs" />
-    <Compile Include="Meta\IKeyedRelationAuditHistory.cs" />
-    <Compile Include="Meta\IRelationAuditHistory.cs" />
-    <Compile Include="Meta\ISetRelationAuditHistory.cs" />
-    <Compile Include="Model\AuditEntityModelFactory.cs" />
-    <Compile Include="Model\AuditRelationModelFactory.cs" />
-    <Compile Include="Model\IAuditableRelationModel.cs" />
-    <Compile Include="Model\IAuditRecordModel.cs" />
-    <Compile Include="Model\InferredRelationAuditInfo.cs" />
-    <Compile Include="Model\IRelationAuditValueResolver.cs" />
-    <Compile Include="Model\ReferenceRelationAuditValueResolver.cs" />
-    <Compile Include="Model\ComponentCollectionAuditValueResolver.cs" />
-    <Compile Include="Query\AuditQueryExtensions.cs" />
-    <Compile Include="Query\Model\EntityListRelationSnapshotQueryModel.cs" />
-    <Compile Include="Query\Model\EntityMapRelationSnapshotQueryModel.cs" />
-    <Compile Include="Query\Model\EntitySetRelationSnapshotQueryModel.cs" />
-    <Compile Include="Query\Model\EntitySnapshotQueryModel.cs" />
-    <Compile Include="Query\ICollectionSnapshotQuery.cs" />
-    <Compile Include="Query\IEntityCollectionMap.cs" />
-    <Compile Include="Query\IListRelationSnapshotQuery.cs" />
-    <Compile Include="Query\IMapRelationSnapshotQuery.cs" />
-    <Compile Include="Query\ISetRelationSnapshotQuery.cs" />
-    <Compile Include="Query\ISnapshotContext.cs" />
-    <Compile Include="Query\Model\ComponentListRelationSnapshotQueryModel.cs" />
-    <Compile Include="Query\Model\ComponentMapRelationSnapshotQueryModel.cs" />
-    <Compile Include="Query\IEntitySnapshotQuery.cs" />
-    <Compile Include="Query\SessionSnapshotContext.cs" />
-    <Compile Include="Query\Model\ComponentSetRelationSnapshotQueryModel.cs" />
-    <Compile Include="Query\Internal\AuditQueryHelper.cs" />
-    <Compile Include="Serialisation.cs" />
-    <Compile Include="SetRelationAuditHistoryEntry.cs" />
-    <Compile Include="Support\CollectionHelpers.cs" />
-    <Compile Include="Support\CommandParameteriser.cs" />
-    <Compile Include="Listeners\Collectors\SetInsertionCollector.cs" />
-    <Compile Include="Listeners\Collectors\KeyedInsertionCollector.cs" />
-    <Compile Include="Runtime\SessionsAuditInfo.cs" />
-    <Compile Include="Support\DateTimeOffsetAsIntegerUserType.cs" />
-    <Compile Include="Listeners\AfterFlush.cs" />
-    <Compile Include="Listeners\BeforeFlush.cs" />
-    <Compile Include="Listeners\ConcurrencyCheckShouldPreferObjectVersionOverSessionRecordedVersion.cs" />
-    <Compile Include="Listeners\AuditEntityListener.cs" />
-    <Compile Include="Model\AuditModel.cs" />
-    <Compile Include="Model\AuditModelBuilder.cs" />
-    <Compile Include="AuditedOperation.cs" />
-    <Compile Include="Model\IAuditableEntityModel.cs" />
-    <Compile Include="Meta\IAuditRecord.cs" />
-    <Compile Include="Model\IAuditEntryFactory.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Runtime\SessionAuditInfo.cs" />
+    <PackageReference Include="Iesi.Collections">
+      <Version>4.0.0.4000</Version>
+    </PackageReference>
+    <PackageReference Include="log4net">
+      <Version>2.0.2</Version>
+    </PackageReference>
+    <PackageReference Include="NHibernate">
+      <Version>4.0.4.4000</Version>
+    </PackageReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Bluewire.NHibernate.Audit.nuspec">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\MsBuild.NuGet.Pack.1.6.1\tools\MsBuild.NuGet.Pack.targets" Condition="Exists('..\packages\MsBuild.NuGet.Pack.1.6.1\tools\MsBuild.NuGet.Pack.targets')" />
-  <Target Name="EnsureMsBuildNuGetPackImported" BeforeTargets="BeforeBuild" Condition="'$(MsBuildNuGetPackImported)' == ''">
-    <Error Condition="!Exists('..\packages\MsBuild.NuGet.Pack.1.6.1\tools\MsBuild.NuGet.Pack.targets') And ('$(RunNuGetPack)' != '' And $(RunNuGetPack))" Text="You are trying to build with MsBuild.NuGet.Pack, but the MsBuild.NuGet.Pack.targets file is not available on this computer. This is probably because the MsBuild.NuGet.Pack package has not been committed to source control, or NuGet Package Restore is not enabled. Please enable NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
-    <Error Condition="Exists('..\packages\MsBuild.NuGet.Pack.1.6.1\tools\MsBuild.NuGet.Pack.targets') And ('$(RunNuGetPack)' != '' And $(RunNuGetPack))" Text="MsBuild.NuGet.Pack cannot be run because NuGet packages were restored prior to the build running, and the targets file was unavailable when the build started. Please build the project again to include these packages in the build. You may also need to make sure that your build server does not delete packages prior to each build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

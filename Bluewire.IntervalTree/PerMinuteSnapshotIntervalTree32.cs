@@ -58,11 +58,11 @@ namespace Bluewire.IntervalTree
             // and then we want it shifted into the top 12 bits.
             var yearsShifted = yearsRecentred << 20;
 
-            if(value.Second != 0)
+            if (value.Second != 0)
             {
                 isRoundedDown = true;
             }
-            else if(value.Millisecond != 0)
+            else if (value.Millisecond != 0)
             {
                 isRoundedDown = true;
             }

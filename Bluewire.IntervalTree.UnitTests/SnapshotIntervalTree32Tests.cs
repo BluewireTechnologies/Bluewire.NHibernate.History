@@ -53,7 +53,7 @@ namespace Bluewire.IntervalTree.UnitTests
             };
 
             // At most one match:
-            for(var i = 0; i < 64; i++)
+            for (var i = 0; i < 64; i++)
             {
                 Assert.That(set.Where(CreateFilter(i)).Count(), Is.LessThanOrEqualTo(1));
             }

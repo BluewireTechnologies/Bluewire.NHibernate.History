@@ -14,7 +14,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
     ///  * Initial creation of a collection (insert all elements)
     ///  * Deletion of a collection (mark all elements as expired)
     ///  * Modifications to a collection (insert and/or expire on a per-element basis)
-    /// 
+    ///
     /// This class encapsulates my understanding of NHibernate's collection lifecycles.
     /// Most of it was reverse-engineered from CollectionUpdateAction and AbstractCollectionPersister.
     /// Note that the concept of 'UpdateRows' is not relevant to value-type collections; that's

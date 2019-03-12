@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace Bluewire.NHibernate.Audit.UnitTests
 {
     [TestFixture]
-    public class DatestampGranularityTests 
+    public class DatestampGranularityTests
     {
         [Test]
         public void DatestampRoundtrippedThroughISOFormatStringIsStillSufficientlyAccurate()

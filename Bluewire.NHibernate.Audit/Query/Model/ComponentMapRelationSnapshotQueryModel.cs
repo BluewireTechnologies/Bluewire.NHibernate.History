@@ -20,7 +20,7 @@ namespace Bluewire.NHibernate.Audit.Query.Model
         {
             return new MapSnapshotQuery<TRelation>(context);
         }
-        
+
         class MapSnapshotQuery<TRelation> : ICollectionSnapshotQuery<TEntity, IDictionary<TCollectionKey, TValue>>
             where TRelation : KeyedRelationAuditHistoryEntry<TEntityKey, TCollectionKey, TValue>
         {
@@ -50,7 +50,7 @@ namespace Bluewire.NHibernate.Audit.Query.Model
 
                 public IDictionary<TCollectionKey, TValue> For(TEntity entity)
                 {
-                    if(!entities.Contains(entity)) throw new InvalidOperationException(String.Format("GetModel did not include entity with Id {0}. No data is available.", entity.Id));
+                    if (!entities.Contains(entity)) throw new InvalidOperationException(String.Format("GetModel did not include entity with Id {0}. No data is available.", entity.Id));
                     return relationsSnapshot[entity.Id].ToDictionary(r => r.Key, r => r.Value);
                 }
             }

@@ -19,7 +19,7 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
         {
             deletePersister = collectionEntry.LoadedPersister;
             insertPersister = collectionEntry.CurrentPersister;
-            
+
             this.collectionEntry = collectionEntry;
             this.collection = collection;
         }

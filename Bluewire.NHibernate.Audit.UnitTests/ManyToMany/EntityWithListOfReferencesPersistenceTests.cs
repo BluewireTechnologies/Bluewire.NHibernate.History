@@ -121,7 +121,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToMany
                 entity.Entities[0] = entity.Entities[1];
                 entity.Entities[1] = temp;
                 session.Flush();
-                
+
                 var auditedEntities = session.Query<EntityWithListOfReferencesAuditHistory>().Where(h => h.Id == 42).ToList();
                 Assert.That(auditedEntities.Count, Is.AtLeast(2));
 

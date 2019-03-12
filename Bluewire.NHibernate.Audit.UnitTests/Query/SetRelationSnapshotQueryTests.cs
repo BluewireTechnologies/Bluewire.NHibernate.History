@@ -124,13 +124,13 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Query
 
                 Assert.IsEmpty(snapshot);
             }
-            
+
             class EntitySetMember : SetRelationAuditHistoryEntry<int, int>
             {
                 public new int OwnerId { get { return base.OwnerId; } set { base.OwnerId = value; } }
                 public new int Value { get { return base.Value; } set { base.Value = value; } }
             }
-            
+
             class SetMemberAudit : EntityAuditHistoryBase<int, Guid>
             {
                 public string Value { get; set; }

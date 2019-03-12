@@ -18,7 +18,6 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Simple
 
         public SimpleEntityPersistenceTests()
         {
-            
             db = TemporaryDatabase.Configure(Configure);
         }
 

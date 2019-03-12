@@ -18,7 +18,7 @@ namespace Bluewire.NHibernate.Audit
         /// flush.
         /// Note that this refers to pending changes only. There is NO guarantee of the converse, that later
         /// changes will not appear in the snapshot.
-        /// 
+        ///
         /// Guarantees offered by this method cannot be stronger than those offered by the clock. If the
         /// datestamp provider steps backwards through time, strange things may happen.
         /// </remarks>

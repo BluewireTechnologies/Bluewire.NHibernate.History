@@ -15,7 +15,7 @@ namespace Bluewire.NHibernate.Audit.Query.Internal
         /// <summary>
         /// Generate an expression representing the generic form of:
         ///  x => !ys.Where(y => y.Id == x.Id).Any(y => y.PreviousVersionId == x.Id)
-        /// 
+        ///
         /// This cannot be written in code since '==' is not defined for an unqualified generic type.
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>

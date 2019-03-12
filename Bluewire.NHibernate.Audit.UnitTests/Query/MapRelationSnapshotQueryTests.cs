@@ -126,14 +126,14 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Query
 
                 Assert.IsEmpty(snapshot);
             }
-            
+
             class EntityMapMember : KeyedRelationAuditHistoryEntry<int, string, int>
             {
                 public new string Key { get { return base.Key; } set { base.Key = value; } }
                 public new int OwnerId { get { return base.OwnerId; } set { base.OwnerId = value; } }
                 public new int Value { get { return base.Value; } set { base.Value = value; } }
             }
-            
+
             class MapMemberAudit : EntityAuditHistoryBase<int, Guid>
             {
                 public string Value { get; set; }

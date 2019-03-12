@@ -82,4 +82,3 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Versioning
         public virtual IList<string> List { get; protected set; }
     }
 }
-

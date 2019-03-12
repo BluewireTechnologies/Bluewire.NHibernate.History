@@ -11,7 +11,7 @@ namespace Bluewire.NHibernate.Audit.Model
         public IAuditableRelationModel CreateRelationModel(Type entityType, AuditableRelationAttribute relationAttr, InferredRelationAuditInfo mappingInfo, IMapping allMappings)
         {
             if (relationAttr == null) throw new ArgumentNullException("relationAttr");
-            
+
             var manyToOne = mappingInfo.ElementType as ManyToOneType;
             if (manyToOne == null)
             {

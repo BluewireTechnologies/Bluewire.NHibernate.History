@@ -18,7 +18,6 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Simple
 
         public ProxyPersistenceTests()
         {
-            
             db = TemporaryDatabase.Configure(Configure);
         }
 

@@ -7,7 +7,7 @@ using NHibernate.Tool.hbm2ddl;
 namespace Bluewire.IntervalTree.UnitTests.Util
 {
     /// <summary>
-    /// In-memory per-session test database instance. 
+    /// In-memory per-session test database instance.
     /// </summary>
     /// <remarks>
     /// Faster than PersistentDatabase when only a single session will use it.

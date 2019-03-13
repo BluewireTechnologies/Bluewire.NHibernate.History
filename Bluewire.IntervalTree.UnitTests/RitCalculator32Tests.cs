@@ -32,7 +32,7 @@ namespace Bluewire.IntervalTree.UnitTests
         {
             new RitCalculator32(-1, Int32.MinValue);
         }
-        
+
         [TestCase(0, 0x7fffffff, 0x40000000)]
         [TestCase(-1, 0x7fffffff, 0x40000000)]
         [TestCase(0x40000000, 0x3fffffff, 0x20000000)]

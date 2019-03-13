@@ -17,7 +17,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             this.model = model;
             this.auditTask = new ValueCollectionAuditTasks(sessions, model);
         }
-        
+
         public override void CollectionWasDestroyed(CollectionEntry collectionEntry, IPersistentCollection collection, IEventSource session)
         {
             if (!model.IsAuditable(collectionEntry.LoadedPersister)) return;

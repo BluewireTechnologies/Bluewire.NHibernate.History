@@ -18,7 +18,6 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToOne
 
         public EntityWithManyToOnePersistenceTests()
         {
-            
             db = TemporaryDatabase.Configure(Configure);
         }
 

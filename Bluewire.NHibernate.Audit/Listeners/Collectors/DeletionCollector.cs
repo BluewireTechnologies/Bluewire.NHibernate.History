@@ -23,7 +23,7 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
         public abstract void Delete(IPersistentCollection collection, object entry, int index);
         public abstract void Delete(IPersistentCollection collection, object key);
         public abstract void Apply(IEventSource session, ValueCollectionAuditTasks task);
-        
+
         public void Insert(IPersistentCollection collection, object entry, int index)
         {
         }

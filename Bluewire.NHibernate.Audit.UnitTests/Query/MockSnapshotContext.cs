@@ -21,5 +21,4 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Query
             return auditRecords.OfType<T>().AsQueryable<T>();
         }
     }
-
 }

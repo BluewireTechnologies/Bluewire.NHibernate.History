@@ -12,7 +12,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Versioning
     /// value of the version property on the entity, which is used only for persistence mapping.
     /// Flushing an entity fails with a StaleObjectStateException if the version in the session
     /// does not match the version in the database.
-    /// 
+    ///
     /// We extend NHibernate's optimistic concurrency to also fail with a StaleObjectStateException
     /// if the version on the entity does not match the version in the session. This is useful
     /// when an operation may cross multiple sessions and may not carry the entire entity state
@@ -143,4 +143,3 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Versioning
         public virtual string Value { get; set; }
     }
 }
-

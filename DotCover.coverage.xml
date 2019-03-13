@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CoverageParams>
+  <Filters>
+    <IncludeFilters>
+      <!-- Modern naming convention: all project names should start with 'Bluewire.' -->
+      <FilterEntry><ModuleMask>Bluewire.*</ModuleMask></FilterEntry>
+    </IncludeFilters>
+    <ExcludeFilters>
+      <!-- Default exclusions -->
+      <FilterEntry><ModuleMask>*Tests</ModuleMask></FilterEntry>
+      <FilterEntry><ModuleMask>*.Contracts</ModuleMask></FilterEntry>
+      <FilterEntry><ModuleMask>*.Contracts.*</ModuleMask></FilterEntry>
+    </ExcludeFilters>
+  </Filters>
+</CoverageParams>

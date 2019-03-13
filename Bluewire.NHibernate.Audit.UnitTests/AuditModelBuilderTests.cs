@@ -35,7 +35,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests
 
             Assert.Throws<AuditConfigurationException>(() => new AuditModelBuilder().AddFromConfiguration(cfg));
         }
-        
+
         [Test]
         public void CanAuditEntityTypeWithMappedUnauditedCollectionProperty()
         {

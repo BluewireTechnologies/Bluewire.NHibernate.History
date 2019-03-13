@@ -8,7 +8,7 @@ using NHibernate.Tool.hbm2ddl;
 namespace Bluewire.NHibernate.Audit.UnitTests.Util
 {
     /// <summary>
-    /// Temporary file-backed test database instance. 
+    /// Temporary file-backed test database instance.
     /// </summary>
     /// <remarks>
     /// Retains data between sessions. Useful when testing interactions between sessions.
@@ -25,7 +25,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Util
             dbFileName = Path.GetTempFileName();
             cfg = new Configuration();
             cfg.DataBaseIntegration(d =>
-            {   
+            {
                 d.Dialect<SQLiteDialect>();
                 d.ConnectionString = String.Format("Data Source={0};Version=3", dbFileName);
             });

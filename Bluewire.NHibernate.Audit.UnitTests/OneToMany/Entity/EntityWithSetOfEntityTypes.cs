@@ -21,7 +21,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Entity
     public class EntityWithSetOfEntityTypesAuditHistory : EntityAuditHistoryBase<int, int>
     {
     }
-    
+
     public class EntityWithSetOfEntityTypesEntitiesAuditHistory : SetRelationAuditHistoryEntry<int, int>
     {
     }

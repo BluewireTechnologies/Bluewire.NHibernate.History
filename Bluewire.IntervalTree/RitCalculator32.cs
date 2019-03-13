@@ -38,7 +38,7 @@ namespace Bluewire.IntervalTree
             HalfRange = halfRange;
             InitialStep = halfRange / 2 + halfRange % 2; // Round up, carefully avoiding overflow.
         }
-        
+
         /// <summary>
         /// A 31-bit RI-Tree occupying only the positive part of the 32-bit space.
         /// </summary>
@@ -56,8 +56,8 @@ namespace Bluewire.IntervalTree
             var step = InitialStep;
             while (step >= 1)
             {
-                if(upper < node) node -= step;
-                else if(lower > node) node += step;
+                if (upper < node) node -= step;
+                else if (lower > node) node += step;
                 else break;
                 step /= 2;
             }

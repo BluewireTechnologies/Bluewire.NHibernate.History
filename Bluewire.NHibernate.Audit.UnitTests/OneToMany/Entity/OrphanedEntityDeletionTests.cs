@@ -47,11 +47,11 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Entity
                 Assert.IsNull(deleted);
 
                 var auditedCollectionEntries = session.Query<OneToManyEntityAuditHistory>().Where(e => e.Id == 7).ToList();
-                
+
                 Assert.That(auditedCollectionEntries, Has.Exactly(1).Matches<OneToManyEntityAuditHistory>(e => e.AuditedOperation == AuditedOperation.Delete));
             }
         }
-        
+
         private void Configure(Configuration cfg)
         {
             var mapper = new ModelMapper();

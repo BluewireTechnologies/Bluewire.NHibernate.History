@@ -17,7 +17,7 @@ namespace Bluewire.IntervalTree.UnitTests
         {
             db = TemporaryDatabase.Configure(Configure);
         }
-        
+
         private readonly DivideByFourSnapshotIntervalTree tree = new DivideByFourSnapshotIntervalTree(RitCalculator32.PositiveOnly);
 
         class DivideByFourSnapshotIntervalTree : SnapshotIntervalTree32<int>
@@ -52,7 +52,7 @@ namespace Bluewire.IntervalTree.UnitTests
                 session.Flush();
 
                 // At most one match:
-                for(var i = 0; i < 64; i++)
+                for (var i = 0; i < 64; i++)
                 {
                     Assert.That(QueryForSnapshot(session, i).Count(), Is.LessThanOrEqualTo(1));
                 }

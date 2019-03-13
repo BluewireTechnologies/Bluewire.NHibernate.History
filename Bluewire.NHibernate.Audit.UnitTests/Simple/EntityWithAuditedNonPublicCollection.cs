@@ -15,7 +15,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Simple
         public virtual int Id { get; set; }
         public virtual string Value { get; set; }
         public virtual int VersionId { get; set; }
-        
+
         [AuditableRelation(typeof(EntityWithAuditedNonPublicCollectionEntitiesAuditHistory))]
         protected virtual IList<ReferencableEntity> Entities_NonPublic { get; set; }
 

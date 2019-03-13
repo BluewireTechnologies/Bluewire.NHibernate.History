@@ -172,13 +172,13 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Entity
 
                 var auditedCollectionEntries = session.Query<OneToManyEntityAuditHistory>().ToList();
                 Assert.That(auditedCollectionEntries.Count, Is.EqualTo(2));
-                
+
                 Assert.AreEqual(7, auditedCollection.ElementAt(1).Value);
                 Assert.IsNotNull(auditedCollection.ElementAt(1).EndDatestamp);
                 // Note that removing the item from the collection does not delete it.
             }
         }
-        
+
         private void Configure(Configuration cfg)
         {
             var mapper = new ModelMapper();

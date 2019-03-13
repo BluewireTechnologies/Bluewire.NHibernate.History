@@ -26,7 +26,7 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
         {
             return insertions;
         }
-    
+
         public override bool IsEmpty { get { return !insertions.Any(); } }
 
         public override void Apply(IEventSource session, ValueCollectionAuditTasks task)

@@ -77,7 +77,7 @@ namespace Bluewire.NHibernate.Audit
             IAuditRecordModel IAdvancedAuditInfo.FindRecordModel(Type recordType)
             {
                 IAuditRecordModel recordModel;
-                if(model.AllModels.TryGetValue(recordType, out recordModel)) return recordModel;
+                if (model.AllModels.TryGetValue(recordType, out recordModel)) return recordModel;
                 return null;
             }
         }

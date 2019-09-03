@@ -11,6 +11,7 @@ namespace Bluewire.NHibernate.Audit.Model
         public IAuditableRelationModel CreateRelationModel(Type entityType, AuditableRelationAttribute relationAttr, InferredRelationAuditInfo mappingInfo, IMapping allMappings)
         {
             if (relationAttr == null) throw new ArgumentNullException("relationAttr");
+            if (relationAttr.AuditEntryType == null) throw new ArgumentException(nameof(relationAttr.AuditEntryType));
 
             var manyToOne = mappingInfo.ElementType as ManyToOneType;
             if (manyToOne == null)
@@ -49,6 +50,21 @@ namespace Bluewire.NHibernate.Audit.Model
             return new AuditableRelationModel(mappingInfo.Role, relationAttr.AuditEntryType, auditValueType, new ComponentCollectionAuditValueResolver());
         }
 
+        public IAuditableRelationModel CreateCascadeModel(Type entityType, AuditableRelationAttribute relationAttr, InferredRelationAuditInfo mappingInfo, IMapping allMappings)
+        {
+            if (relationAttr == null) throw new ArgumentNullException("relationAttr");
+
+            var manyToOne = mappingInfo.ElementType as ManyToOneType;
+            if (manyToOne == null)
+            {
+                return CreateComponentRelationModel(entityType, relationAttr, mappingInfo);
+            }
+            else
+            {
+                return CreateEntityRelationModel(entityType, relationAttr, mappingInfo, allMappings, manyToOne);
+            }
+        }
+
         public static Type DetermineAuditValueType(InferredRelationAuditInfo inferred, AuditableRelationAttribute attribute, Type entityType)
         {
             var specificBase = inferred.GetRecognisedBaseType(attribute.AuditEntryType);
@@ -76,10 +92,10 @@ namespace Bluewire.NHibernate.Audit.Model
         {
             public AuditableRelationModel(string collectionRole, Type auditEntryType, Type auditValueType, IRelationAuditValueResolver relationAuditEntryResolver)
             {
-                AuditValueResolver = relationAuditEntryResolver;
-                CollectionRole = collectionRole;
-                AuditEntryType = auditEntryType;
-                AuditValueType = auditValueType;
+                AuditValueResolver = relationAuditEntryResolver ?? throw new ArgumentNullException(nameof(relationAuditEntryResolver));
+                CollectionRole = collectionRole ?? throw new ArgumentNullException(nameof(collectionRole));
+                AuditEntryType = auditEntryType ?? throw new ArgumentNullException(nameof(auditEntryType));
+                AuditValueType = auditValueType ?? throw new ArgumentNullException(nameof(auditValueType));
             }
 
             public string CollectionRole { get; private set; }

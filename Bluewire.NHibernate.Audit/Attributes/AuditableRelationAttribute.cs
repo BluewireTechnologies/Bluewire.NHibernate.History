@@ -10,6 +10,11 @@ namespace Bluewire.NHibernate.Audit.Attributes
             AuditEntryType = auditEntryType;
         }
 
+        public AuditableRelationAttribute()
+        {
+            // Valid only on one-to-one mappings.
+        }
+
         public Type AuditEntryType { get; private set; }
         /// <summary>
         /// Explicitly specify the collection element type which is recorded.

@@ -5,12 +5,13 @@ using Bluewire.NHibernate.Audit.Meta;
 using Bluewire.NHibernate.Audit.Model;
 using Bluewire.NHibernate.Audit.Runtime;
 using NHibernate;
+using NHibernate.Engine;
 using NHibernate.Event;
 using NHibernate.Persister.Entity;
 
 namespace Bluewire.NHibernate.Audit.Listeners
 {
-    class AuditEntityListener : IFlushEntityEventListener, IDeleteEventListener
+    class AuditEntityListener : IFlushEntityEventListener, IDeleteEventListener, IDirtyCheckEventListener, IFlushEventListener, IAutoFlushEventListener
     {
         private readonly SessionsAuditInfo sessions;
         private readonly AuditModel model;
@@ -26,7 +27,12 @@ namespace Bluewire.NHibernate.Audit.Listeners
             if (!IsDirty(@event)) return;
 
             IAuditableEntityModel entityModel;
-            if (!model.TryGetModelForPersister(@event.EntityEntry.Persister, out entityModel)) return;
+            if (!model.TryGetModelForPersister(@event.EntityEntry.Persister, out entityModel))
+            {
+                //var entry = @event.Session.PersistenceContext.GetEntry(@event.Entity);
+                //CheckInverseCascades(@event.Session, entry, @event.Entity);
+                return;
+            }
 
             var sessionAuditInfo = sessions.Lookup(@event.Session);
             sessionAuditInfo.AssertIsFlushing();
@@ -53,6 +59,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             if (!@event.EntityEntry.ExistsInDatabase) return true;
             if (@event.HasDirtyCollection) return true;
             if (@event.DirtyProperties != null && @event.DirtyProperties.Any()) return true;
+            if (@event.EntityEntry.LockMode == LockMode.Force) return true;
             return false;
         }
 
@@ -64,8 +71,38 @@ namespace Bluewire.NHibernate.Audit.Listeners
             OnDelete(@event);
         }
 
+        private void CheckInverseCascades(IEventSource session, EntityEntry entry, object entity)
+        {
+            foreach (var cascade in model.EnumerateInverseCascades(entity.GetType()))
+            {
+                var parent = session.Get(cascade.ParentEntityName, entry.EntityKey.Identifier);
+                if (parent == null) continue;
+
+                var parentEntry = session.PersistenceContext.GetEntry(parent);
+                if (parentEntry.ExistsInDatabase && parentEntry.Status != Status.Deleted)
+                {
+                    parentEntry.LockMode = LockMode.Force;
+                    // Nulling out the version in the loaded state will cause the entity to appear dirty
+                    // to NHibernate, but won't interfere with any audit code which needs to read this.
+                    parentEntry.LoadedState[parentEntry.Persister.VersionProperty] = null;
+                }
+            }
+        }
+
         public void OnDelete(DeleteEvent @event)
         {
+            if (@event.EntityName != null)
+            {
+                var entry = @event.Session.PersistenceContext.GetEntry(@event.Entity);
+                // Cascade-delete of a one-to-one-related entity can cause OnDelete to be called
+                // with the parent's EntityName but the child entity instance.
+                if (entry?.EntityName != @event.EntityName)
+                {
+                    CheckInverseCascades(@event.Session, entry, @event.Entity);
+                    return;
+                }
+            }
+
             var entity = @event.Session.PersistenceContext.UnproxyAndReassociate(@event.Entity);
 
             var persister = @event.Session.GetEntityPersister(@event.EntityName, entity);
@@ -103,6 +140,18 @@ namespace Bluewire.NHibernate.Audit.Listeners
             auditEntry.AuditedOperation = AuditedOperation.Delete;
             auditEntry.PreviousVersionId = persister.GetVersion(@event.Entity, EntityMode.Poco);
             auditEntry.VersionId = null;
+        }
+
+        public void OnDirtyCheck(DirtyCheckEvent @event) => OnFlush(@event);
+        public void OnAutoFlush(AutoFlushEvent @event) => OnFlush(@event);
+
+        public void OnFlush(FlushEvent @event)
+        {
+            foreach (var entity in @event.Session.PersistenceContext.EntitiesByKey.Values)
+            {
+                var entry = @event.Session.PersistenceContext.GetEntry(entity);
+                CheckInverseCascades(@event.Session, entry, entity);
+            }
         }
     }
 }

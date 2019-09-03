@@ -21,7 +21,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests
         {
             BasicConfigurator.Configure(
                 new log4net.Appender.ConsoleAppender {
-                    Threshold = Level.Warn,
+                    Threshold = Level.Info,
                     Layout = new log4net.Layout.SimpleLayout()
                 });
         }

@@ -14,15 +14,17 @@ namespace Bluewire.NHibernate.Audit.Model
     public class AuditModel
     {
         private readonly IAuditEntryFactory auditEntryFactory;
+        private readonly IAuditableCascadeModel[] cascadeModels;
         private readonly Dictionary<Type, IAuditableEntityModel> entityModels;
         private readonly Dictionary<string, IAuditableRelationModel> relationModels;
         private readonly Dictionary<Type, PersistentClass> auditEntryMappings;
         private readonly Dictionary<Type, IAuditRecordModel> allModels;
 
 
-        public AuditModel(IAuditEntryFactory auditEntryFactory, IEnumerable<IAuditableEntityModel> entityModels, IEnumerable<IAuditableRelationModel> relationModels, IEnumerable<PersistentClass> auditEntryMappings)
+        public AuditModel(IAuditEntryFactory auditEntryFactory, IEnumerable<IAuditableEntityModel> entityModels, IEnumerable<IAuditableRelationModel> relationModels, List<IAuditableCascadeModel> cascadeModels, IEnumerable<PersistentClass> auditEntryMappings)
         {
             this.auditEntryFactory = auditEntryFactory;
+            this.cascadeModels = cascadeModels.ToArray();
             this.entityModels = entityModels.ToDictionary(m => m.EntityType);
             this.relationModels = relationModels.ToDictionary(m => m.CollectionRole);
             this.auditEntryMappings = auditEntryMappings.ToDictionary(m => m.MappedClass);
@@ -38,6 +40,11 @@ namespace Bluewire.NHibernate.Audit.Model
         public bool IsAuditable(ICollectionPersister collectionPersister)
         {
             return relationModels.ContainsKey(collectionPersister.Role);
+        }
+
+        public IEnumerable<IAuditableCascadeModel> EnumerateInverseCascades(Type entityType)
+        {
+            return cascadeModels.Where(m => m.ChildType.IsAssignableFrom(entityType));
         }
 
         public IEntityAuditHistory GenerateAuditEntry(IAuditableEntityModel entityModel, object entity)

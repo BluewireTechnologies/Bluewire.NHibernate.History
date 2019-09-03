@@ -94,6 +94,9 @@ namespace Bluewire.NHibernate.Audit
             var auditListener = new AuditEntityListener(sessions, model);
             listeners.FlushEntityEventListeners = listeners.FlushEntityEventListeners.Concat(new [] { auditListener }).ToArray();
             listeners.DeleteEventListeners = listeners.DeleteEventListeners.Concat(new[] { auditListener }).ToArray();
+            listeners.FlushEventListeners = listeners.FlushEventListeners.Concat(new [] { auditListener }).ToArray();
+            listeners.AutoFlushEventListeners = listeners.AutoFlushEventListeners.Concat(new [] { auditListener }).ToArray();
+            listeners.DirtyCheckEventListeners = listeners.DirtyCheckEventListeners.Concat(new [] { auditListener }).ToArray();
 
             var collectionAuditListener = new AuditCollectionListener(
                 new AuditValueCollectionListener(sessions, model));

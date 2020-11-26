@@ -3,7 +3,10 @@
 
   <PropertyGroup>
     <Configuration>Release</Configuration>
-    <PreferredMSBuildToolsVersion>15.0</PreferredMSBuildToolsVersion>
+    <PreferredMSBuildToolsVersion>Current</PreferredMSBuildToolsVersion>
+
+    <UseTeamCityLogging>False</UseTeamCityLogging>
+    <UseTeamCityLogging Condition="'$(TEAMCITY_VERSION)' != ''">True</UseTeamCityLogging>
   </PropertyGroup>
 
 </Project>

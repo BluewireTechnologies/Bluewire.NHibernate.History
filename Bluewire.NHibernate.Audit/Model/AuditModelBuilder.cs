@@ -7,6 +7,7 @@ using Bluewire.NHibernate.Audit.Meta;
 using NHibernate.Cfg;
 using NHibernate.Engine;
 using NHibernate.Mapping;
+using NHibernate.Type;
 
 namespace Bluewire.NHibernate.Audit.Model
 {
@@ -36,6 +37,7 @@ namespace Bluewire.NHibernate.Audit.Model
 
         private PropertyInfo GetPropertyForCollection(Collection mapping)
         {
+            if (mapping is Bag) throw new NotSupportedException("Audit of Bag collections cannot be supported because duplicate entries cannot be distinguished. Use a Set or an IdBag instead.");
             var propertyName = mapping.Role.Replace(mapping.OwnerEntityName, "").TrimStart('.');
             var propertyInfo = mapping.Owner.MappedClass.GetProperty(propertyName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
             Debug.Assert(propertyInfo != null, $"Unable to find a property called {propertyName} on {mapping.Owner.MappedClass}.");

@@ -21,7 +21,7 @@
       <Version>4.0.0.4000</Version>
     </PackageReference>
     <PackageReference Include="NHibernate">
-      <Version>4.1.2.4000</Version>
+      <Version>4.0.4.4000</Version>
     </PackageReference>
     <PackageReference Include="NUnit">
       <Version>3.4.1</Version>

@@ -39,6 +39,7 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
             var emptySnapshot = collectionEntry.IsSnapshotEmpty(collection);
             if (emptySnapshot) return;
 
+            receiver.Prepare(collection);
             var index = 0;
             foreach (var item in collection.Entries(deletePersister))
             {
@@ -58,6 +59,7 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
         {
             if (receiver.Persister != insertPersister) throw new InvalidOperationException();
 
+            receiver.Prepare(collection);
             var index = 0;
             foreach (var item in collection.Entries(insertPersister))
             {
@@ -76,6 +78,7 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
         {
             var receivesDeletes = receiver.Persister == deletePersister;
             var receivesInserts = receiver.Persister == insertPersister;
+            receiver.Prepare(collection);
             if (receivesDeletes)
             {
                 var deleted = collection.GetDeletes(deletePersister, false).Cast<object>();

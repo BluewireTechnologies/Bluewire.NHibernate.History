@@ -68,6 +68,10 @@ namespace Bluewire.NHibernate.Audit.Listeners
             {
                 return new KeyedInsertionCollector(collectionEntry);
             }
+            if (collectionEntry.CurrentPersister.IdentifierGenerator != null)
+            {
+                return new IdentifiedInsertionCollector(collectionEntry);
+            }
             return new SetInsertionCollector(collectionEntry);
         }
 
@@ -76,6 +80,10 @@ namespace Bluewire.NHibernate.Audit.Listeners
             if (collectionEntry.LoadedPersister.HasIndex)
             {
                 return new KeyedDeletionCollector(collectionEntry);
+            }
+            if (collectionEntry.LoadedPersister.IdentifierGenerator != null)
+            {
+                return new IdentifiedDeletionCollector(collectionEntry);
             }
             return new SetDeletionCollector(collectionEntry);
         }

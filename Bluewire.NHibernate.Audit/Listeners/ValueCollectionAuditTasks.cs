@@ -62,6 +62,23 @@ namespace Bluewire.NHibernate.Audit.Listeners
             innerSession.Flush();
         }
 
+        public void ExecuteIdentifiedInsertion(IEventSource session, IdentifiedInsertionCollector collector)
+        {
+            var sessionAuditInfo = GetCurrentSessionInfo(session);
+            var createModel = GetRelationModel(collector.Persister);
+
+            var innerSession = session.GetSession(EntityMode.Poco);
+            foreach (var insertion in collector.Enumerate())
+            {
+                var entry = (IKeyedRelationAuditHistory)model.GenerateRelationAuditEntry(createModel, insertion.Value, session, collector.Persister);
+                entry.OwnerId = collector.OwnerKey;
+                entry.Key = insertion.Key;
+                entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
+                innerSession.Save(entry);
+            }
+            innerSession.Flush();
+        }
+
         public void ExecuteSetDeletion(IEventSource session, SetDeletionCollector collector)
         {
             var sessionAuditInfo = GetCurrentSessionInfo(session);
@@ -84,6 +101,24 @@ namespace Bluewire.NHibernate.Audit.Listeners
         public void ExecuteKeyedDeletion(IEventSource session, KeyedDeletionCollector collector)
         {
             if (!collector.Persister.HasIndex) throw new ArgumentException(String.Format("Not a keyed collection: {0}", collector.Persister.Role));
+            var sessionAuditInfo = GetCurrentSessionInfo(session);
+            var deleteModel = GetRelationModel(collector.Persister);
+
+            var auditMapping = model.GetAuditClassMapping(deleteModel.AuditEntryType);
+            var auditDelete = new AuditKeyedDeleteCommand(session.Factory, auditMapping);
+
+            foreach (var deletion in collector.Enumerate())
+            {
+                var expectation = Expectations.AppropriateExpectation(ExecuteUpdateResultCheckStyle.Count);
+                var cmd = session.Batcher.PrepareBatchCommand(auditDelete.Command.CommandType, auditDelete.Command.Text, auditDelete.Command.ParameterTypes);
+                auditDelete.PopulateCommand(session, cmd, collector.OwnerKey, deletion, sessionAuditInfo.OperationDatestamp);
+                session.Batcher.AddToBatch(expectation);
+            }
+        }
+
+        public void ExecuteIdentifiedDeletion(IEventSource session, IdentifiedDeletionCollector collector)
+        {
+            if (collector.Persister.IdentifierGenerator == null) throw new ArgumentException(String.Format("Not an identified collection: {0}", collector.Persister.Role));
             var sessionAuditInfo = GetCurrentSessionInfo(session);
             var deleteModel = GetRelationModel(collector.Persister);
 

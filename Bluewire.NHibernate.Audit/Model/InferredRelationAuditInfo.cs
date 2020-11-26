@@ -50,6 +50,11 @@ namespace Bluewire.NHibernate.Audit.Model
             {
                 return new InferredRelationAuditInfo(mapping.Role, mapping.Owner.Identifier.Type, mapping.Key.Type) { ElementType =  mapping.Element.Type };
             }
+            else if (mapping.IsIdentified)  // IdBag
+            {
+                var definition = (IdentifierCollection)mapping;
+                return new InferredRelationAuditInfo(mapping.Role, mapping.Owner.Identifier.Type, definition.Identifier.Type) { ElementType = mapping.Element.Type };
+            }
             else
             {
                 return new InferredRelationAuditInfo(mapping.Role, mapping.Owner.Identifier.Type) { ElementType =  mapping.Element.Type };

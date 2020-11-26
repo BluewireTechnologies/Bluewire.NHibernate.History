@@ -25,6 +25,21 @@
     </PropertyGroup>
     <Message Text="Limit NUnit agent concurrency to $(NumberOfParallelAgents)" />
   </Target>
+  
+  <Target Name="PrepareTeamCityVSTestAdapterPath" Condition="'$(UseTeamCityLogging)' == 'True'">
+    <ItemGroup>
+        <TeamCityVSTestAdapterPaths Include="packages\teamcity.vstest.testadapter\*\build\_common\vstest*\TeamCity.VSTest.TestAdapter.dll" />
+    </ItemGroup>
+    <ItemGroup>
+        <TeamCityVSTestAdapterDirectories Include="@(TeamCityVSTestAdapterPaths->'%(RelativeDir)')" />
+    </ItemGroup>
+    <FindInList List="@(TeamCityVSTestAdapterDirectories)" FindLastMatch="true" ItemSpecToFind="%(TeamCityVSTestAdapterDirectories.Identity)" Condition="'@(TeamCityVSTestAdapterDirectories)' != ''" >
+        <Output TaskParameter="ItemFound" PropertyName="TeamCityVSTestAdapterPath"/>
+    </FindInList>
+    <Message Text="TeamCity VSTest adapter paths: @(TeamCityVSTestAdapterPaths)" />
+
+    <Message Text="Using TeamCity VSTest adapter at: $(TeamCityVSTestAdapterPath)" />
+  </Target>
 
   <Target Name="PrepareDotCover" Condition="'$(DotCoverConfigurationFile)' != ''">
     <!--
@@ -33,25 +48,25 @@
     -->
     <ItemGroup>
         <DotCoverPaths Condition="'$(agent_home_dir)' != ''" Include="$(agent_home_dir)\tools\**\dotCover.exe" />
-        <DotCoverPaths Include="$(LOCALAPPDATA)\JetBrains\Installations\**\dotCover.exe" />
         <DotCoverPaths Include="packages\JetBrains.dotCover.CommandLineTools*\tools\dotCover.exe" />
         <DotCoverPaths Include="packages\JetBrains.dotCover.CommandLineTools\*\tools\dotCover.exe" />
     </ItemGroup>
     <ItemGroup>
         <DotCoverDirectories Include="@(DotCoverPaths->'%(RootDir)%(Directory)')" />
     </ItemGroup>
-    <FindInList List="@(DotCoverDirectories)" FindLastMatch="true" ItemSpecToFind="%(DotCoverDirectories.Identity)" >
+    <FindInList List="@(DotCoverDirectories)" FindLastMatch="true" ItemSpecToFind="%(DotCoverDirectories.Identity)" Condition="'@(DotCoverDirectories)' != ''">
         <Output TaskParameter="ItemFound" PropertyName="DotCoverRunnerDirectory"/>
     </FindInList>
     <Message Text="dotCover runner paths: @(DotCoverPaths)" />
-    <Error Condition="'$(DotCoverRunnerDirectory)' == ''" Text="Could not find dotCover runner executable." />
+    <Message Text="dotCover runner directories: @(DotCoverDirectories)" />
+    <Message Condition="'$(DotCoverRunnerDirectory)' == ''" Text="Could not find dotCover runner executable." />
     <PropertyGroup>
-        <DotCoverRunnerPath>$(DotCoverRunnerDirectory)dotCover.exe</DotCoverRunnerPath>
+        <DotCoverRunnerPath Condition="'$(DotCoverRunnerDirectory)' != ''">$(DotCoverRunnerDirectory)dotCover.exe</DotCoverRunnerPath>
     </PropertyGroup>
-    <Error Condition="!Exists('$(DotCoverRunnerPath)')" Text="Could not find dotCover runner executable." />
+    <Error Condition="'$(DotCoverRunnerPath)' != '' And !Exists('$(DotCoverRunnerPath)')" Text="Could not find dotCover runner executable." />
 
-    <Message Text="##teamcity[dotNetCoverage dotcover_home='$(DotCoverRunnerDirectory)']" />
-    <Message Text="Using dotCover at: $(DotCoverRunnerPath)" />
+    <Message Text="##teamcity[dotNetCoverage dotcover_home='$(DotCoverRunnerDirectory)']" Condition="'$(DotCoverRunnerPath)' != ''" />
+    <Message Text="Using dotCover at: $(DotCoverRunnerPath)" Condition="'$(DotCoverRunnerPath)' != ''" />
   </Target>
 
   <Target Name="BuildNUnitTestAssemblies" Condition="'@(NUnitProjects)' != ''">
@@ -66,12 +81,16 @@
     <ItemGroup>
         <NUnitProjectsOutputs Include="%(NUnitProjectAssemblies.MSBuildSourceProjectFile)">
             <TargetPath>%(NUnitProjectAssemblies.Identity)</TargetPath>
+            <TargetFrameworkIdentifier>%(NUnitProjectAssemblies.TargetFrameworkIdentifier)</TargetFrameworkIdentifier>
         </NUnitProjectsOutputs>
-        <NUnitTestProjects Include="%(Identity)">
+        <NUnitTestProjectsWithDependsOn Include="%(Identity)" Condition="'@(NUnitProjectsAbsolute->'%(DependsOn)')' != ''" >
             <DependsOn>@(NUnitProjectsAbsolute->'%(DependsOn)')</DependsOn>
-            <TargetPath>@(NUnitProjectsOutputs->'%(TargetPath)')</TargetPath>
-            <DotCoverSnapshot>@(NUnitProjectsOutputs->'%(TargetPath).dcvr')</DotCoverSnapshot>
-        </NUnitTestProjects>
+        </NUnitTestProjectsWithDependsOn>
+        <NUnitTestAssemblies Include="@(NUnitProjectsOutputs->'%(TargetPath)')">
+            <OriginalProject>%(NUnitProjectsOutputs.Identity)</OriginalProject>
+            <DotCoverSnapshot>%(TargetPath).dcvr</DotCoverSnapshot>
+            <UseDotNetTest Condition="'%(TargetFrameworkIdentifier)' == '.NETCoreApp'">True</UseDotNetTest>
+        </NUnitTestAssemblies>
     </ItemGroup>
   </Target>
 
@@ -88,15 +107,32 @@
 
   <Target Name="RunNUnitTestsOnly" Condition="'$(CoverageToolName)' == '*NONE*'" DependsOnTargets="_RunNUnitTestsOnly">
   </Target>
+  
+  <Target Name="_BuildNUnitTestsDependsOn" Inputs="@(NUnitTestProjectsWithDependsOn)" Outputs="%(Identity).skip" DependsOnTargets="PrepareNUnitRunner;BuildNUnitTestAssemblies">
+    <Message Text="%(NUnitTestProjectsWithDependsOn.Identity):" />
+    <Message Text="     Depends on: %(NUnitTestProjectsWithDependsOn.DependsOn)" />
 
-  <Target Name="_RunNUnitTestsOnly" Inputs="@(NUnitTestProjects)" Outputs="%(Identity).skip" DependsOnTargets="PrepareNUnitRunner;BuildNUnitTestAssemblies">
-    <Message Text="%(NUnitTestProjects.Identity):" />
-    <Message Text="     %(NUnitTestProjects.TargetPath)" />
-    <Message Text="     %(NUnitTestProjects.DependsOn)" />
+    <MSBuild Projects="%(NUnitTestProjectsWithDependsOn.Identity)" Targets="%(NUnitTestProjectsWithDependsOn.DependsOn)" />
+  </Target>
 
-    <MSBuild Projects="%(NUnitTestProjects.Identity)" Condition="'%(NUnitTestProjects.DependsOn)'!=''" Targets="%(NUnitTestProjects.DependsOn)" />
-
-    <Exec Command='"$(NUnitRunnerPath)" --teamcity --agents=$(NumberOfParallelAgents) "%(NUnitTestProjects.TargetPath)"' />
+  <Target Name="_RunNUnitTestsOnly" Inputs="@(NUnitTestAssemblies)" Outputs="%(Identity).skip" DependsOnTargets="PrepareNUnitRunner;PrepareTeamCityVSTestAdapterPath;BuildNUnitTestAssemblies;_BuildNUnitTestsDependsOn">
+    <PropertyGroup>
+      <NUnitTestAssemblies>@(NUnitTestAssemblies -> '"%(Identity)"', ' ')</NUnitTestAssemblies>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <_NUnitArguments Include='--teamcity'  Condition="'$(UseTeamCityLogging)' == 'True'" />
+      <_NUnitArguments Include='--agents=$(NumberOfParallelAgents)' />
+      <_NUnitArguments Include='$(NUnitTestAssemblies)' />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <_DotNetTestArguments Include='--logger:teamcity --test-adapter-path:$(TeamCityVSTestAdapterPath)' Condition="'$(UseTeamCityLogging)' == 'True' And '$(TeamCityVSTestAdapterPath)' != ''" />
+      <_DotNetTestArguments Include='$(NUnitTestAssemblies)' />
+    </ItemGroup>
+    
+    <Exec Command="dotnet test @(_DotNetTestArguments, ' ')" Condition="'%(NUnitTestAssemblies.UseDotNetTest)' == 'True'" />
+    <Exec Command="&quot;$(NUnitRunnerPath)&quot; @(_NUnitArguments, ' ')" Condition="'%(NUnitTestAssemblies.UseDotNetTest)' != 'True'"/>
   </Target>
 
   <Target Name="RunNUnitTestsWithDotCover" Condition="'$(CoverageToolName)' == 'DotCover'" DependsOnTargets="_RunNUnitTestsWithDotCover">
@@ -110,26 +146,41 @@
 
   </Target>
 
-  <Target Name="_RunNUnitTestsWithDotCover" Inputs="@(NUnitTestProjects)" Outputs="%(Identity).skip" DependsOnTargets="PrepareNUnitRunner;PrepareDotCover;BuildNUnitTestAssemblies">
-    <Message Text="%(NUnitTestProjects.Identity):" />
-    <Message Text="     %(NUnitTestProjects.TargetPath)" />
-    <Message Text="     %(NUnitTestProjects.DependsOn)" />
-    <Message Text="     %(NUnitTestProjects.DotCoverSnapshot)" />
-
+  <Target Name="_RunNUnitTestsWithDotCover" Inputs="@(NUnitTestAssemblies)" Outputs="%(DotCoverSnapshot)" DependsOnTargets="PrepareNUnitRunner;PrepareTeamCityVSTestAdapterPath;PrepareDotCover;BuildNUnitTestAssemblies;_BuildNUnitTestsDependsOn">
+    <Message Text="DotCover + NUnit: %(NUnitTestAssemblies.Identity) -> %(NUnitTestAssemblies.DotCoverSnapshot)" />
+    
     <ItemGroup>
-      <_DotCoverCoverageArguments Include='cover' />
-      <_DotCoverCoverageArguments Include='"$(DotCoverConfigurationFile)"' />
-      <_DotCoverCoverageArguments Include='/Output="%(NUnitTestProjects.DotCoverSnapshot)"' />
-      <_DotCoverCoverageArguments Include='/TargetExecutable="$(NUnitRunnerPath)"' />
-      <_DotCoverCoverageArguments Include='/TargetArguments="--teamcity --agents=$(NumberOfParallelAgents) \"%(NUnitTestProjects.TargetPath)\""' />
+      <_NUnitArguments Include='--teamcity'  Condition="'$(UseTeamCityLogging)' == 'True'" />
+      <_NUnitArguments Include='"%(NUnitTestAssemblies.Identity)"' />
     </ItemGroup>
-    <MSBuild Projects="%(NUnitTestProjects.Identity)" Condition="'%(NUnitTestProjects.DependsOn)'!=''" Targets="%(NUnitTestProjects.DependsOn)" />
-
-    <Exec Command="&quot;$(DotCoverRunnerPath)&quot; @(_DotCoverCoverageArguments, ' ')" />
-    <Message Text="##teamcity[importData type='dotNetCoverage' tool='dotcover' path='%(NUnitTestProjects.DotCoverSnapshot)']" />
+    <PropertyGroup>
+      <_NUnitArgumentString>@(_NUnitArguments, ' ')</_NUnitArgumentString>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <!-- This does not work with dotCover: -->
+      <!-- <_DotNetTestArguments Include='&#45;&#45;logger:teamcity "&#45;&#45;test-adapter-path:$(TeamCityVSTestAdapterPath)"' Condition="'$(UseTeamCityLogging)' == 'True' And '$(TeamCityVSTestAdapterPath)' != ''" />-->
+      <_DotNetTestArguments Include='"%(NUnitTestAssemblies.Identity)"' />
+    </ItemGroup>
+    <PropertyGroup>
+      <_DotNetTestArgumentString>@(_DotNetTestArguments, ' ')</_DotNetTestArgumentString>
+    </PropertyGroup>
 
     <ItemGroup>
-      <DotCoverSnapshots Include="%(NUnitTestProjects.DotCoverSnapshot)" />
+      <_DotCoverCoverageArguments Include='"$(DotCoverConfigurationFile)"' />
+      <_DotCoverCoverageArguments Include='/Output="%(NUnitTestAssemblies.DotCoverSnapshot)"' />
+      <_DotCoverCoverageArguments Include='/TargetExecutable="$(NUnitRunnerPath)"' Condition="'%(NUnitTestAssemblies.UseDotNetTest)' != 'True'" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_DotCoverCoverageArgumentString>@(_DotCoverCoverageArguments, ' ')</_DotCoverCoverageArgumentString>
+    </PropertyGroup>
+
+    <Exec Command="&quot;$(DotCoverRunnerPath)&quot; cover-dotnet $(_DotCoverCoverageArgumentString) -- $(_DotNetTestArgumentString)" Condition="'%(NUnitTestAssemblies.UseDotNetTest)' == 'True'" />
+    <Exec Command="&quot;$(DotCoverRunnerPath)&quot; cover $(_DotCoverCoverageArgumentString) -- $(_NUnitArgumentString)" Condition="'%(NUnitTestAssemblies.UseDotNetTest)' != 'True'" />
+    <Message Text="##teamcity[importData type='dotNetCoverage' tool='dotcover' path='%(NUnitTestAssemblies.DotCoverSnapshot)']" />
+
+    <ItemGroup>
+      <DotCoverSnapshots Include="%(NUnitTestAssemblies.DotCoverSnapshot)" />
     </ItemGroup>
   </Target>
 

@@ -16,6 +16,8 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
         }
 
         public object OwnerKey { get; private set; }
+        public virtual void Prepare(IPersistentCollection collection) { }
+
         public ICollectionPersister Persister { get; private set; }
 
         public abstract bool IsEmpty { get; }

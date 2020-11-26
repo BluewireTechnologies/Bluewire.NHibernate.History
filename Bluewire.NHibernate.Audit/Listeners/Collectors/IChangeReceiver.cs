@@ -5,6 +5,7 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
 {
     public interface IChangeReceiver
     {
+        void Prepare(IPersistentCollection collection);
         ICollectionPersister Persister { get; }
         void Delete(IPersistentCollection collection, object entry, int index);
         void Delete(IPersistentCollection collection, object key);

@@ -3,6 +3,7 @@ using System.Linq;
 using Bluewire.Common.Time;
 using Bluewire.NHibernate.Audit.Support;
 using Bluewire.NHibernate.Audit.UnitTests.Util;
+using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Linq;
 using NHibernate.Mapping.ByCode;
@@ -201,6 +202,40 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Component
                 clock.Advance(TimeSpan.FromSeconds(1));
 
                 session.Delete(entity);
+                session.Flush();
+
+                var audited = session.Query<EntityWithIdBagOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
+
+                Assert.That(audited.Count, Is.EqualTo(3));
+                Assert.That(audited.Select(x => x.EndDatestamp), Has.All.Not.Null);
+            }
+        }
+
+        [Test]
+        public void DeletingOwnerEntityWithoutLoadingLazyCollectionIsAudited()
+        {
+            using (var session = db.CreateSession())
+            {
+                var entity = new EntityWithIdBagOfValueTypes
+                {
+                    Id = 42,
+                    Values =
+                    {
+                        new ComponentType { Integer = 2, String = "2" },
+                        new ComponentType { Integer = 2, String = "2" },
+                        new ComponentType { Integer = 7, String = "8" }
+                    }
+                };
+                session.Save(entity);
+                session.Flush();
+
+                clock.Advance(TimeSpan.FromSeconds(1));
+
+                session.Clear();
+                entity = session.Get<EntityWithIdBagOfValueTypes>(entity.Id);
+                Assume.That(NHibernateUtil.IsInitialized(entity.Values), Is.False);
+                session.Delete(entity);
+                Assume.That(NHibernateUtil.IsInitialized(entity.Values), Is.False);
                 session.Flush();
 
                 var audited = session.Query<EntityWithIdBagOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();

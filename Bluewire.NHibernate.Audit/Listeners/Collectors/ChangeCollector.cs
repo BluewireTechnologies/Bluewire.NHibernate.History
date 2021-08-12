@@ -40,8 +40,13 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
             if (emptySnapshot) return;
 
             receiver.Prepare(collection);
+
+            collection.ForceInitialization();
+            var entries = collection.Entries(deletePersister);
+            if (entries == null) throw new InvalidOperationException("BUG? Collection is not initialised, despite ForceInitialization() being used.");
+
             var index = 0;
-            foreach (var item in collection.Entries(deletePersister))
+            foreach (var item in entries)
             {
                 receiver.Delete(collection, item, index);
                 index++;
@@ -60,8 +65,13 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
             if (receiver.Persister != insertPersister) throw new InvalidOperationException();
 
             receiver.Prepare(collection);
+
+            collection.ForceInitialization();
+            var entries = collection.Entries(insertPersister);
+            if (entries == null) throw new InvalidOperationException("BUG? Collection is not initialised, despite ForceInitialization() being used.");
+
             var index = 0;
-            foreach (var item in collection.Entries(insertPersister))
+            foreach (var item in entries)
             {
                 receiver.Insert(collection, item, index);
                 ++index;

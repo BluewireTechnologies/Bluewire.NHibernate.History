@@ -8,6 +8,7 @@ namespace Bluewire.IntervalTree
     [Flags]
     public enum RitStatus
     {
+        Error = -1,
         Valid = 0,
         NodeNeedsUpdate = 0x0001,
         BoundsNeedUpdate = 0x0002,

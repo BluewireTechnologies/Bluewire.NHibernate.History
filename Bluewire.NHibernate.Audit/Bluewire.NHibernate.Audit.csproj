@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net46</TargetFrameworks>
-    <VersionPrefix>10.0.1</VersionPrefix>
+    <VersionPrefix>10.0.2</VersionPrefix>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
@@ -13,7 +13,7 @@
       <Version>4.0.0.4000</Version>
     </PackageReference>
     <PackageReference Include="log4net">
-      <Version>2.0.2</Version>
+      <Version>2.0.12</Version>
     </PackageReference>
     <PackageReference Include="NHibernate">
       <Version>4.0.4.4000</Version>

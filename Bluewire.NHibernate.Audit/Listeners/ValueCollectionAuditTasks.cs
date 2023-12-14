@@ -145,7 +145,9 @@ namespace Bluewire.NHibernate.Audit.Listeners
         {
             IAuditableRelationModel relationModel;
             if (!model.TryGetModelForPersister(persister, out relationModel))
+            {
                 throw new ArgumentException(String.Format("No audit model defined for {0}", persister.Role));
+            }
             return relationModel;
         }
 

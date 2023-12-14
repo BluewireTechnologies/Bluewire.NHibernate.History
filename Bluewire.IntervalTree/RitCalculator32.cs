@@ -56,9 +56,18 @@ namespace Bluewire.IntervalTree
             var step = InitialStep;
             while (step >= 1)
             {
-                if (upper < node) node -= step;
-                else if (lower > node) node += step;
-                else break;
+                if (upper < node)
+                {
+                    node -= step;
+                }
+                else if (lower > node)
+                {
+                    node += step;
+                }
+                else
+                {
+                    break;
+                }
                 step /= 2;
             }
             return node;

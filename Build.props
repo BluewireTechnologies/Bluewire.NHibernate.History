@@ -2,11 +2,20 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <ItemGroup>
         <!-- Full list of NuGet package projects -->
-        <NugetProjects Include="**\*.Contracts.csproj" />
-
+        <NugetProjects Include="Bluewire.NHibernate.Audit\Bluewire.NHibernate.Audit.csproj" />
+        <NugetProjects Include="Bluewire.IntervalTree\Bluewire.IntervalTree.csproj" />
+    
         <!-- Full list of NUnit test projects -->
         <NUnitProjects Include="**\*.UnitTests.csproj" />
     </ItemGroup>
+
+    <ItemDefinitionGroup>
+        <!-- Library repository: all packages use SemVer -->
+        <NugetProjects>
+            <UseSemVer>True</UseSemVer>
+        </NugetProjects>
+    </ItemDefinitionGroup>
+
     <PropertyGroup>
         <DotCoverConfigurationFile>DotCover.coverage.xml</DotCoverConfigurationFile>
     </PropertyGroup>

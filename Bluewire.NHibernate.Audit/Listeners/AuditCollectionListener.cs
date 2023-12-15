@@ -39,7 +39,9 @@ namespace Bluewire.NHibernate.Audit.Listeners
             if (!collection.WasInitialized)
             {
                 if (!collection.HasQueuedOperations)
+                {
                     throw new AssertionFailure("no queued adds");
+                }
             }
             else if (!hasFilters && collection.Empty)
             {

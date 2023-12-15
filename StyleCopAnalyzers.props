@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <StyleCopAnalyzersRootPath>$(MSBuildThisFileDirectory)StyleCopAnalyzers\</StyleCopAnalyzersRootPath>
+    <CommonAnalyzersRootPath>$(MSBuildThisFileDirectory)Analysers\</CommonAnalyzersRootPath>
+    <StyleCopAnalyzersRootPath>$(CommonAnalyzersRootPath)StyleCopAnalyzers\</StyleCopAnalyzersRootPath>
     <CodeAnalysisRuleSet>$(StyleCopAnalyzersRootPath)CodeAnalysisRules.ruleset</CodeAnalysisRuleSet>
     
     <!--
@@ -13,16 +14,32 @@
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <!-- Keep '#warning' and some internally-suppressed warnings as warnings: -->
     <WarningsNotAsErrors>1030,1701,1702</WarningsNotAsErrors>
+    <!-- Do not fail builds when packages are discovered to be vulnerable. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
     <!-- Do not fail on SemVer 2 compatibility warnings when building packages. -->
     <NoWarn>$(NoWarn),NU5105</NoWarn>
 
+    <LangVersion Condition="'$(LangVersion)' == ''">10.0</LangVersion>
+    <GenerateDocumentationFile Condition="'$(GenerateDocumentationFile)' == '' and '$(GeneratePackageOnBuild)' == 'True'">True</GenerateDocumentationFile>
+    <PackageReadmeFile Condition="'$(PackageReadmeFile)' == '' and '$(GeneratePackageOnBuild)' == 'True'">README.md</PackageReadmeFile>
+
   </PropertyGroup>
+  
+  <ItemGroup Condition="'$(PackageReadmeFile)' != ''">
+    <None Remove="$(PackageReadmeFile)" />
+    <None Include="$(PackageReadmeFile)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
 
   <!-- Enable stylecop analyzers for all non-release builds or a release build that's running a build in visual studio (i.e. Intellisense). -->
   <ItemGroup Condition=" '$(Configuration)' != 'Release' Or '$(BuildingInsideVisualStudio)' != 'True' Or '$(BuildingProject)' != 'True' ">
     <Analyzer Include="$(StyleCopAnalyzersRootPath)lib\1.0.0\Newtonsoft.Json.dll" />
     <Analyzer Include="$(StyleCopAnalyzersRootPath)lib\1.0.0\StyleCop.Analyzers.CodeFixes.dll" />
     <Analyzer Include="$(StyleCopAnalyzersRootPath)lib\1.0.0\StyleCop.Analyzers.dll" />
+    <Analyzer Include="$(CommonAnalyzersRootPath)Bluewire.Analysers\lib\netstandard1.3\Bluewire.Analysers.dll" />
   </ItemGroup>
   
   <!-- All our projects share the same style requirements -->

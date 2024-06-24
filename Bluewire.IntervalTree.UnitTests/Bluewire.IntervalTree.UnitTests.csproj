@@ -10,11 +10,8 @@
     <ProjectReference Include="..\Bluewire.IntervalTree\Bluewire.IntervalTree.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Iesi.Collections">
-      <Version>4.0.0.4000</Version>
-    </PackageReference>
     <PackageReference Include="NHibernate">
-      <Version>4.0.4.4000</Version>
+      <Version>5.5.1</Version>
     </PackageReference>
     <PackageReference Include="NUnit">
       <Version>3.14.0</Version>

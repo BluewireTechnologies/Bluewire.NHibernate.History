@@ -1,4 +1,6 @@
-﻿using NHibernate;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using NHibernate;
 using NHibernate.Engine;
 using NHibernate.Event;
 
@@ -11,10 +13,22 @@ namespace Bluewire.NHibernate.Audit.Listeners
     /// </summary>
     class ConcurrencyCheckShouldPreferObjectVersionOverSessionRecordedVersion : ISaveOrUpdateEventListener, IFlushEntityEventListener
     {
+        public Task OnSaveOrUpdateAsync(SaveOrUpdateEvent @event, CancellationToken cancellationToken)
+        {
+            OnSaveOrUpdate(@event);
+            return Task.CompletedTask;
+        }
+
         public void OnSaveOrUpdate(SaveOrUpdateEvent @event)
         {
             if (@event.Entry == null) return;
             CheckEntityVersion(@event.Session, @event.Entity, @event.Entry, @event.RequestedId);
+        }
+
+        public Task OnFlushEntityAsync(FlushEntityEvent @event, CancellationToken cancellationToken)
+        {
+            OnFlushEntity(@event);
+            return Task.CompletedTask;
         }
 
         public void OnFlushEntity(FlushEntityEvent @event)
@@ -27,7 +41,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var entityPersister = session.GetEntityPersister(entry.EntityName, entity);
             if (!entityPersister.IsVersioned) return;
 
-            var version = entityPersister.GetVersion(entity, session.EntityMode);
+            var version = entityPersister.GetVersion(entity);
 
             if (entityPersister.VersionType.IsEqual(version, entry.Version)) return;
 

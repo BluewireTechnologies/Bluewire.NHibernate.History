@@ -9,14 +9,11 @@
     <None Remove="*.ncrunchproject" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Iesi.Collections">
-      <Version>4.0.0.4000</Version>
-    </PackageReference>
     <PackageReference Include="log4net">
       <Version>2.0.15</Version>
     </PackageReference>
     <PackageReference Include="NHibernate">
-      <Version>4.0.4.4000</Version>
+      <Version>5.5.1</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="..\StyleCopAnalyzers.props" />

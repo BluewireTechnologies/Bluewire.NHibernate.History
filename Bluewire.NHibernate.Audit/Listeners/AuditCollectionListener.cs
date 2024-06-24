@@ -1,4 +1,6 @@
-﻿using NHibernate;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using NHibernate;
 using NHibernate.Collection;
 using NHibernate.Engine;
 using NHibernate.Event;
@@ -30,6 +32,12 @@ namespace Bluewire.NHibernate.Audit.Listeners
             this.children = children;
         }
 
+        public Task OnPreUpdateCollectionAsync(PreCollectionUpdateEvent @event, CancellationToken cancellationToken)
+        {
+            OnPreUpdateCollection(@event);
+            return Task.CompletedTask;
+        }
+
         public void OnPreUpdateCollection(PreCollectionUpdateEvent @event)
         {
             var collection = @event.Collection;
@@ -58,12 +66,24 @@ namespace Bluewire.NHibernate.Audit.Listeners
             }
         }
 
+        public Task OnPreRemoveCollectionAsync(PreCollectionRemoveEvent @event, CancellationToken cancellationToken)
+        {
+            OnPreRemoveCollection(@event);
+            return Task.CompletedTask;
+        }
+
         public void OnPreRemoveCollection(PreCollectionRemoveEvent @event)
         {
             var collectionEntry = @event.Session.PersistenceContext.GetCollectionEntry(@event.Collection);
             if (collectionEntry.LoadedPersister == null) return;
 
             CollectionWasDestroyed(collectionEntry, @event.Collection, @event.Session);
+        }
+
+        public Task OnPreRecreateCollectionAsync(PreCollectionRecreateEvent @event, CancellationToken cancellationToken)
+        {
+            OnPreRecreateCollection(@event);
+            return Task.CompletedTask;
         }
 
         public void OnPreRecreateCollection(PreCollectionRecreateEvent @event)

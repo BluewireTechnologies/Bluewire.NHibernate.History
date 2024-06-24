@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
+using System.Data.Common;
 using NHibernate;
+using NHibernate.Engine;
 using NHibernate.SqlTypes;
 using NHibernate.UserTypes;
 
@@ -42,23 +44,23 @@ namespace Bluewire.NHibernate.Audit.Support
             get { return false; }
         }
 
-        public object NullSafeGet(IDataReader rs, string[] names, object owner)
+        public object NullSafeGet(DbDataReader rs, string[] names, ISessionImplementor session, object owner)
         {
-            var ticks = NHibernateUtil.Int64.NullSafeGet(rs, names);
+            var ticks = NHibernateUtil.Int64.NullSafeGet(rs, names, session, owner);
             if (ticks == null) return null;
             return new DateTimeOffset((long)ticks, TimeSpan.Zero);
         }
 
-        public void NullSafeSet(IDbCommand cmd, object value, int index)
+        public void NullSafeSet(DbCommand cmd, object value, int index, ISessionImplementor session)
         {
             if (value == null)
             {
-                NHibernateUtil.Int64.NullSafeSet(cmd, null, index);
+                NHibernateUtil.Int64.NullSafeSet(cmd, null, index, session);
             }
             else
             {
                 var dateTimeOffset = (DateTimeOffset)value;
-                NHibernateUtil.Int64.NullSafeSet(cmd, dateTimeOffset.UtcTicks, index);
+                NHibernateUtil.Int64.NullSafeSet(cmd, dateTimeOffset.UtcTicks, index, session);
             }
         }
 

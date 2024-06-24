@@ -62,8 +62,7 @@ namespace Bluewire.NHibernate.Audit.Model
 
         public bool TryGetModelForPersister(IEntityPersister persister, out IAuditableEntityModel model)
         {
-            var entityType = persister.GetMappedClass(EntityMode.Poco);
-            return entityModels.TryGetValue(entityType, out model);
+            return entityModels.TryGetValue(persister.MappedClass, out model);
         }
 
         public bool TryGetModelForPersister(ICollectionPersister persister, out IAuditableRelationModel model)

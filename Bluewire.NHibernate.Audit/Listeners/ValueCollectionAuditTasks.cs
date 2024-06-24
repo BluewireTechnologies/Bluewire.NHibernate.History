@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
 using Bluewire.NHibernate.Audit.Listeners.Collectors;
 using Bluewire.NHibernate.Audit.Meta;
@@ -27,6 +28,17 @@ namespace Bluewire.NHibernate.Audit.Listeners
             this.model = model;
         }
 
+        private ISession CreateChildSession(IEventSource session)
+        {
+            return session
+                .SessionWithOptions()
+                .Connection()
+                .ConnectionReleaseMode()
+                .FlushMode()
+                .Interceptor()
+                .OpenSession();
+        }
+
         public void ExecuteSetInsertion(IEventSource session, SetInsertionCollector collector)
         {
             var sessionAuditInfo = GetCurrentSessionInfo(session);
@@ -34,15 +46,17 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
             //Debug.Assert(!collector.Persister.IsOneToMany);
 
-            var innerSession = session.GetSession(EntityMode.Poco);
-            foreach (var insertion in collector.Enumerate())
+            using (var innerSession = CreateChildSession(session))
             {
-                var entry = model.GenerateRelationAuditEntry(createModel, insertion, session, collector.Persister);
-                entry.OwnerId = collector.OwnerKey;
-                entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
-                innerSession.Save(entry);
+                foreach (var insertion in collector.Enumerate())
+                {
+                    var entry = model.GenerateRelationAuditEntry(createModel, insertion, session, collector.Persister);
+                    entry.OwnerId = collector.OwnerKey;
+                    entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
+                    innerSession.Save(entry);
+                }
+                innerSession.Flush();
             }
-            innerSession.Flush();
         }
 
         public void ExecuteKeyedInsertion(IEventSource session, KeyedInsertionCollector collector)
@@ -50,16 +64,18 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var sessionAuditInfo = GetCurrentSessionInfo(session);
             var createModel = GetRelationModel(collector.Persister);
 
-            var innerSession = session.GetSession(EntityMode.Poco);
-            foreach (var insertion in collector.Enumerate())
+            using (var innerSession = CreateChildSession(session))
             {
-                var entry = (IKeyedRelationAuditHistory)model.GenerateRelationAuditEntry(createModel, insertion.Value, session, collector.Persister);
-                entry.OwnerId = collector.OwnerKey;
-                entry.Key = insertion.Key;
-                entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
-                innerSession.Save(entry);
+                foreach (var insertion in collector.Enumerate())
+                {
+                    var entry = (IKeyedRelationAuditHistory)model.GenerateRelationAuditEntry(createModel, insertion.Value, session, collector.Persister);
+                    entry.OwnerId = collector.OwnerKey;
+                    entry.Key = insertion.Key;
+                    entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
+                    innerSession.Save(entry);
+                }
+                innerSession.Flush();
             }
-            innerSession.Flush();
         }
 
         public void ExecuteIdentifiedInsertion(IEventSource session, IdentifiedInsertionCollector collector)
@@ -67,16 +83,18 @@ namespace Bluewire.NHibernate.Audit.Listeners
             var sessionAuditInfo = GetCurrentSessionInfo(session);
             var createModel = GetRelationModel(collector.Persister);
 
-            var innerSession = session.GetSession(EntityMode.Poco);
-            foreach (var insertion in collector.Enumerate())
+            using (var innerSession = CreateChildSession(session))
             {
-                var entry = (IKeyedRelationAuditHistory)model.GenerateRelationAuditEntry(createModel, insertion.Value, session, collector.Persister);
-                entry.OwnerId = collector.OwnerKey;
-                entry.Key = insertion.Key;
-                entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
-                innerSession.Save(entry);
+                foreach (var insertion in collector.Enumerate())
+                {
+                    var entry = (IKeyedRelationAuditHistory)model.GenerateRelationAuditEntry(createModel, insertion.Value, session, collector.Persister);
+                    entry.OwnerId = collector.OwnerKey;
+                    entry.Key = insertion.Key;
+                    entry.StartDatestamp = sessionAuditInfo.OperationDatestamp;
+                    innerSession.Save(entry);
+                }
+                innerSession.Flush();
             }
-            innerSession.Flush();
         }
 
         public void ExecuteSetDeletion(IEventSource session, SetDeletionCollector collector)
@@ -184,7 +202,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             private SqlUpdateBuilder SqlUpdateBuilder { get; }
             public SqlCommandInfo Command => SqlUpdateBuilder.ToSqlCommandInfo();
 
-            public void PopulateCommand(ISessionImplementor session, IDbCommand cmd, object owningEntityId, object deletion, DateTimeOffset deletionDatestamp)
+            public void PopulateCommand(ISessionImplementor session, DbCommand cmd, object owningEntityId, object deletion, DateTimeOffset deletionDatestamp)
             {
                 var parameters = new CommandParameteriser(session, cmd);
                 parameters.Set(endDateProperty, deletionDatestamp);
@@ -225,7 +243,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
             private SqlUpdateBuilder SqlUpdateBuilder { get; }
             public SqlCommandInfo Command => SqlUpdateBuilder.ToSqlCommandInfo();
 
-            public void PopulateCommand(ISessionImplementor session, IDbCommand cmd, object owningEntityId, object deletion, DateTimeOffset deletionDatestamp)
+            public void PopulateCommand(ISessionImplementor session, DbCommand cmd, object owningEntityId, object deletion, DateTimeOffset deletionDatestamp)
             {
                 var parameters = new CommandParameteriser(session, cmd);
                 parameters.Set(endDateProperty, deletionDatestamp);

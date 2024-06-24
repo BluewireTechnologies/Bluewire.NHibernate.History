@@ -78,7 +78,11 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Versioning
             var hbm = mapper.CompileMappingForAllExplicitlyAddedEntities();
             cfg.AddMapping(hbm);
 
-            new AuditConfigurer(new DynamicAuditEntryFactory(), new ClockAuditDatestampProvider(new Clock())).IntegrateWithNHibernate(cfg);
+            var auditEntryFactory = new AutoAuditEntryFactory(x =>
+            {
+                x.CreateMap<EntityWithPropertyAndListOfPrimitiveTypes, EntityWithPropertyAndListOfPrimitiveTypesAuditHistory>().IgnoreHistoryMetadata();
+            });
+            new AuditConfigurer(auditEntryFactory, new ClockAuditDatestampProvider(new Clock())).IntegrateWithNHibernate(cfg);
         }
     }
 

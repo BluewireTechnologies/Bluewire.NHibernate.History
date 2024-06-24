@@ -255,7 +255,11 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToMany
             });
             cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
 
-            new AuditConfigurer(new DynamicAuditEntryFactory(), new ClockAuditDatestampProvider(clock)).IntegrateWithNHibernate(cfg);
+            var auditEntryFactory = new AutoAuditEntryFactory(x =>
+            {
+                x.CreateMap<EntityWithListOfReferences, EntityWithListOfReferencesAuditHistory>().IgnoreHistoryMetadata();
+            });
+            new AuditConfigurer(auditEntryFactory, new ClockAuditDatestampProvider(clock)).IntegrateWithNHibernate(cfg);
         }
     }
 }

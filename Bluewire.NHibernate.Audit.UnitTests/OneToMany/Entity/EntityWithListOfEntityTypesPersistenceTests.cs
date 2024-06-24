@@ -353,7 +353,12 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Entity
             });
             cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
 
-            new AuditConfigurer(new DynamicAuditEntryFactory(), new ClockAuditDatestampProvider(clock)).IntegrateWithNHibernate(cfg);
+            var auditEntryFactory = new AutoAuditEntryFactory(x =>
+            {
+                x.CreateMap<OneToManyEntity, OneToManyEntityAuditHistory>().IgnoreHistoryMetadata();
+                x.CreateMap<EntityWithListOfEntityTypes, EntityWithListOfEntityTypesAuditHistory>().IgnoreHistoryMetadata();
+            });
+            new AuditConfigurer(auditEntryFactory, new ClockAuditDatestampProvider(clock)).IntegrateWithNHibernate(cfg);
         }
     }
 }

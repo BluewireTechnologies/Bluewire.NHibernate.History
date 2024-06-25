@@ -10,7 +10,24 @@ namespace Bluewire.NHibernate.Audit.Model
         public IAuditableEntityModel CreateEntityModel(PersistentClass classMapping, AuditableEntityAttribute auditAttribute)
         {
             if (!classMapping.IsVersioned || classMapping.Version == null) throw new AuditConfigurationException(classMapping.MappedClass, "The NHibernate mapping for this type does not define a property to use for versioning.");
+            ValidateCollections(classMapping);
             return CreateEntityModel(classMapping.MappedClass, auditAttribute);
+        }
+
+        private void ValidateCollections(PersistentClass classMapping)
+        {
+            foreach (var property in classMapping.PropertyClosureIterator)
+            {
+                if (!property.IsOptimisticLocked) continue;
+                if (property.Type.IsCollectionType)
+                {
+                    var collection = property.Value as Collection;
+                    if (collection?.IsInverse == true)
+                    {
+                        throw new AuditConfigurationException(classMapping.MappedClass, $"This type has an inverse-mapped collection '{property.Name}' which is configured to use optimistic locking. Inverse-mapped collections must specify 'OptimisticLock(false)'.");
+                    }
+                }
+            }
         }
 
         public IAuditableEntityModel CreateEntityModel(Type entityType, AuditableEntityAttribute auditAttribute)

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Bluewire.NHibernate.Audit.Meta;
 using Bluewire.NHibernate.Audit.Model;
 using Bluewire.NHibernate.Audit.Runtime;
@@ -19,6 +21,12 @@ namespace Bluewire.NHibernate.Audit.Listeners
         {
             this.sessions = sessions;
             this.model = model;
+        }
+
+        public Task OnFlushEntityAsync(FlushEntityEvent @event, CancellationToken cancellationToken)
+        {
+            OnFlushEntity(@event);
+            return Task.CompletedTask;
         }
 
         public void OnFlushEntity(FlushEntityEvent @event)
@@ -64,6 +72,18 @@ namespace Bluewire.NHibernate.Audit.Listeners
             OnDelete(@event);
         }
 
+        public Task OnDeleteAsync(DeleteEvent @event, CancellationToken cancellationToken)
+        {
+            OnDelete(@event);
+            return Task.CompletedTask;
+        }
+
+        public Task OnDeleteAsync(DeleteEvent @event, ISet<object> transientEntities, CancellationToken cancellationToken)
+        {
+            OnDelete(@event, transientEntities);
+            return Task.CompletedTask;
+        }
+
         public void OnDelete(DeleteEvent @event)
         {
             var entity = @event.Session.PersistenceContext.UnproxyAndReassociate(@event.Entity);
@@ -79,7 +99,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
 
             AuditDelete(auditEntry, @event, persister);
 
-            Debug.Assert(Equals(auditEntry.Id, persister.GetIdentifier(entity, EntityMode.Poco)));
+            Debug.Assert(Equals(auditEntry.Id, persister.GetIdentifier(entity)));
             Debug.Assert(!Equals(auditEntry.VersionId, auditEntry.PreviousVersionId));
             @event.Session.Save(auditEntry);
         }
@@ -88,7 +108,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
         {
             auditEntry.AuditedOperation = AuditedOperation.Add;
             auditEntry.PreviousVersionId = null;
-            auditEntry.VersionId = @event.EntityEntry.Persister.GetVersion(@event.Entity, EntityMode.Poco);
+            auditEntry.VersionId = @event.EntityEntry.Persister.GetVersion(@event.Entity);
         }
 
         private static void AuditUpdate(IEntityAuditHistory auditEntry, FlushEntityEvent @event)
@@ -101,7 +121,7 @@ namespace Bluewire.NHibernate.Audit.Listeners
         private static void AuditDelete(IEntityAuditHistory auditEntry, DeleteEvent @event, IEntityPersister persister)
         {
             auditEntry.AuditedOperation = AuditedOperation.Delete;
-            auditEntry.PreviousVersionId = persister.GetVersion(@event.Entity, EntityMode.Poco);
+            auditEntry.PreviousVersionId = persister.GetVersion(@event.Entity);
             auditEntry.VersionId = null;
         }
     }

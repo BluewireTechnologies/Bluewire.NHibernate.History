@@ -66,7 +66,9 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Versioning
                      );
             });
             cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
-            new AuditConfigurer(new DynamicAuditEntryFactory(), new ClockAuditDatestampProvider(new Clock())).IntegrateWithNHibernate(cfg);
+
+            var auditEntryFactory = new AutoAuditEntryFactory(x => { });
+            new AuditConfigurer(auditEntryFactory, new ClockAuditDatestampProvider(new Clock())).IntegrateWithNHibernate(cfg);
         }
     }
 

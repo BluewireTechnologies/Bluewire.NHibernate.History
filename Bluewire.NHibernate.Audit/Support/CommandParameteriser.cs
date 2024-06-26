@@ -1,4 +1,5 @@
 using System.Data;
+using System.Data.Common;
 using NHibernate.Engine;
 using NHibernate.Mapping;
 
@@ -12,10 +13,10 @@ namespace Bluewire.NHibernate.Audit.Support
     class CommandParameteriser
     {
         private readonly ISessionImplementor session;
-        private readonly IDbCommand cmd;
+        private readonly DbCommand cmd;
         private int i;
 
-        public CommandParameteriser(ISessionImplementor session, IDbCommand cmd)
+        public CommandParameteriser(ISessionImplementor session, DbCommand cmd)
         {
             this.session = session;
             this.cmd = cmd;

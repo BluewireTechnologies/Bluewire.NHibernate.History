@@ -78,7 +78,11 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Simple
             });
             cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
 
-            var configurer = new AuditConfigurer(new DynamicAuditEntryFactory(), new ClockAuditDatestampProvider(clock));
+            var auditEntryFactory = new AutoAuditEntryFactory(x =>
+            {
+                x.CreateMap<SimpleEntity, SimpleEntityAuditHistory>().IgnoreHistoryMetadata();
+            });
+            var configurer = new AuditConfigurer(auditEntryFactory, new ClockAuditDatestampProvider(clock));
             auditInfo = configurer.IntegrateWithNHibernate(cfg);
         }
     }

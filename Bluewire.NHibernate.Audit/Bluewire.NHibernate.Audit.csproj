@@ -1,22 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk" TreatAsLocalProperty="VersionPrefix">
   <PropertyGroup>
-    <TargetFrameworks>net48</TargetFrameworks>
-    <VersionPrefix>11.1.0</VersionPrefix>
+    <TargetFrameworks>net48;netstandard2.0</TargetFrameworks>
+    <VersionPrefix>12.0.0</VersionPrefix>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="*.ncrunchproject" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Iesi.Collections">
-      <Version>4.0.0.4000</Version>
-    </PackageReference>
     <PackageReference Include="log4net">
       <Version>2.0.15</Version>
     </PackageReference>
     <PackageReference Include="NHibernate">
-      <Version>4.0.4.4000</Version>
+      <Version>5.5.1</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="..\StyleCopAnalyzers.props" />

@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Bluewire.Common.Time;
 using Bluewire.NHibernate.Audit.Attributes;
+using Bluewire.NHibernate.Audit.Model;
 using Bluewire.NHibernate.Audit.Support;
-using Bluewire.NHibernate.Audit.UnitTests.OneToMany.Element;
-using Bluewire.NHibernate.Audit.UnitTests.OneToMany.Entity;
 using Bluewire.NHibernate.Audit.UnitTests.Util;
 using NHibernate.Cfg;
 using NHibernate.Mapping.ByCode;
@@ -78,10 +73,9 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Versioning
             var hbm = mapper.CompileMappingForAllExplicitlyAddedEntities();
             cfg.AddMapping(hbm);
 
-            var auditEntryFactory = new AutoAuditEntryFactory(x =>
-            {
-                x.CreateMap<EntityWithPropertyAndListOfPrimitiveTypes, EntityWithPropertyAndListOfPrimitiveTypesAuditHistory>().IgnoreHistoryMetadata();
-            });
+            var auditEntryFactory = new SimpleAuditEntryFactoryBuilder()
+                .MapEntity<EntityWithPropertyAndListOfPrimitiveTypes, EntityWithPropertyAndListOfPrimitiveTypesAuditHistory>(x => new EntityWithPropertyAndListOfPrimitiveTypesAuditHistory { Id = x.Id, Property = x.Property })
+                .Build();
             new AuditConfigurer(auditEntryFactory, new ClockAuditDatestampProvider(new Clock())).IntegrateWithNHibernate(cfg);
         }
     }
@@ -103,7 +97,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Versioning
 
     public class EntityWithPropertyAndListOfPrimitiveTypesAuditHistory : EntityAuditHistoryBase<int, int>
     {
-        public virtual string Property { get; protected set; }
+        public virtual string Property { get; init; }
     }
 
     public class EntityWithPropertyAndListOfPrimitiveTypesValuesAuditHistory : KeyedRelationAuditHistoryEntry<int, int, string>

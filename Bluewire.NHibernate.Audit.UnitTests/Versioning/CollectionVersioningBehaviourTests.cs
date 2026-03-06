@@ -5,6 +5,7 @@ using NHibernate.Cfg;
 using NHibernate.Mapping.ByCode;
 using NUnit.Framework;
 using System.Collections.Generic;
+using Bluewire.NHibernate.Audit.Model;
 
 namespace Bluewire.NHibernate.Audit.UnitTests.Versioning
 {
@@ -67,7 +68,7 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Versioning
             });
             cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
 
-            var auditEntryFactory = new AutoAuditEntryFactory(x => { });
+            var auditEntryFactory = new SimpleAuditEntryFactoryBuilder().Build();
             new AuditConfigurer(auditEntryFactory, new ClockAuditDatestampProvider(new Clock())).IntegrateWithNHibernate(cfg);
         }
     }

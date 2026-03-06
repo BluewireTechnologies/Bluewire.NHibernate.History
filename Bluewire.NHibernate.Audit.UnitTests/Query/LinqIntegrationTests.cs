@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Bluewire.Common.Time;
 using Bluewire.NHibernate.Audit.Attributes;
+using Bluewire.NHibernate.Audit.Model;
 using Bluewire.NHibernate.Audit.Query;
 using Bluewire.NHibernate.Audit.Support;
 using Bluewire.NHibernate.Audit.UnitTests.ManyToOne;
@@ -172,10 +173,9 @@ namespace Bluewire.NHibernate.Audit.UnitTests.Query
             });
             cfg.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
 
-            var auditEntryFactory = new AutoAuditEntryFactory(x =>
-            {
-                x.CreateMap<Entity, EntityAuditHistory>().IgnoreHistoryMetadata();
-            });
+            var auditEntryFactory = new SimpleAuditEntryFactoryBuilder()
+                .MapEntity<Entity, EntityAuditHistory>(x => new EntityAuditHistory { Id = x.Id })
+                .Build();
             new AuditConfigurer(auditEntryFactory, new ClockAuditDatestampProvider(clock)).IntegrateWithNHibernate(cfg);
         }
     }

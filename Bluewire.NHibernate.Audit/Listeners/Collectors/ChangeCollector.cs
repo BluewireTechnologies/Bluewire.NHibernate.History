@@ -45,11 +45,23 @@ namespace Bluewire.NHibernate.Audit.Listeners.Collectors
             var entries = collection.Entries(deletePersister);
             if (entries == null) throw new InvalidOperationException("BUG? Collection is not initialised, despite ForceInitialization() being used.");
 
+            // This method may be called for two cases:
+            //  * The owning entity is deleted.
+            //  * All items are removed from the collection.
+
+            // In the former case, the collection object still contains references to the items.
             var index = 0;
             foreach (var item in entries)
             {
                 receiver.Delete(collection, item, index);
                 index++;
+            }
+
+            // In the latter case, the collection is empty. We need to ask it what was deleted.
+            var deleted = collection.GetDeletes(deletePersister, false).Cast<object>();
+            foreach (var d in deleted)
+            {
+                receiver.Delete(collection, d);
             }
         }
 

@@ -131,6 +131,36 @@ namespace Bluewire.NHibernate.Audit.UnitTests.ManyToMany
             }
         }
 
+        [Test]
+        public void RemovingElementFromCollection_LeavingItEmpty_IsAudited()
+        {
+            using (var session = db.CreateSession())
+            {
+                var b = new ReferencableEntity { String = "8" };
+
+                var entity = new EntityWithSetOfReferences
+                {
+                    Id = 42,
+                    Entities = { b }
+                };
+                session.Save(entity);
+                session.Flush();
+
+                clock.Advance(TimeSpan.FromSeconds(1));
+
+                entity.Entities.Remove(b);
+                session.Flush();
+
+                var audited = session.Query<EntityWithSetOfReferencesEntitiesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
+
+                Assert.That(audited.Count, Is.EqualTo(1));
+
+                var item = audited.Single(i => i.Value == b.Id);
+                Assert.AreEqual(b.Id, item.Value);
+                Assert.IsNotNull(item.EndDatestamp);
+            }
+        }
+
         private void Configure(Configuration cfg)
         {
             var mapper = new ModelMapper();

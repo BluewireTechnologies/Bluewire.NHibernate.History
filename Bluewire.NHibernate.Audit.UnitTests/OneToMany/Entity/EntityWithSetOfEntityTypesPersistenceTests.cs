@@ -180,6 +180,39 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Entity
             }
         }
 
+        [Test]
+        public void RemovingElementFromCollection_LeavingItEmpty_IsAudited()
+        {
+            using (var session = db.CreateSession())
+            {
+                var entity = new EntityWithSetOfEntityTypes
+                {
+                    Id = 42,
+                    Entities =
+                    {
+                        new OneToManyEntity { Id = 7, Value = "8" },
+                    }
+                };
+                session.Save(entity);
+                session.Flush();
+
+                clock.Advance(TimeSpan.FromSeconds(1));
+
+                entity.Entities.Remove(entity.Entities.Single(e => e.Id == 7));
+                session.Flush();
+
+                var auditedCollection = session.Query<EntityWithSetOfEntityTypesEntitiesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
+                Assert.That(auditedCollection.Count, Is.EqualTo(1));
+
+                var auditedCollectionEntries = session.Query<OneToManyEntityAuditHistory>().ToList();
+                Assert.That(auditedCollectionEntries.Count, Is.EqualTo(1));
+
+                Assert.AreEqual(7, auditedCollection.Single().Value);
+                Assert.IsNotNull(auditedCollection.Single().EndDatestamp);
+                // Note that removing the item from the collection does not delete it.
+            }
+        }
+
         private void Configure(Configuration cfg)
         {
             var mapper = new ModelMapper();

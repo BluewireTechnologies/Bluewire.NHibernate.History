@@ -224,6 +224,37 @@ namespace Bluewire.NHibernate.Audit.UnitTests.OneToMany.Component
         }
 
         [Test]
+        public void RemovingElementFromCollection_LeavingItEmpty_IsAudited()
+        {
+            using (var session = db.CreateSession())
+            {
+                var entity = new EntityWithMapOfValueTypes
+                {
+                    Id = 42,
+                    Values =
+                    {
+                        { "B", new ComponentType { Integer = 7, String = "8" } }
+                    }
+                };
+                session.Save(entity);
+                session.Flush();
+
+                clock.Advance(TimeSpan.FromSeconds(1));
+
+                entity.Values.Remove("B");
+                session.Flush();
+
+                var audited = session.Query<EntityWithMapOfValueTypesValuesAuditHistory>().Where(h => h.OwnerId == 42).ToList();
+
+                Assert.That(audited.Count, Is.EqualTo(1));
+
+                var item = audited.Single();
+                Assert.AreEqual("8", item.Value.String);
+                Assert.IsNotNull(item.EndDatestamp);
+            }
+        }
+
+        [Test]
         public void DeletingOwnerEntityDeletedCollection()
         {
             using (var session = db.CreateSession())
